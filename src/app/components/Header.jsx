@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import { useState } from "react";
+import CartIcon from "./CartIcon";
 
 
 export default function Header() {
@@ -22,13 +23,14 @@ export default function Header() {
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-4 lg:gap-5">
                     <Link href="/" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">خانه</Link>
-                    <Link href="/features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">سرویس ها</Link>
+                    <Link href="/services" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">سرویس ها</Link>
                     <Link href="/contact" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">تماس با ما</Link>
                     <Link href="/about" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">درباره ما</Link>
                 </nav>
 
                 {/* Right Side - Auth Buttons & Menu */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
+                    <CartIcon />
                     <ThemeToggle />
                     <Link href="/login" className="btn-ghost hidden sm:block text-xs py-1.5 px-2.5 whitespace-nowrap">ورود</Link>
                     <Link href="/register" className="btn-default hidden xs:block text-xs py-1.5 px-2.5 whitespace-nowrap">ثبت نام</Link>

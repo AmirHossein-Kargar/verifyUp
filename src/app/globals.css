@@ -7,6 +7,93 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer components {
+  /* Typography Components */
+  h1,
+  .h1 {
+    @apply text-5xl font-bold text-gray-900;
+  }
+
+  .dark h1,
+  .dark .h1 {
+    @apply text-white;
+  }
+
+  h2,
+  .h2 {
+    @apply text-4xl font-bold text-gray-900;
+  }
+
+  .dark h2,
+  .dark .h2 {
+    @apply text-white;
+  }
+
+  h3,
+  .h3 {
+    @apply text-3xl font-bold text-gray-900;
+  }
+
+  .dark h3,
+  .dark .h3 {
+    @apply text-white;
+  }
+
+  h4,
+  .h4 {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  .dark h4,
+  .dark .h4 {
+    @apply text-white;
+  }
+
+  h5,
+  .h5 {
+    @apply text-xl font-bold text-gray-900;
+  }
+
+  .dark h5,
+  .dark .h5 {
+    @apply text-white;
+  }
+
+  h6,
+  .h6 {
+    @apply text-lg font-bold text-gray-900;
+  }
+
+  .dark h6,
+  .dark .h6 {
+    @apply text-white;
+  }
+
+  p,
+  .p {
+    @apply text-lg font-normal text-gray-500;
+  }
+
+  .dark p,
+  .dark .p {
+    @apply text-gray-400;
+  }
+
+  .p-large {
+    @apply text-lg font-normal text-gray-500 lg:text-xl;
+  }
+
+  .dark .p-large {
+    @apply text-gray-400;
+  }
+
+  .badge-brand {
+    @apply inline-flex ms-3 px-2 py-1 ring-1 ring-inset text-blue-700 text-sm font-medium rounded bg-blue-50;
+  }
+
+  .dark .badge-brand {
+    @apply text-blue-400 bg-blue-900/30;
+  }
+
   /* Dark mode button improvements */
   .btn-default {
     @apply text-white bg-blue-500 border border-transparent hover:bg-blue-600;

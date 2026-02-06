@@ -26,7 +26,7 @@ export default function LoginPage() {
         <div className="fixed inset-0 flex items-center justify-center p-4 sm:pt-20 overflow-hidden" dir="rtl">
             <div className="w-full max-w-md bg-neutral-primary-soft p-6 sm:p-8 border border-default rounded-base shadow-lg select-none">
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                    <h5 className="text-xl sm:text-2xl font-semibold text-heading mb-4 sm:mb-6 text-center">ورود به حساب کاربری</h5>
+                    <h5 className="h5 mb-4 sm:mb-6 text-center">ورود به حساب کاربری</h5>
 
                     <div className="mb-3 sm:mb-4">
                         <label htmlFor="email" className="block mb-1.5 sm:mb-2 text-sm font-medium text-heading">

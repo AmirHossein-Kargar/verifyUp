@@ -31,7 +31,7 @@ export default function SignupPage() {
         <div className="fixed inset-0 flex items-center justify-center p-4 sm:pt-20 overflow-hidden" dir="rtl">
             <div className="w-full max-w-md bg-neutral-primary-soft p-6 sm:p-8 border border-default rounded-base shadow-lg select-none">
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                    <h5 className="text-xl sm:text-2xl font-semibold text-heading mb-4 sm:mb-6 text-center">
+                    <h5 className="h5 mb-4 sm:mb-6 text-center">
                         ثبت نام در سایت
                     </h5>
 
