@@ -14,7 +14,7 @@ export default function Header() {
             <div className="flex items-center justify-between">
                 {/* Logo */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg flex items-center justify-center">
                         <span className="text-white font-bold text-base sm:text-lg">ل</span>
                     </div>
                     <span className="text-gray-900 dark:text-white font-semibold text-sm sm:text-base">لوگو</span>
@@ -30,10 +30,10 @@ export default function Header() {
 
                 {/* Right Side - Auth Buttons & Menu */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                    <CartIcon />
                     <ThemeToggle />
-                    <Link href="/login" className="btn-ghost hidden sm:block text-xs py-1.5 px-2.5 whitespace-nowrap">ورود</Link>
-                    <Link href="/register" className="btn-default hidden xs:block text-xs py-1.5 px-2.5 whitespace-nowrap">ثبت نام</Link>
+                    <CartIcon />
+                    <Link href="/login" className="hidden sm:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">ورود</Link>
+                    <Link href="/register" className="hidden xs:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">ثبت نام</Link>
 
                     {/* Mobile Menu Button */}
                     <button
@@ -89,13 +89,13 @@ export default function Header() {
                         <div className="xs:hidden flex flex-col items-center gap-2 w-full mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <button
                                 onClick={() => setIsMenuOpen(false)}
-                                className="btn-ghost w-full text-sm py-2.5 px-4 font-medium"
+                                className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
                             >
                                 ورود
                             </button>
                             <button
                                 onClick={() => setIsMenuOpen(false)}
-                                className="btn-default w-full text-sm py-2.5 px-4 font-medium"
+                                className="w-full text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800"
                             >
                                 ثبت نام
                             </button>

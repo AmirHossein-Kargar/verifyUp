@@ -1,4 +1,5 @@
 import localFont from "next/font/local";
+import Script from "next/script";
 import Header from "./components/Header";
 import "./globals.css";
 
@@ -70,17 +71,12 @@ export default function RootLayout({ children }) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme');
-                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  var shouldBeDark = theme === 'dark' || (!theme && prefersDark);
-                  
-                  if (shouldBeDark) {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch (e) {}
-              })();
+              // On page load or when changing themes, best to add inline in head to avoid FOUC
+              if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+              }
             `,
           }}
         />
@@ -92,6 +88,7 @@ export default function RootLayout({ children }) {
         <main className="pt-24">
           {children}
         </main>
+        <Script src="/flowbite.min.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

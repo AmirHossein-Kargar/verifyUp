@@ -6,7 +6,7 @@ export default function CartIcon() {
     return (
         <Link
             href="/cart"
-            className="p-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer inline-flex"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 inline-flex"
             aria-label="Shopping cart"
         >
             <svg
@@ -15,7 +15,7 @@ export default function CartIcon() {
                 viewBox="0 0 24 24"
                 strokeWidth={2}
                 stroke="currentColor"
-                className="size-4 text-gray-600 dark:text-gray-300"
+                className="w-4 h-4"
             >
                 <path
                     strokeLinecap="round"
