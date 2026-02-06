@@ -30,8 +30,8 @@ export default function Header() {
                 {/* Right Side - Auth Buttons & Menu */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
                     <ThemeToggle />
-                    <button className="btn-ghost hidden sm:block text-xs py-1.5 px-2.5 whitespace-nowrap">ورود</button>
-                    <button className="btn-default hidden xs:block text-xs py-1.5 px-2.5 whitespace-nowrap">ثبت نام</button>
+                    <Link href="/login" className="btn-ghost hidden sm:block text-xs py-1.5 px-2.5 whitespace-nowrap">ورود</Link>
+                    <Link href="/register" className="btn-default hidden xs:block text-xs py-1.5 px-2.5 whitespace-nowrap">ثبت نام</Link>
 
                     {/* Mobile Menu Button */}
                     <button
