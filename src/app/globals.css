@@ -7,32 +7,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer components {
-  /* Base button styles */
-  .btn {
-    box-sizing: border-box;
-    font-weight: 500;
-    line-height: 1.25rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    padding: 0.625rem 1rem;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-    transition-property: color, background-color, border-color;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
-
-  .btn:focus {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px var(--ring-color);
-  }
-
-  /* Button variants */
+  /* Dark mode button improvements */
   .btn-default {
     @apply text-white bg-blue-500 border border-transparent hover:bg-blue-600;
     --ring-color: rgb(191 219 254);
+  }
+
+  .dark .btn-default {
+    @apply bg-blue-600 hover:bg-blue-700;
+    --ring-color: rgb(147 197 253);
   }
 
   .btn-secondary {
@@ -40,9 +23,19 @@
     --ring-color: rgb(229 231 235);
   }
 
+  .dark .btn-secondary {
+    @apply text-gray-300 bg-gray-700 border-gray-600 hover:bg-gray-600 hover:text-white;
+    --ring-color: rgb(75 85 99);
+  }
+
   .btn-tertiary {
     @apply text-gray-600 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:text-gray-900;
     --ring-color: rgb(243 244 246);
+  }
+
+  .dark .btn-tertiary {
+    @apply text-gray-400 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:text-gray-200;
+    --ring-color: rgb(55 65 81);
   }
 
   .btn-success {
@@ -50,9 +43,19 @@
     --ring-color: rgb(187 247 208);
   }
 
+  .dark .btn-success {
+    @apply bg-green-600 hover:bg-green-700;
+    --ring-color: rgb(134 239 172);
+  }
+
   .btn-danger {
     @apply text-white bg-red-500 border border-transparent hover:bg-red-600;
     --ring-color: rgb(254 202 202);
+  }
+
+  .dark .btn-danger {
+    @apply bg-red-600 hover:bg-red-700;
+    --ring-color: rgb(252 165 165);
   }
 
   .btn-warning {
@@ -60,9 +63,19 @@
     --ring-color: rgb(253 230 138);
   }
 
+  .dark .btn-warning {
+    @apply bg-amber-600 hover:bg-amber-700;
+    --ring-color: rgb(252 211 77);
+  }
+
   .btn-dark {
     @apply text-white bg-gray-800 border border-transparent hover:bg-gray-900;
     --ring-color: rgb(209 213 219);
+  }
+
+  .dark .btn-dark {
+    @apply bg-gray-700 hover:bg-gray-600;
+    --ring-color: rgb(156 163 175);
   }
 
   .btn-ghost {
@@ -70,7 +83,13 @@
     --ring-color: rgb(229 231 235);
   }
 
-  /* Apply base button styles to all button variants */
+  .dark .btn-ghost {
+    @apply text-gray-100 hover:bg-gray-800;
+    --ring-color: rgb(75 85 99);
+  }
+
+  /* Base button styles */
+  .btn,
   .btn-default,
   .btn-secondary,
   .btn-tertiary,
@@ -88,11 +107,12 @@
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     outline: 2px solid transparent;
     outline-offset: 2px;
-    transition-property: color, background-color, border-color;
+    transition-property: color, background-color, border-color, box-shadow;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
   }
 
+  .btn:focus,
   .btn-default:focus,
   .btn-secondary:focus,
   .btn-tertiary:focus,
