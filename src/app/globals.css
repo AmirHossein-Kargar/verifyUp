@@ -1,2 +1,108 @@
 @import "tailwindcss";
+
+@theme {
+  --font-family-sans: var(--font-iran-yekan), system-ui, sans-serif;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
+
+@layer components {
+  /* Base button styles */
+  .btn {
+    box-sizing: border-box;
+    font-weight: 500;
+    line-height: 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.625rem 1rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition-property: color, background-color, border-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  .btn:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--ring-color);
+  }
+
+  /* Button variants */
+  .btn-default {
+    @apply text-white bg-blue-500 border border-transparent hover:bg-blue-600;
+    --ring-color: rgb(191 219 254);
+  }
+
+  .btn-secondary {
+    @apply text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 hover:text-gray-900;
+    --ring-color: rgb(229 231 235);
+  }
+
+  .btn-tertiary {
+    @apply text-gray-600 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:text-gray-900;
+    --ring-color: rgb(243 244 246);
+  }
+
+  .btn-success {
+    @apply text-white bg-green-500 border border-transparent hover:bg-green-600;
+    --ring-color: rgb(187 247 208);
+  }
+
+  .btn-danger {
+    @apply text-white bg-red-500 border border-transparent hover:bg-red-600;
+    --ring-color: rgb(254 202 202);
+  }
+
+  .btn-warning {
+    @apply text-white bg-amber-500 border border-transparent hover:bg-amber-600;
+    --ring-color: rgb(253 230 138);
+  }
+
+  .btn-dark {
+    @apply text-white bg-gray-800 border border-transparent hover:bg-gray-900;
+    --ring-color: rgb(209 213 219);
+  }
+
+  .btn-ghost {
+    @apply text-gray-900 bg-transparent border border-transparent hover:bg-gray-100;
+    --ring-color: rgb(229 231 235);
+  }
+
+  /* Apply base button styles to all button variants */
+  .btn-default,
+  .btn-secondary,
+  .btn-tertiary,
+  .btn-success,
+  .btn-danger,
+  .btn-warning,
+  .btn-dark,
+  .btn-ghost {
+    box-sizing: border-box;
+    font-weight: 500;
+    line-height: 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.625rem 1rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition-property: color, background-color, border-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  .btn-default:focus,
+  .btn-secondary:focus,
+  .btn-tertiary:focus,
+  .btn-success:focus,
+  .btn-danger:focus,
+  .btn-warning:focus,
+  .btn-dark:focus,
+  .btn-ghost:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--ring-color);
+  }
+}
