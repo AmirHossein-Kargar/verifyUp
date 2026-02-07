@@ -1,6 +1,10 @@
+'use client';
+
 import localFont from "next/font/local";
 import Script from "next/script";
+import { usePathname } from "next/navigation";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import "./globals.css";
 
 const iranYekan = localFont({
@@ -88,6 +92,8 @@ export default function RootLayout({ children }) {
         <main className="pt-24">
           {children}
         </main>
+        {/* Footer */}
+        <Footer />
         <Script src="/flowbite.min.js" strategy="beforeInteractive" />
       </body>
     </html>
