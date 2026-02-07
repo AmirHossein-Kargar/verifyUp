@@ -1,42 +1,125 @@
 const Order = require("../models/Order");
-const { createOrderService } = require("../services/order.service");
+const Document = require("../models/Document");
+const {
+  createOrderSchema,
+  addDocSchema,
+} = require("../validators/order.validation");
+const { recomputeOrderSummary } = require("../services/order.service");
+const ApiResponse = require("../utils/response");
 
-const createOrder = async (req, res) => {
+exports.createOrder = async (req, res, next) => {
   try {
-    const order = await createOrderService(req.user._id, req.body);
-    res.status(201).json(order);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    const data = createOrderSchema.parse(req.body);
 
-const getOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ user: req.user._id }).sort({
-      createdAt: -1,
+    const order = await Order.create({
+      userId: req.user.userId,
+      service: data.service,
+      status: "pending_docs",
+      priceToman: data.priceToman,
+      currency: "IRR_TOMAN",
+      requiredDocs: data.requiredDocs,
     });
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    return ApiResponse.created(res, {
+      message: "سفارش با موفقیت ایجاد شد",
+      data: { order },
+    });
+  } catch (err) {
+    if (err?.issues) {
+      return ApiResponse.badRequest(res, {
+        message: "اطلاعات وارد شده نامعتبر است",
+        errors: err.issues.map((i) => i.message),
+      });
+    }
+    next(err);
   }
 };
 
-const getOrderById = async (req, res) => {
+exports.addDocument = async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const data = addDocSchema.parse(req.body);
+    const { orderId } = req.params;
+
+    // Verify order belongs to user
+    const order = await Order.findOne({
+      _id: orderId,
+      userId: req.user.userId,
+    });
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return ApiResponse.notFound(res, {
+        message: "سفارش یافت نشد یا دسترسی به آن ندارید",
+      });
     }
 
-    if (order.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
+    // Create document
+    const doc = await Document.create({
+      orderId,
+      userId: req.user.userId,
+      type: data.type,
+      fileUrl: data.fileUrl,
+      status: "uploaded",
+    });
 
-    res.json(order);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Recompute order summary and status
+    const summary = await recomputeOrderSummary(orderId);
+
+    return ApiResponse.created(res, {
+      message: "مدرک با موفقیت آپلود شد",
+      data: {
+        document: doc,
+        orderSummary: summary,
+      },
+    });
+  } catch (err) {
+    if (err?.issues) {
+      return ApiResponse.badRequest(res, {
+        message: "اطلاعات وارد شده نامعتبر است",
+        errors: err.issues.map((i) => i.message),
+      });
+    }
+    next(err);
   }
 };
 
-module.exports = { createOrder, getOrders, getOrderById };
+exports.myOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ userId: req.user.userId })
+      .sort({ createdAt: -1 })
+      .select("-__v");
+
+    return ApiResponse.success(res, {
+      message: "سفارشات با موفقیت دریافت شد",
+      data: { orders, count: orders.length },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getOrderById = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({
+      _id: orderId,
+      userId: req.user.userId,
+    }).select("-__v");
+
+    if (!order) {
+      return ApiResponse.notFound(res, {
+        message: "سفارش یافت نشد",
+      });
+    }
+
+    // Get documents for this order
+    const documents = await Document.find({ orderId }).select("-__v");
+
+    return ApiResponse.success(res, {
+      message: "جزئیات سفارش با موفقیت دریافت شد",
+      data: { order, documents },
+    });
+  } catch (err) {
+    next(err);
+  }
+};

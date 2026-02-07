@@ -1,27 +1,18 @@
-const validateOrder = (req, res, next) => {
-  const { items } = req.body;
+const { z } = require("zod");
 
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    return res
-      .status(400)
-      .json({ message: "Order must contain at least one item" });
-  }
+const createOrderSchema = z.object({
+  service: z.literal("upwork_verification", {
+    errorMap: () => ({ message: "سرویس باید 'upwork_verification' باشد" }),
+  }),
+  priceToman: z.number().int().positive("قیمت باید یک عدد صحیح مثبت باشد"),
+  requiredDocs: z
+    .array(z.string())
+    .min(1, "حداقل یک مدرک الزامی باید مشخص شود"),
+});
 
-  for (const item of items) {
-    if (!item.name || !item.quantity || !item.price) {
-      return res
-        .status(400)
-        .json({ message: "Each item must have name, quantity, and price" });
-    }
+const addDocSchema = z.object({
+  type: z.string().min(2, "نوع مدرک باید حداقل ۲ کاراکتر باشد"),
+  fileUrl: z.string().url("فرمت آدرس فایل نامعتبر است"),
+});
 
-    if (item.quantity <= 0 || item.price <= 0) {
-      return res
-        .status(400)
-        .json({ message: "Quantity and price must be positive numbers" });
-    }
-  }
-
-  next();
-};
-
-module.exports = { validateOrder };
+module.exports = { createOrderSchema, addDocSchema };

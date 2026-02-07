@@ -69,6 +69,9 @@ const iranYekan = localFont({
 });
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+  const hideFooter = pathname === '/cart';
+
   return (
     <html lang="en" suppressHydrationWarning className={iranYekan.variable}>
       <head>
@@ -93,7 +96,7 @@ export default function RootLayout({ children }) {
           {children}
         </main>
         {/* Footer */}
-        <Footer />
+        {!hideFooter && <Footer />}
         <Script src="/flowbite.min.js" strategy="beforeInteractive" />
       </body>
     </html>

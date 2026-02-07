@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 export default function CartPage() {
     return (
-        <div className="fixed inset-0 flex items-center justify-center p-4 sm:pt-20 overflow-hidden" dir="rtl">
-            <div className="w-full max-w-md bg-neutral-primary-soft p-6 sm:p-8 border border-default rounded-base shadow-lg select-none">
+        <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl">
+            <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 sm:p-8 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg select-none">
                 <div className="flex flex-col items-center justify-center text-center">
                     <svg
                         className="w-20 h-20 sm:w-24 sm:h-24 text-gray-400 mb-4"

@@ -1,36 +1,23 @@
-const validateRegister = (req, res, next) => {
-  const { name, email, password } = req.body;
+const { z } = require("zod");
 
-  if (!name || !email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Please provide all required fields" });
-  }
+const registerSchema = z
+  .object({
+    email: z.string().email("فرمت ایمیل نامعتبر است").optional(),
+    phone: z.string().min(8, "شماره تلفن باید حداقل ۸ کاراکتر باشد").optional(),
+    password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+  })
+  .refine((d) => d.email || d.phone, {
+    message: "ایمیل یا شماره تلفن الزامی است",
+  });
 
-  if (password.length < 6) {
-    return res
-      .status(400)
-      .json({ message: "Password must be at least 6 characters" });
-  }
+const loginSchema = z
+  .object({
+    email: z.string().email("فرمت ایمیل نامعتبر است").optional(),
+    phone: z.string().min(8, "شماره تلفن باید حداقل ۸ کاراکتر باشد").optional(),
+    password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+  })
+  .refine((d) => d.email || d.phone, {
+    message: "ایمیل یا شماره تلفن الزامی است",
+  });
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: "Please provide a valid email" });
-  }
-
-  next();
-};
-
-const validateLogin = (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Please provide email and password" });
-  }
-
-  next();
-};
-
-module.exports = { validateRegister, validateLogin };
+module.exports = { registerSchema, loginSchema };

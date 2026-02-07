@@ -1,42 +1,212 @@
-const User = require("../models/User");
 const Order = require("../models/Order");
+const Document = require("../models/Document");
+const User = require("../models/User");
+const { recomputeOrderSummary } = require("../services/order.service");
+const ApiResponse = require("../utils/response");
 
-const getAllUsers = async (req, res) => {
+exports.listOrders = async (req, res, next) => {
   try {
-    const users = await User.find({}).select("-password");
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const { status, page = 1, limit = 20 } = req.query;
+
+    const query = {};
+    if (status) query.status = status;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .populate("userId", "email phone role")
+        .select("-__v"),
+      Order.countDocuments(query),
+    ]);
+
+    return ApiResponse.success(res, {
+      message: "سفارشات با موفقیت دریافت شد",
+      data: {
+        orders,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(total / parseInt(limit)),
+        },
+      },
+    });
+  } catch (err) {
+    next(err);
   }
 };
 
-const getAllOrders = async (req, res) => {
+exports.getOrderDetails = async (req, res, next) => {
   try {
-    const orders = await Order.find({})
-      .populate("user", "name email")
-      .sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    const { orderId } = req.params;
 
-const updateOrderStatus = async (req, res) => {
-  try {
-    const { status } = req.body;
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(orderId)
+      .populate("userId", "email phone role")
+      .select("-__v");
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return ApiResponse.notFound(res, {
+        message: "سفارش یافت نشد",
+      });
     }
 
-    order.status = status;
-    await order.save();
+    const documents = await Document.find({ orderId }).select("-__v");
 
-    res.json(order);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    return ApiResponse.success(res, {
+      message: "جزئیات سفارش با موفقیت دریافت شد",
+      data: { order, documents },
+    });
+  } catch (err) {
+    next(err);
   }
 };
 
-module.exports = { getAllUsers, getAllOrders, updateOrderStatus };
+exports.orderDocs = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return ApiResponse.notFound(res, {
+        message: "سفارش یافت نشد",
+      });
+    }
+
+    const docs = await Document.find({ orderId }).select("-__v");
+
+    return ApiResponse.success(res, {
+      message: "مدارک با موفقیت دریافت شد",
+      data: { documents: docs, count: docs.length },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.reviewDoc = async (req, res, next) => {
+  try {
+    const { docId } = req.params;
+    const { status, adminNote } = req.body;
+
+    // Validate status
+    if (!["accepted", "resubmit"].includes(status)) {
+      return ApiResponse.badRequest(res, {
+        message: "وضعیت نامعتبر است. باید 'accepted' یا 'resubmit' باشد",
+      });
+    }
+
+    // Find and update document
+    const doc = await Document.findByIdAndUpdate(
+      docId,
+      {
+        $set: { status, adminNote: adminNote || "" },
+        $currentDate: { updatedAt: true },
+      },
+      { new: true },
+    );
+
+    if (!doc) {
+      return ApiResponse.notFound(res, {
+        message: "مدرک یافت نشد",
+      });
+    }
+
+    // Recompute order summary and status
+    const summary = await recomputeOrderSummary(doc.orderId);
+
+    return ApiResponse.success(res, {
+      message:
+        status === "accepted"
+          ? "مدرک تایید شد"
+          : "مدرک برای ارسال مجدد علامت‌گذاری شد",
+      data: {
+        document: doc,
+        orderSummary: summary,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateOrderStatus = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { status, adminNote } = req.body;
+
+    const validStatuses = [
+      "pending_docs",
+      "in_review",
+      "needs_resubmit",
+      "approved",
+      "rejected",
+      "completed",
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return ApiResponse.badRequest(res, {
+        message: `وضعیت نامعتبر است. باید یکی از موارد زیر باشد: ${validStatuses.join("، ")}`,
+      });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        $set: { status, adminNote: adminNote || "" },
+        $currentDate: { updatedAt: true },
+      },
+      { new: true },
+    ).populate("userId", "email phone role");
+
+    if (!order) {
+      return ApiResponse.notFound(res, {
+        message: "سفارش یافت نشد",
+      });
+    }
+
+    return ApiResponse.success(res, {
+      message: "وضعیت سفارش با موفقیت به‌روزرسانی شد",
+      data: { order },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getStats = async (req, res, next) => {
+  try {
+    const [totalOrders, totalUsers, ordersByStatus, recentOrders] =
+      await Promise.all([
+        Order.countDocuments(),
+        User.countDocuments({ role: "user" }),
+        Order.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+        Order.find()
+          .sort({ createdAt: -1 })
+          .limit(5)
+          .populate("userId", "email phone")
+          .select("-__v"),
+      ]);
+
+    const statusMap = {};
+    ordersByStatus.forEach((item) => {
+      statusMap[item._id] = item.count;
+    });
+
+    return ApiResponse.success(res, {
+      message: "آمار با موفقیت دریافت شد",
+      data: {
+        totalOrders,
+        totalUsers,
+        ordersByStatus: statusMap,
+        recentOrders,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};

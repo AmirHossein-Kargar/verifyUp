@@ -1,15 +1,21 @@
-const express = require("express");
-const router = express.Router();
-const {
-  getAllUsers,
-  getAllOrders,
-  updateOrderStatus,
-} = require("../controllers/admin.controller");
-const { protect } = require("../middleware/auth");
-const { admin } = require("../middleware/admin");
+const router = require("express").Router();
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
+const ctrl = require("../controllers/admin.controller");
 
-router.get("/users", protect, admin, getAllUsers);
-router.get("/orders", protect, admin, getAllOrders);
-router.put("/orders/:id", protect, admin, updateOrderStatus);
+// All admin routes require authentication and admin role
+router.use(auth, admin);
+
+// Statistics
+router.get("/stats", ctrl.getStats);
+
+// Orders management
+router.get("/orders", ctrl.listOrders);
+router.get("/orders/:orderId", ctrl.getOrderDetails);
+router.get("/orders/:orderId/documents", ctrl.orderDocs);
+router.patch("/orders/:orderId/status", ctrl.updateOrderStatus);
+
+// Document review
+router.patch("/documents/:docId/review", ctrl.reviewDoc);
 
 module.exports = router;

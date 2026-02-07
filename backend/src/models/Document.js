@@ -1,28 +1,17 @@
 const mongoose = require("mongoose");
 
-const documentSchema = new mongoose.Schema(
+const DocumentSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    category: {
-      type: String,
-      default: "general",
-    },
+    orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true, index: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
+
+    type: { type: String, required: true, index: true }, // passport_front, selfie, ...
+    fileUrl: { type: String, required: true },
+
+    status: { type: String, enum: ["uploaded", "accepted", "resubmit"], default: "uploaded", index: true },
+    adminNote: { type: String, default: "" }
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("Document", documentSchema);
+module.exports = mongoose.model("Document", DocumentSchema);
