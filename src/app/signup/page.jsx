@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ErrorText = ({ children }) =>
     children ? (
@@ -17,6 +18,7 @@ const ErrorText = ({ children }) =>
 export default function SignupPage() {
     const router = useRouter();
     const { toast, showToast, hideToast } = useToast();
+    const { user, loading, login } = useAuth();
     const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm({
         mode: "onChange",
         defaultValues: {
@@ -36,6 +38,13 @@ export default function SignupPage() {
         hasLongPassword: false,
         strength: 0
     });
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (!loading && user) {
+            router.push('/dashboard');
+        }
+    }, [user, loading, router]);
 
     useEffect(() => {
         if (passwordValue) {
@@ -71,9 +80,15 @@ export default function SignupPage() {
     const onSubmit = async (data) => {
         try {
             const response = await api.register({
+                name: data.name,
                 email: data.email,
                 password: data.password,
             });
+
+            // Update auth context with user data
+            if (response.data?.user) {
+                login(response.data.user);
+            }
 
             showToast(response.message || 'ثبت‌نام با موفقیت انجام شد', 'success');
 
@@ -83,6 +98,16 @@ export default function SignupPage() {
         } catch (error) {
             showToast(error.message || 'خطا در ثبت‌نام', 'error');
         }
+    }
+
+    // Show loading or nothing while checking auth
+    if (loading) {
+        return null;
+    }
+
+    // Don't render signup form if user is already logged in
+    if (user) {
+        return null;
     }
 
 

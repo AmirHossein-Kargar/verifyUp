@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
 
 const ErrorText = ({ children }) =>
     children ? (
@@ -16,6 +18,7 @@ const ErrorText = ({ children }) =>
 export default function LoginPage() {
     const router = useRouter();
     const { toast, showToast, hideToast } = useToast();
+    const { user, loading, login } = useAuth();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         mode: "onChange",
         defaultValues: {
@@ -25,12 +28,24 @@ export default function LoginPage() {
         }
     });
 
+    // Redirect if already logged in
+    useEffect(() => {
+        if (!loading && user) {
+            router.push('/dashboard');
+        }
+    }, [user, loading, router]);
+
     const onSubmit = async (data) => {
         try {
             const response = await api.login({
                 email: data.email,
                 password: data.password,
             });
+
+            // Update auth context with user data
+            if (response.data?.user) {
+                login(response.data.user);
+            }
 
             showToast(response.message || 'ورود با موفقیت انجام شد', 'success');
 
@@ -40,6 +55,16 @@ export default function LoginPage() {
         } catch (error) {
             showToast(error.message || 'خطا در ورود به حساب کاربری', 'error');
         }
+    }
+
+    // Show loading or nothing while checking auth
+    if (loading) {
+        return null;
+    }
+
+    // Don't render login form if user is already logged in
+    if (user) {
+        return null;
     }
 
     return (

@@ -1,27 +1,60 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
 import { useState } from "react";
 import CartIcon from "./CartIcon";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { motion } from 'framer-motion';
 
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user, loading, logout } = useAuth();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await logout();
+        router.push('/');
+        setIsMenuOpen(false);
+    };
 
     return <header className="fixed top-2 sm:top-4 right-1/2 translate-x-1/2 w-[96%] sm:w-[95%] max-w-7xl z-50" dir="rtl">
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2 sm:py-2.5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between relative">
                 {/* Logo */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-base sm:text-lg">ل</span>
-                    </div>
-                    <span className="text-gray-900 dark:text-white font-semibold text-sm sm:text-base">لوگو</span>
-                </div>
+                <Link href="/" className="flex items-center gap-2 sm:gap-3">
+                    <motion.div
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center overflow-hidden"
+                        style={{ filter: 'contrast(1.1) brightness(1.05) saturate(1.1)' }}
+                        whileHover={{
+                            scale: 1.1,
+                            boxShadow: "0 10px 25px -5px rgba(99, 102, 241, 0.5), 0 8px 10px -6px rgba(99, 102, 241, 0.5)"
+                        }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                        <Image
+                            src="/Logo.png"
+                            alt="VerifyUp Logo"
+                            width={32}
+                            height={32}
+                            className="w-full h-full object-contain"
+                            style={{
+                                imageRendering: '-webkit-optimize-contrast',
+                                filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
+                            }}
+                            priority
+                        />
+                    </motion.div>
+                    <span className="text-gray-900 dark:text-white font-semibold text-sm sm:text-base tracking-wider">
+                        VerifyUp
+                    </span>
+                </Link>
 
-                {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center gap-4 lg:gap-5">
+                {/* Desktop Navigation - Centered */}
+                <nav className="hidden md:flex items-center gap-4 lg:gap-5 absolute left-1/2 -translate-x-1/2">
                     <Link href="/" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">خانه</Link>
                     <Link href="/services" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">سرویس ها</Link>
                     <Link href="/contact" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">تماس با ما</Link>
@@ -32,8 +65,22 @@ export default function Header() {
                 <div className="flex items-center gap-1.5 sm:gap-2">
                     <ThemeToggle />
                     <CartIcon />
-                    <Link href="/login" className="hidden sm:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">ورود</Link>
-                    <Link href="/register" className="hidden xs:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">ثبت نام</Link>
+
+                    {!loading && (
+                        user ? (
+                            // Logged in state
+                            <>
+                                <Link href="/dashboard" className="hidden sm:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">داشبورد</Link>
+                                <button onClick={handleLogout} className="hidden xs:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">خروج</button>
+                            </>
+                        ) : (
+                            // Logged out state
+                            <>
+                                <Link href="/login" className="hidden sm:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">ورود</Link>
+                                <Link href="/signup" className="hidden xs:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">ثبت نام</Link>
+                            </>
+                        )
+                    )}
 
                     {/* Mobile Menu Button */}
                     <button
@@ -86,20 +133,44 @@ export default function Header() {
                         </Link>
 
                         {/* Mobile Auth Buttons */}
-                        <div className="xs:hidden flex flex-col items-center gap-2 w-full mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <button
-                                onClick={() => setIsMenuOpen(false)}
-                                className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-                            >
-                                ورود
-                            </button>
-                            <button
-                                onClick={() => setIsMenuOpen(false)}
-                                className="w-full text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800"
-                            >
-                                ثبت نام
-                            </button>
-                        </div>
+                        {!loading && (
+                            <div className="xs:hidden flex flex-col items-center gap-2 w-full mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                {user ? (
+                                    <>
+                                        <Link
+                                            href="/dashboard"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="w-full text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800"
+                                        >
+                                            داشبورد
+                                        </Link>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                        >
+                                            خروج
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href="/login"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                        >
+                                            ورود
+                                        </Link>
+                                        <Link
+                                            href="/signup"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="w-full text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800"
+                                        >
+                                            ثبت نام
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
+                        )}
                     </nav>
                 </div>
             )}

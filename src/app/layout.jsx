@@ -1,12 +1,97 @@
-'use client';
-
 import localFont from "next/font/local";
 import Script from "next/script";
-import { usePathname } from "next/navigation";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
+import LayoutClient from "./LayoutClient";
 import "./globals.css";
 
+// * Meta Data
+export const metadata = {
+  metadataBase: new URL('https://verifyup.ir'),
+
+  title: {
+    default: 'VerifyUp | وریفای آپ',
+    template: '%s | VerifyUp'
+  },
+
+  description:
+    'VerifyUp پلتفرم تخصصی احراز هویت کاربران آپورک (Upwork) است. تایید مدارک، بررسی هویت و ارسال امن اسناد به‌صورت آنلاین، سریع و قابل اعتماد برای فریلنسرها و کارفرماها.',
+
+  keywords: [
+    'احراز هویت آپورک',
+    'احراز هویت Upwork',
+    'تایید مدارک آپورک',
+    'VerifyUp',
+    'احراز هویت فریلنسر',
+    'تایید هویت آنلاین',
+    'KYC',
+    'احراز هویت دیجیتال',
+    'تایید اسناد آنلاین',
+    'Upwork verification',
+    'احراز هویت کاربران آپورک'
+  ],
+
+  authors: [{ name: 'VerifyUp Team' }],
+  creator: 'VerifyUp',
+  publisher: 'VerifyUp',
+
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/Logo.png',
+  },
+
+  openGraph: {
+    title: 'VerifyUp | احراز هویت کاربران آپورک (Upwork)',
+    description:
+      'پلتفرم VerifyUp برای احراز هویت و تایید مدارک کاربران آپورک. ارسال امن اسناد، بررسی سریع و افزایش شانس تایید حساب Upwork.',
+    url: 'https://verifyup.ir',
+    siteName: 'VerifyUp',
+    type: 'website',
+    locale: 'fa_IR',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'VerifyUp – احراز هویت کاربران آپورک',
+      },
+    ],
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VerifyUp | احراز هویت Upwork',
+    description:
+      'احراز هویت و تایید مدارک کاربران آپورک با VerifyUp. سریع، امن و آنلاین.',
+    images: ['/twitter-image.jpg'],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+
+  alternates: {
+    canonical: 'https://verifyup.ir',
+  },
+
+  category: 'technology',
+};
+
+// * Font
 const iranYekan = localFont({
   src: [
     {
@@ -69,11 +154,8 @@ const iranYekan = localFont({
 });
 
 export default function RootLayout({ children }) {
-  const pathname = usePathname();
-  const hideFooter = pathname === '/cart';
-
   return (
-    <html lang="en" suppressHydrationWarning className={iranYekan.variable}>
+    <html lang="fa" dir="rtl" suppressHydrationWarning className={iranYekan.variable}>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -89,14 +171,9 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={`bg-gray-50 dark:bg-gray-900 ${iranYekan.className}`}>
-        {/* Floating Header */}
-        <Header />
-        {/* Main Content with padding for fixed header */}
-        <main className="pt-24">
-          {children}
-        </main>
-        {/* Footer */}
-        {!hideFooter && <Footer />}
+        <AuthProvider>
+          <LayoutClient>{children}</LayoutClient>
+        </AuthProvider>
         <Script src="/flowbite.min.js" strategy="beforeInteractive" />
       </body>
     </html>
