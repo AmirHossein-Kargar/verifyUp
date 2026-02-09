@@ -18,6 +18,14 @@
   --color-primary-700: #5145cd;
   --color-primary-800: #42389d;
   --color-primary-900: #362f78;
+
+  /* Stepper colors */
+  --color-brand-softer: #e5edff;
+  --color-brand-subtle: #6875f5;
+  --color-neutral-tertiary: #e5e7eb;
+  --color-fg-brand: #5850ec;
+  --color-body: #6b7280;
+  --color-default: #d1d5db;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
