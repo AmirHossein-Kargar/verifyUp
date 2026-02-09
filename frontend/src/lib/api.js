@@ -1,28 +1,53 @@
-// API client configuration
+// ===============================
+// * API Client Configuration
+// ===============================
+
+// * Base URL for all API requests
+// * Uses environment variable in production
+// * Falls back to localhost in development
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
+// ===============================
+// * ApiClient
+// * Centralized wrapper around fetch
+// * Handles base URL, cookies, and errors
+// ===============================
 class ApiClient {
   constructor() {
+    // * Store API base URL
     this.baseURL = API_BASE_URL;
   }
 
+  // ===============================
+  // * Generic request handler
+  // * endpoint: API route (e.g. /auth/login)
+  // * options: fetch configuration
+  // ===============================
   async request(endpoint, options = {}) {
+    // * Build full request URL
     const url = `${this.baseURL}${endpoint}`;
 
+    // * Default fetch configuration
     const config = {
       ...options,
       headers: {
+        // * Send and receive JSON
         "Content-Type": "application/json",
         ...options.headers,
       },
-      credentials: "include", // Important: enables cookies
+      // * Required for HttpOnly cookie-based auth
+      credentials: "include",
     };
 
     try {
+      // * Send request to API
       const response = await fetch(url, config);
+
+      // * Parse JSON response
       const data = await response.json();
 
+      // * Handle non-success responses
       if (!response.ok) {
         throw {
           status: response.status,
@@ -31,11 +56,15 @@ class ApiClient {
         };
       }
 
+      // * Return successful response data
       return data;
     } catch (error) {
+      // * Known API error
       if (error.status) {
         throw error;
       }
+
+      // * Network or unexpected error
       throw {
         status: 500,
         message: "خطا در برقراری ارتباط با سرور",
@@ -44,7 +73,11 @@ class ApiClient {
     }
   }
 
-  // Auth endpoints
+  // ===============================
+  // * Authentication Endpoints
+  // ===============================
+
+  // * Register a new user
   async register(data) {
     return this.request("/auth/register", {
       method: "POST",
@@ -52,6 +85,7 @@ class ApiClient {
     });
   }
 
+  // * Login user with credentials
   async login(data) {
     return this.request("/auth/login", {
       method: "POST",
@@ -59,16 +93,20 @@ class ApiClient {
     });
   }
 
+  // * Logout current user
+  // * Clears authentication cookies
   async logout() {
     return this.request("/auth/logout", {
       method: "POST",
     });
   }
 
+  // * Get current authenticated user
   async getMe() {
     return this.request("/auth/me");
   }
 
+  // * Refresh access token using refresh token
   async refreshToken() {
     return this.request("/auth/refresh", {
       method: "POST",
@@ -76,4 +114,5 @@ class ApiClient {
   }
 }
 
+// * Export a single shared API client instance
 export const api = new ApiClient();

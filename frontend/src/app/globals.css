@@ -1,13 +1,37 @@
+/* ===============================
+ * Global Imports
+ * =============================== */
+
+/* * Tailwind CSS core */
 @import "tailwindcss";
+
+/* * Flowbite default theme */
 @import "flowbite/src/themes/default";
 
+/* ===============================
+ * Flowbite Configuration
+ * =============================== */
+
+/* * Enable Flowbite plugin */
 @plugin "flowbite/plugin";
+
+/* * Include Flowbite source files */
 @source "../node_modules/flowbite";
 
+/* ===============================
+ * Theme Customization
+ * =============================== */
+
 @theme {
+  /* * Primary sans-serif font stack
+   * * Uses Iran Yekan as main font
+   * * Falls back to system fonts
+   */
   --font-family-sans: var(--font-iran-yekan), system-ui, sans-serif;
 
-  /* Custom brand colors using indigo palette */
+  /* * Brand color palette (Indigo-based)
+   * * Used across buttons, links, and UI accents
+   */
   --color-primary-50: #f0f5ff;
   --color-primary-100: #e5edff;
   --color-primary-200: #cddbfe;
@@ -19,7 +43,7 @@
   --color-primary-800: #42389d;
   --color-primary-900: #362f78;
 
-  /* Stepper colors */
+  /* * Stepper & UI semantic colors */
   --color-brand-softer: #e5edff;
   --color-brand-subtle: #6875f5;
   --color-neutral-tertiary: #e5e7eb;
@@ -28,9 +52,20 @@
   --color-default: #d1d5db;
 }
 
+/* ===============================
+ * Dark Mode Variant
+ * =============================== */
+
+/* * Enables Tailwind dark mode using `.dark` class */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Toast animation */
+/* ===============================
+ * Animations
+ * =============================== */
+
+/* * Toast entrance animation
+ * * Used for notification transitions
+ */
 @keyframes fade-in-down {
   0% {
     opacity: 0;
@@ -42,6 +77,7 @@
   }
 }
 
+/* * Utility class for fade-in-down animation */
 .animate-fade-in-down {
   animation: fade-in-down 0.3s ease-out;
 }
