@@ -2,6 +2,7 @@ const router = require("express").Router();
 const rateLimit = require("express-rate-limit");
 const ctrl = require("../controllers/auth.controller");
 const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 
 // Strict rate limiter for auth endpoints (per IP)
 const authLimiter = rateLimit({
@@ -36,6 +37,10 @@ router.post("/login", authLimiter, ctrl.login);
 router.post("/refresh", refreshLimiter, ctrl.refresh);
 router.post("/logout", logoutLimiter, auth, ctrl.logout);
 router.get("/me", auth, ctrl.me);
+
+// Admin-only MFA endpoints (require normal authentication + admin role)
+router.post("/setup-mfa", auth, admin, ctrl.setupMfa);
+router.post("/verify-mfa", auth, admin, ctrl.verifyMfa);
 
 // CSRF token endpoint (read-only, used by frontend to prime CSRF cookie/header)
 router.get("/csrf", (req, res) => {

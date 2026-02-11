@@ -17,7 +17,8 @@ function sanitizeQuery(obj) {
  * Remove sensitive fields from user object
  */
 function sanitizeUser(user) {
-  const { passwordHash, __v, ...safe } = user.toObject ? user.toObject() : user;
+  const { passwordHash, __v, mfaSecret, mfaBackupCodes, ...safe } =
+    user.toObject ? user.toObject() : user;
   return safe;
 }
 

@@ -1,19 +1,14 @@
 const router = require("express").Router();
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 const auth = require("../middleware/auth");
 const ctrl = require("../controllers/order.controller");
+const { uploadsDir } = require("../config/uploads");
 
 // All order routes require authentication
 router.use(auth);
 
 // Multer storage for order documents
-const uploadsDir = path.join(__dirname, "..", "..", "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 const storage = multer.diskStorage({
   destination: (_, __, cb) => cb(null, uploadsDir),
   filename: (_, file, cb) => {
@@ -24,15 +19,30 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (_req, file, cb) => {
-  // Basic whitelist: images and PDFs
+  // Strict whitelist: only specific image types and PDFs
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+  ];
+  const allowedExtensions = [".jpg", ".jpeg", ".png", ".pdf"];
+
+  const mimetype = (file.mimetype || "").toLowerCase();
+  const ext = path.extname(file.originalname || "").toLowerCase();
+
   if (
-    file.mimetype.startsWith("image/") ||
-    file.mimetype === "application/pdf"
+    !allowedMimeTypes.includes(mimetype) ||
+    !allowedExtensions.includes(ext)
   ) {
-    cb(null, true);
-  } else {
-    cb(new Error("فرمت فایل مجاز نیست. فقط تصویر یا PDF مجاز است."));
+    return cb(
+      new Error(
+        "فرمت فایل مجاز نیست. فقط تصاویر (JPG, JPEG, PNG) یا PDF با پسوند صحیح مجاز هستند."
+      )
+    );
   }
+
+  cb(null, true);
 };
 
 const upload = multer({

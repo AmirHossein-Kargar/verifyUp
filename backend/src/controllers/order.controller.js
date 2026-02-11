@@ -1,3 +1,4 @@
+const fs = require("fs");
 const Order = require("../models/Order");
 const Document = require("../models/Document");
 const {
@@ -7,6 +8,7 @@ const {
 const { recomputeOrderSummary } = require("../services/order.service");
 const ApiResponse = require("../utils/response");
 const { ensureUserOwnsOrder } = require("../permissions/orders");
+const { scanFileForMalware } = require("../services/virusScan.service");
 
 exports.createOrder = async (req, res, next) => {
   try {
@@ -83,22 +85,41 @@ exports.uploadDocument = async (req, res, next) => {
     const order = await ensureUserOwnsOrder(orderId, req.user.userId, res);
     if (!order) return;
 
-    // Build public URL for the uploaded file
-    const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
-      req.file.filename
-    }`;
+    // Security: run uploaded file through malware scanner hook
+    const scanResult = await scanFileForMalware(req.file.path);
+    if (!scanResult.isClean) {
+      // Best-effort cleanup of suspicious file
+      try {
+        await fs.promises.unlink(req.file.path);
+      } catch {
+        // ignore cleanup errors
+      }
+
+      return ApiResponse.badRequest(res, {
+        message: "فایل شما به دلایل امنیتی پذیرفته نشد",
+      });
+    }
 
     // Document type can be optionally sent by client, otherwise generic
     const type = req.body.type || "user_upload";
 
-    // Create document record
-    const doc = await Document.create({
+    // Create document record with private storage details
+    const doc = new Document({
       orderId,
       userId: req.user.userId,
       type,
-      fileUrl,
+      // URL will point to the controlled download endpoint
+      fileUrl: "", // set below after id is available
       status: "uploaded",
+      fileName: req.file.filename,
+      storagePath: req.file.path,
     });
+
+    // File will be served only through an authenticated download endpoint
+    doc.fileUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/files/${doc._id.toString()}`;
+    await doc.save();
 
     // Recompute order summary and status
     const summary = await recomputeOrderSummary(orderId);

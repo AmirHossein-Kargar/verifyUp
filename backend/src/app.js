@@ -13,6 +13,7 @@ const ApiResponse = require("./utils/response");
 const authRoutes = require("./routes/auth.routes");
 const orderRoutes = require("./routes/order.routes");
 const adminRoutes = require("./routes/admin.routes");
+const fileRoutes = require("./routes/files.routes");
 
 const app = express();
 
@@ -47,9 +48,6 @@ app.use(
   })
 );
 
-// Static files for uploaded documents
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
-
 // Health check
 app.get("/", (req, res) => {
   ApiResponse.success(res, {
@@ -62,6 +60,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/files", fileRoutes);
 
 // 404 handler
 app.use((req, res) => {

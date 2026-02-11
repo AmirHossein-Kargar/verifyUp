@@ -1,8 +1,11 @@
 const bcrypt = require("bcryptjs");
+const speakeasy = require("speakeasy");
+const crypto = require("crypto");
 const User = require("../models/User");
 const {
   registerSchema,
   loginSchema,
+  verifyMfaSchema,
 } = require("../validators/auth.validation");
 const {
   generateAccessToken,
@@ -154,6 +157,43 @@ exports.login = async (req, res, next) => {
       });
     }
 
+    // If admin has MFA enabled, require a valid TOTP code before issuing tokens
+    if (user.role === "admin" && user.mfaEnabled) {
+      if (!data.mfaCode) {
+        return ApiResponse.unauthorized(res, {
+          message:
+            "برای ورود به حساب ادمین با احراز هویت دو مرحله‌ای، وارد کردن کد تأیید الزامی است.",
+        });
+      }
+
+      const isValidTotp = speakeasy.totp.verify({
+        secret: user.mfaSecret,
+        encoding: "base32",
+        token: data.mfaCode,
+        window: 1, // allow slight clock skew
+      });
+
+      if (!isValidTotp) {
+        // Count invalid MFA attempts toward the same login throttle identifier
+        if (identifier) {
+          const now = Date.now();
+          const existing = failedLoginAttempts.get(identifier);
+          if (!existing || now - existing.firstAttemptAt >= LOGIN_WINDOW_MS) {
+            failedLoginAttempts.set(identifier, {
+              count: 1,
+              firstAttemptAt: now,
+            });
+          } else {
+            existing.count += 1;
+          }
+        }
+
+        return ApiResponse.unauthorized(res, {
+          message: "کد تأیید دو مرحله‌ای نامعتبر است",
+        });
+      }
+    }
+
     // Successful login → clear failed-attempts counter
     if (identifier) {
       failedLoginAttempts.delete(identifier);
@@ -269,6 +309,120 @@ exports.logout = async (req, res, next) => {
       data: null,
     });
   } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Step 1: Setup MFA for an authenticated admin.
+ * Generates a TOTP secret and returns otpauth URL + base32 secret.
+ * Does NOT enable MFA until verifyMfa is called.
+ */
+exports.setupMfa = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.userId);
+
+    if (!user) {
+      return ApiResponse.notFound(res, { message: "کاربر یافت نشد" });
+    }
+
+    if (user.role !== "admin") {
+      return ApiResponse.forbidden(res, {
+        message: "تنها ادمین‌ها می‌توانند احراز هویت دو مرحله‌ای را فعال کنند",
+      });
+    }
+
+    if (user.mfaEnabled && user.mfaSecret) {
+      return ApiResponse.badRequest(res, {
+        message: "احراز هویت دو مرحله‌ای قبلاً برای این حساب فعال شده است",
+      });
+    }
+
+    const secret = speakeasy.generateSecret({
+      length: 20,
+      name: "VerifyUp (Admin)",
+      issuer: "VerifyUp",
+    });
+
+    user.mfaSecret = secret.base32;
+    user.mfaBackupCodes = []; // reset any previous codes
+    await user.save();
+
+    return ApiResponse.success(res, {
+      message:
+        "کلید احراز هویت دو مرحله‌ای با موفقیت ایجاد شد. لطفاً آن را در برنامه احراز هویت خود اسکن کنید.",
+      data: {
+        otpauthUrl: secret.otpauth_url,
+        secret: secret.base32,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Step 2: Verify TOTP code and enable MFA.
+ * Returns a one-time list of backup codes that should be stored securely by the admin.
+ */
+exports.verifyMfa = async (req, res, next) => {
+  try {
+    const data = verifyMfaSchema.parse(req.body);
+
+    const user = await User.findById(req.user.userId);
+
+    if (!user) {
+      return ApiResponse.notFound(res, { message: "کاربر یافت نشد" });
+    }
+
+    if (user.role !== "admin") {
+      return ApiResponse.forbidden(res, {
+        message: "تنها ادمین‌ها می‌توانند احراز هویت دو مرحله‌ای را فعال کنند",
+      });
+    }
+
+    if (!user.mfaSecret) {
+      return ApiResponse.badRequest(res, {
+        message:
+          "کلید احراز هویت دو مرحله‌ای برای این حساب تنظیم نشده است. ابتدا مرحله ایجاد را انجام دهید.",
+      });
+    }
+
+    const isValid = speakeasy.totp.verify({
+      secret: user.mfaSecret,
+      encoding: "base32",
+      token: data.mfaCode,
+      window: 1,
+    });
+
+    if (!isValid) {
+      return ApiResponse.unauthorized(res, {
+        message: "کد تأیید دو مرحله‌ای نامعتبر است",
+      });
+    }
+
+    // Generate a small set of backup codes (one-time use, shown only once)
+    const backupCodes = Array.from({ length: 5 }).map(() =>
+      crypto.randomBytes(4).toString("hex")
+    );
+
+    user.mfaEnabled = true;
+    user.mfaBackupCodes = backupCodes;
+    await user.save();
+
+    return ApiResponse.success(res, {
+      message: "احراز هویت دو مرحله‌ای برای حساب ادمین با موفقیت فعال شد",
+      data: {
+        backupCodes,
+      },
+    });
+  } catch (err) {
+    if (err?.issues) {
+      return ApiResponse.badRequest(res, {
+        message: "اطلاعات وارد شده نامعتبر است",
+        errors: err.issues.map((i) => i.message),
+      });
+    }
     next(err);
   }
 };

@@ -41,7 +41,12 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await api.login({ email: data.email, password: data.password });
+      const response = await api.login({
+        email: data.email,
+        password: data.password,
+        // Optional MFA code (used for admin accounts with MFA enabled)
+        mfaCode: data.mfaCode || undefined,
+      });
 
       if (response.data?.user) login(response.data.user);
 
@@ -121,6 +126,22 @@ export default function LoginPage() {
                 />
 
                 <ErrorText>{errors.password?.message}</ErrorText>
+              </div>
+
+              {/* OPTIONAL MFA CODE (for admins with MFA enabled) */}
+              <div className="mb-4">
+                <label htmlFor="mfaCode" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                  کد تأیید دو مرحله‌ای (در صورت فعال بودن)
+                </label>
+
+                <input
+                  id="mfaCode"
+                  type="text"
+                  inputMode="numeric"
+                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                  placeholder="123456"
+                  {...register('mfaCode')}
+                />
               </div>
 
               {/* REMEMBER + FORGOT */}
