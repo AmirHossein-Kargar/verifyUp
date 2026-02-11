@@ -31,7 +31,7 @@ export default function DashboardNavbar({ user }) {
 
     const toggleSidebar = () => {
         const sidebar = document.getElementById('dashboard-sidebar');
-        sidebar?.classList.toggle('-translate-x-full');
+        sidebar?.classList.toggle('translate-x-full');
     };
 
     return (

@@ -8,6 +8,9 @@
 /* * Flowbite default theme */
 @import "flowbite/src/themes/default";
 
+/* * Flag Icons CSS */
+@import "flag-icons/css/flag-icons.min.css";
+
 /* ===============================
  * Flowbite Configuration
  * =============================== */
@@ -80,4 +83,18 @@
 /* * Utility class for fade-in-down animation */
 .animate-fade-in-down {
   animation: fade-in-down 0.3s ease-out;
+}
+
+/* ===============================
+ * Scrollbar Utilities
+ * =============================== */
+
+/* * Hide scrollbar while keeping scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }

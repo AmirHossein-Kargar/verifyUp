@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { CartProvider } from "@/contexts/CartContext";
 
 export default function LayoutClient({ children }) {
     const pathname = usePathname();
@@ -10,7 +11,7 @@ export default function LayoutClient({ children }) {
     const isDashboard = pathname?.startsWith('/dashboard');
 
     return (
-        <>
+        <CartProvider>
             {/* Floating Header - hide on dashboard */}
             {!isDashboard && <Header />}
             {/* Main Content with padding for fixed header */}
@@ -19,6 +20,6 @@ export default function LayoutClient({ children }) {
             </main>
             {/* Footer - hide on cart and dashboard */}
             {!hideFooter && !isDashboard && <Footer />}
-        </>
+        </CartProvider>
     );
 }
