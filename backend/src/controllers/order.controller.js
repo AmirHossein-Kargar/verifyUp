@@ -4,6 +4,7 @@ const Document = require("../models/Document");
 const {
   createOrderSchema,
   addDocSchema,
+  orderIdParamsSchema,
 } = require("../validators/order.validation");
 const { recomputeOrderSummary } = require("../services/order.service");
 const ApiResponse = require("../utils/response");
@@ -73,7 +74,7 @@ exports.createPaidOrder = async (req, res, next) => {
 
 exports.uploadDocument = async (req, res, next) => {
   try {
-    const { orderId } = req.params;
+    const { orderId } = orderIdParamsSchema.parse(req.params);
 
     if (!req.file) {
       return ApiResponse.badRequest(res, {
@@ -145,7 +146,7 @@ exports.uploadDocument = async (req, res, next) => {
 exports.addDocument = async (req, res, next) => {
   try {
     const data = addDocSchema.parse(req.body);
-    const { orderId } = req.params;
+    const { orderId } = orderIdParamsSchema.parse(req.params);
 
     // Verify order belongs to user using centralized permission helper
     const order = await ensureUserOwnsOrder(orderId, req.user.userId, res);
@@ -198,7 +199,7 @@ exports.myOrders = async (req, res, next) => {
 
 exports.getOrderById = async (req, res, next) => {
   try {
-    const { orderId } = req.params;
+    const { orderId } = orderIdParamsSchema.parse(req.params);
     const order = await ensureUserOwnsOrder(orderId, req.user.userId, res);
     if (!order) return;
 
@@ -210,6 +211,12 @@ exports.getOrderById = async (req, res, next) => {
       data: { order, documents },
     });
   } catch (err) {
+    if (err?.issues) {
+      return ApiResponse.badRequest(res, {
+        message: "اطلاعات وارد شده نامعتبر است",
+        errors: err.issues.map((i) => i.message),
+      });
+    }
     next(err);
   }
 };

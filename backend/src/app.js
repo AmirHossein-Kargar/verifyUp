@@ -18,10 +18,67 @@ const fileRoutes = require("./routes/files.routes");
 const app = express();
 
 // Security middleware
-app.use(helmet());
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const allowedOrigins = [FRONTEND_URL].filter(Boolean);
+
+app.use(
+  helmet({
+    contentSecurityPolicy:
+      process.env.NODE_ENV === "production"
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              imgSrc: ["'self'", "data:"],
+              connectSrc: ["'self'", FRONTEND_URL],
+              fontSrc: ["'self'"],
+              objectSrc: ["'none'"],
+              frameAncestors: ["'none'"],
+              baseUri: ["'self'"],
+            },
+          }
+        : false,
+  })
+);
+
+// Additional security headers via helmet helpers
+app.use(
+  helmet.hsts({
+    maxAge: 15552000, // 180 days in seconds
+    includeSubDomains: true,
+    preload: false,
+  })
+);
+
+app.use(
+  helmet.referrerPolicy({
+    policy: "no-referrer",
+  })
+);
+
+// Lock down powerful browser APIs by default
+app.use((_, res, next) => {
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=()"
+  );
+  next();
+});
+
+// CORS: strict origin/method/header allowlist
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      // Allow same-origin / non-browser requests with no origin
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "X-CSRF-Token"],
     credentials: true,
   })
 );

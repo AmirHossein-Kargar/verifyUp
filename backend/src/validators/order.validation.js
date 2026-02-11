@@ -15,4 +15,9 @@ const addDocSchema = z.object({
   fileUrl: z.string().url("فرمت آدرس فایل نامعتبر است"),
 });
 
-module.exports = { createOrderSchema, addDocSchema };
+// Reusable ObjectId validator for order-related params
+const orderIdParamsSchema = z.object({
+  orderId: z.string().regex(/^[0-9a-fA-F]{24}$/i, "شناسه سفارش نامعتبر است"),
+});
+
+module.exports = { createOrderSchema, addDocSchema, orderIdParamsSchema };
