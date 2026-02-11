@@ -1,47 +1,49 @@
 export default function AboutSkeleton() {
-    return (
-        <div className="min-h-screen px-4 py-8 sm:py-12 md:py-16" dir="rtl">
-            <div className="max-w-7xl mx-auto">
-                {/* Header Skeleton */}
-                <div className="text-center mb-12 animate-pulse">
-                    <div className="h-10 sm:h-12 md:h-14 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mx-auto mb-4"></div>
-                    <div className="h-5 sm:h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mx-auto mb-2"></div>
-                    <div className="h-5 sm:h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mx-auto"></div>
-                </div>
-
-                {/* Features Grid Skeleton */}
-                <div className="max-w-6xl mx-auto mb-12">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div
-                                key={i}
-                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg animate-pulse"
-                            >
-                                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                                <div className="w-full space-y-2">
-                                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto"></div>
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6 mx-auto"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Mission Section Skeleton */}
-                <div className="max-w-6xl mx-auto">
-                    <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg animate-pulse">
-                        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-                        <div className="space-y-3">
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mt-4"></div>
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  return (
+    <main className="bg-white dark:bg-gray-900" dir="rtl">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
+        {/* Header Skeleton */}
+        <div className="mx-auto mb-10 max-w-3xl text-center animate-pulse">
+          <div className="mx-auto mb-4 h-10 w-2/3 rounded-lg bg-gray-200 dark:bg-gray-700 sm:h-12 md:h-14" />
+          <div className="mx-auto mb-2 h-5 w-11/12 rounded-lg bg-gray-200 dark:bg-gray-700 sm:h-6" />
+          <div className="mx-auto h-5 w-9/12 rounded-lg bg-gray-200 dark:bg-gray-700 sm:h-6" />
         </div>
-    );
+
+        {/* Features Grid Skeleton */}
+        <section className="mx-auto mb-10 max-w-6xl">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="animate-pulse rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+              >
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700" />
+
+                <div className="mb-2 h-5 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="mt-2 h-4 w-5/6 rounded bg-gray-200 dark:bg-gray-700" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Mission Section Skeleton */}
+        <section className="mx-auto max-w-6xl">
+          <div className="animate-pulse rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-8">
+            <div className="mb-4 h-8 w-1/3 rounded bg-gray-200 dark:bg-gray-700" />
+
+            <div className="space-y-3">
+              <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
+              <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
+              <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
+
+              <div className="pt-2" />
+              <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
+              <div className="h-4 w-5/6 rounded bg-gray-200 dark:bg-gray-700" />
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
 }
