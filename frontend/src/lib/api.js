@@ -47,24 +47,48 @@ class ApiClient {
       // * Parse JSON response
       const data = await response.json();
 
-      // * Handle non-success responses
+      // * Handle non-success responses from backend
       if (!response.ok) {
-        throw {
+        const apiError = {
           status: response.status,
-          message: data.message || "خطایی رخ داده است",
-          errors: data.errors || null,
+          message: data?.message || "خطایی رخ داده است",
+          errors: data?.errors || null,
         };
+
+        // * Log details in development to help debugging
+        if (process.env.NODE_ENV !== "production") {
+          // Don't spam console with expected 401 on /auth/me when user is not logged in
+          if (endpoint === "/auth/me" && response.status === 401) {
+            console.info("Auth check: user is not authenticated yet.");
+          } else {
+            console.warn("API error:", {
+              endpoint,
+              status: apiError.status,
+              message: apiError.message,
+              errors: apiError.errors,
+            });
+          }
+        }
+
+        throw apiError;
       }
 
       // * Return successful response data
       return data;
     } catch (error) {
-      // * Known API error
+      // * Re-throw known API errors
       if (error.status) {
         throw error;
       }
 
       // * Network or unexpected error
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Network / unexpected API error:", {
+          endpoint,
+          error,
+        });
+      }
+
       throw {
         status: 500,
         message: "خطا در برقراری ارتباط با سرور",

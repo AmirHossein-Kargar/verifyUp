@@ -14,6 +14,10 @@ export function AuthProvider({ children }) {
             const response = await api.getMe();
             setUser(response.data.user);
         } catch (error) {
+            // 401 from /auth/me simply means "not logged in" – don't log as error
+            if (process.env.NODE_ENV !== 'production' && error?.status !== 401) {
+                console.warn('Auth check (getMe) failed:', error);
+            }
             setUser(null);
         } finally {
             setLoading(false);
@@ -33,7 +37,9 @@ export function AuthProvider({ children }) {
             await api.logout();
             setUser(null);
         } catch (error) {
-            console.error('Logout error:', error);
+            if (process.env.NODE_ENV !== 'production') {
+                console.warn('Logout error:', error);
+            }
         }
     };
 
