@@ -14,6 +14,11 @@ const {
 const { sanitizeUser } = require("../utils/sanitize");
 const ApiResponse = require("../utils/response");
 
+// In-memory tracker for repeated failed login attempts per identifier
+const failedLoginAttempts = new Map();
+const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_ATTEMPTS_PER_ID = 10;
+
 exports.register = async (req, res, next) => {
   try {
     const data = registerSchema.parse(req.body);
@@ -44,8 +49,12 @@ exports.register = async (req, res, next) => {
       role: "user",
     });
 
-    // Generate tokens
-    const payload = { userId: user._id.toString(), role: user.role };
+    // Generate tokens (include tokenVersion for rotation support)
+    const payload = {
+      userId: user._id.toString(),
+      role: user.role,
+      tokenVersion: user.tokenVersion,
+    };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
@@ -72,12 +81,42 @@ exports.login = async (req, res, next) => {
   try {
     const data = loginSchema.parse(req.body);
 
+    const identifier = (data.email || data.phone || "").toLowerCase();
+    if (identifier) {
+      const existing = failedLoginAttempts.get(identifier);
+      const now = Date.now();
+      if (existing && now - existing.firstAttemptAt < LOGIN_WINDOW_MS) {
+        if (existing.count >= MAX_ATTEMPTS_PER_ID) {
+          return ApiResponse.tooManyRequests(res, {
+            message:
+              "تعداد تلاش‌های ناموفق برای این حساب زیاد بوده است. لطفاً بعداً دوباره تلاش کنید.",
+          });
+        }
+      } else if (existing) {
+        // Window expired → reset counter
+        failedLoginAttempts.delete(identifier);
+      }
+    }
+
     // Find user
     const user = await User.findOne(
-      data.email ? { email: data.email.toLowerCase() } : { phone: data.phone },
+      data.email ? { email: data.email.toLowerCase() } : { phone: data.phone }
     );
 
     if (!user) {
+      if (identifier) {
+        const now = Date.now();
+        const existing = failedLoginAttempts.get(identifier);
+        if (!existing || now - existing.firstAttemptAt >= LOGIN_WINDOW_MS) {
+          failedLoginAttempts.set(identifier, {
+            count: 1,
+            firstAttemptAt: now,
+          });
+        } else {
+          existing.count += 1;
+        }
+      }
+
       return ApiResponse.unauthorized(res, {
         message: "ایمیل/شماره تلفن یا رمز عبور اشتباه است",
       });
@@ -86,17 +125,39 @@ exports.login = async (req, res, next) => {
     // Verify password
     const isPasswordValid = await bcrypt.compare(
       data.password,
-      user.passwordHash,
+      user.passwordHash
     );
 
     if (!isPasswordValid) {
+      if (identifier) {
+        const now = Date.now();
+        const existing = failedLoginAttempts.get(identifier);
+        if (!existing || now - existing.firstAttemptAt >= LOGIN_WINDOW_MS) {
+          failedLoginAttempts.set(identifier, {
+            count: 1,
+            firstAttemptAt: now,
+          });
+        } else {
+          existing.count += 1;
+        }
+      }
+
       return ApiResponse.unauthorized(res, {
         message: "ایمیل/شماره تلفن یا رمز عبور اشتباه است",
       });
     }
 
+    // Successful login → clear failed-attempts counter
+    if (identifier) {
+      failedLoginAttempts.delete(identifier);
+    }
+
     // Generate tokens
-    const payload = { userId: user._id.toString(), role: user.role };
+    const payload = {
+      userId: user._id.toString(),
+      role: user.role,
+      tokenVersion: user.tokenVersion,
+    };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
@@ -129,7 +190,7 @@ exports.refresh = async (req, res, next) => {
       });
     }
 
-    // Verify refresh token
+    // Verify refresh token signature & expiry
     const decoded = verifyRefreshToken(refreshToken);
 
     if (!decoded) {
@@ -149,17 +210,31 @@ exports.refresh = async (req, res, next) => {
       });
     }
 
-    // Generate new access token
-    const payload = { userId: user._id.toString(), role: user.role };
-    const newAccessToken = generateAccessToken(payload);
+    // Enforce tokenVersion match to support rotation & logout-all
+    if (
+      typeof decoded.tokenVersion !== "number" ||
+      decoded.tokenVersion !== user.tokenVersion
+    ) {
+      clearAuthCookies(res);
+      return ApiResponse.unauthorized(res, {
+        message: "این نشست دیگر معتبر نیست. لطفاً دوباره وارد شوید.",
+      });
+    }
 
-    // Update only access token cookie
-    res.cookie("accessToken", newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+    // Rotate refresh token: bump tokenVersion and issue new pair
+    user.tokenVersion += 1;
+    await user.save();
+
+    const payload = {
+      userId: user._id.toString(),
+      role: user.role,
+      tokenVersion: user.tokenVersion,
+    };
+
+    const newAccessToken = generateAccessToken(payload);
+    const newRefreshToken = generateRefreshToken(payload);
+
+    setAuthCookies(res, newAccessToken, newRefreshToken);
 
     return ApiResponse.success(res, {
       message: "توکن با موفقیت تازه‌سازی شد",
@@ -172,6 +247,14 @@ exports.refresh = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
+    if (req.user?.userId) {
+      // Invalidate all existing refresh tokens for this user by bumping tokenVersion.
+      // This effectively logs the user out from all devices.
+      await User.findByIdAndUpdate(req.user.userId, {
+        $inc: { tokenVersion: 1 },
+      });
+    }
+
     clearAuthCookies(res);
 
     return ApiResponse.success(res, {

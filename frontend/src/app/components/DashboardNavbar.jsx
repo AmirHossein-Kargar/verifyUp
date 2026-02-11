@@ -33,8 +33,17 @@ export default function DashboardNavbar({ user }) {
     };
 
     const toggleSidebar = () => {
-        const sidebar = document.getElementById('dashboard-sidebar');
-        sidebar?.classList.toggle('translate-x-full');
+        // Support both user and admin sidebars on small screens
+        const dashboardSidebar = document.getElementById('dashboard-sidebar');
+        const adminSidebar = document.getElementById('admin-sidebar');
+
+        if (dashboardSidebar) {
+            dashboardSidebar.classList.toggle('translate-x-full');
+        }
+
+        if (adminSidebar) {
+            adminSidebar.classList.toggle('translate-x-full');
+        }
     };
 
     return (
@@ -86,6 +95,13 @@ export default function DashboardNavbar({ user }) {
                                                 داشبورد
                                             </a>
                                         </li>
+                                        {user?.role === 'admin' && (
+                                            <li>
+                                                <a href="/admin" className="inline-flex items-center w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
+                                                    پنل ادمین
+                                                </a>
+                                            </li>
+                                        )}
                                         <li>
                                             <a href="/dashboard/profile" className="inline-flex items-center w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
                                                 تنظیمات

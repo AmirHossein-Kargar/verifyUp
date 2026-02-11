@@ -6,6 +6,7 @@ const {
 } = require("../validators/order.validation");
 const { recomputeOrderSummary } = require("../services/order.service");
 const ApiResponse = require("../utils/response");
+const { ensureUserOwnsOrder } = require("../permissions/orders");
 
 exports.createOrder = async (req, res, next) => {
   try {
@@ -35,7 +36,8 @@ exports.createOrder = async (req, res, next) => {
   }
 };
 
-// Create an order that is already paid/completed (used after successful payment)
+// Create an order after successful payment
+// NOTE: The order still needs documents & review, so we start from `pending_docs`
 exports.createPaidOrder = async (req, res, next) => {
   try {
     const data = createOrderSchema.parse(req.body);
@@ -43,14 +45,17 @@ exports.createPaidOrder = async (req, res, next) => {
     const order = await Order.create({
       userId: req.user.userId,
       service: data.service,
-      status: "completed",
+      // Payment is done, but documents and admin review are still required.
+      // We intentionally start from `pending_docs` so the user can upload docs
+      // and the admin workflow (in_review -> approved/completed) can run.
+      status: "pending_docs",
       priceToman: data.priceToman,
       currency: "IRR_TOMAN",
       requiredDocs: data.requiredDocs,
     });
 
     return ApiResponse.created(res, {
-      message: "سفارش پرداخت‌شده با موفقیت ایجاد شد",
+      message: "سفارش پرداخت‌شده ایجاد شد. لطفاً مدارک موردنیاز را آپلود کنید.",
       data: { order },
     });
   } catch (err) {
@@ -74,17 +79,9 @@ exports.uploadDocument = async (req, res, next) => {
       });
     }
 
-    // Verify order belongs to user
-    const order = await Order.findOne({
-      _id: orderId,
-      userId: req.user.userId,
-    });
-
-    if (!order) {
-      return ApiResponse.notFound(res, {
-        message: "سفارش یافت نشد یا دسترسی به آن ندارید",
-      });
-    }
+    // Verify order belongs to user using centralized permission helper
+    const order = await ensureUserOwnsOrder(orderId, req.user.userId, res);
+    if (!order) return;
 
     // Build public URL for the uploaded file
     const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
@@ -129,17 +126,9 @@ exports.addDocument = async (req, res, next) => {
     const data = addDocSchema.parse(req.body);
     const { orderId } = req.params;
 
-    // Verify order belongs to user
-    const order = await Order.findOne({
-      _id: orderId,
-      userId: req.user.userId,
-    });
-
-    if (!order) {
-      return ApiResponse.notFound(res, {
-        message: "سفارش یافت نشد یا دسترسی به آن ندارید",
-      });
-    }
+    // Verify order belongs to user using centralized permission helper
+    const order = await ensureUserOwnsOrder(orderId, req.user.userId, res);
+    if (!order) return;
 
     // Create document
     const doc = await Document.create({
@@ -189,17 +178,8 @@ exports.myOrders = async (req, res, next) => {
 exports.getOrderById = async (req, res, next) => {
   try {
     const { orderId } = req.params;
-
-    const order = await Order.findOne({
-      _id: orderId,
-      userId: req.user.userId,
-    }).select("-__v");
-
-    if (!order) {
-      return ApiResponse.notFound(res, {
-        message: "سفارش یافت نشد",
-      });
-    }
+    const order = await ensureUserOwnsOrder(orderId, req.user.userId, res);
+    if (!order) return;
 
     // Get documents for this order
     const documents = await Document.find({ orderId }).select("-__v");

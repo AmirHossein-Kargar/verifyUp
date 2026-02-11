@@ -8,18 +8,18 @@ import { CartProvider } from "@/contexts/CartContext";
 export default function LayoutClient({ children }) {
     const pathname = usePathname();
     const hideFooter = pathname === '/cart';
-    const isDashboard = pathname?.startsWith('/dashboard');
+    const isDashboardLike = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
 
     return (
         <CartProvider>
-            {/* Floating Header - hide on dashboard */}
-            {!isDashboard && <Header />}
+            {/* Floating Header - hide on dashboard & admin */}
+            {!isDashboardLike && <Header />}
             {/* Main Content with padding for fixed header */}
-            <main className={isDashboard ? '' : 'pt-24'}>
+            <main className={isDashboardLike ? '' : 'pt-24'}>
                 {children}
             </main>
-            {/* Footer - hide on cart and dashboard */}
-            {!hideFooter && !isDashboard && <Footer />}
+            {/* Footer - hide on cart, dashboard and admin */}
+            {!hideFooter && !isDashboardLike && <Footer />}
         </CartProvider>
     );
 }

@@ -8,15 +8,59 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
+// HTTP methods considered safe from a CSRF perspective
+const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "TRACE"];
+
 // ===============================
 // * ApiClient
 // * Centralized wrapper around fetch
-// * Handles base URL, cookies, and errors
+// * Handles base URL, cookies, CSRF, and errors
 // ===============================
 class ApiClient {
   constructor() {
     // * Store API base URL
     this.baseURL = API_BASE_URL;
+    this.csrfToken = null;
+    this.csrfLoading = null;
+  }
+
+  /**
+   * Lazily fetch CSRF token from backend and cache it.
+   * Runs only in the browser; on the server we skip CSRF headers.
+   */
+  async ensureCsrfToken() {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (this.csrfToken) {
+      return;
+    }
+
+    if (this.csrfLoading) {
+      await this.csrfLoading;
+      return;
+    }
+
+    this.csrfLoading = (async () => {
+      try {
+        const res = await fetch(`${this.baseURL}/auth/csrf`, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.token) {
+          this.csrfToken = data.token;
+        }
+      } catch {
+        // Fail silently; requests will still be sent but may be rejected by server
+      } finally {
+        this.csrfLoading = null;
+      }
+    })();
+
+    await this.csrfLoading;
   }
 
   // ===============================
@@ -31,6 +75,13 @@ class ApiClient {
     // * Default fetch configuration
     const isFormData = options.body instanceof FormData;
 
+    const method = (options.method || "GET").toUpperCase();
+
+    // For state-changing requests, ensure CSRF token and attach header
+    if (!SAFE_METHODS.includes(method)) {
+      await this.ensureCsrfToken();
+    }
+
     const baseHeaders = isFormData
       ? options.headers || {}
       : {
@@ -39,9 +90,17 @@ class ApiClient {
           ...options.headers,
         };
 
+    const headersWithCsrf =
+      !SAFE_METHODS.includes(method) && this.csrfToken
+        ? {
+            ...baseHeaders,
+            "X-CSRF-Token": this.csrfToken,
+          }
+        : baseHeaders;
+
     const config = {
       ...options,
-      headers: baseHeaders,
+      headers: headersWithCsrf,
       // * Required for HttpOnly cookie-based auth
       credentials: "include",
     };
@@ -155,7 +214,8 @@ class ApiClient {
     });
   }
 
-  // * Create a paid/completed order after successful payment
+  // * Create an order after successful payment
+  // * Status starts as `pending_docs` so user can upload documents
   async createPaidOrder(data) {
     return this.request("/orders/complete", {
       method: "POST",
@@ -174,6 +234,21 @@ class ApiClient {
       method: "POST",
       body: formData,
     });
+  }
+
+  // ===============================
+  // * Admin Endpoints
+  // * All of these require admin role on backend
+  // ===============================
+
+  async getAdminStats() {
+    return this.request("/admin/stats");
+  }
+
+  async getAdminOrders(params = {}) {
+    const searchParams = new URLSearchParams(params).toString();
+    const qs = searchParams ? `?${searchParams}` : "";
+    return this.request(`/admin/orders${qs}`);
   }
 }
 

@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 const path = require("path");
 
 const errorHandler = require("./middleware/error");
+const csrfProtection = require("./middleware/csrf");
 const ApiResponse = require("./utils/response");
 
 const authRoutes = require("./routes/auth.routes");
@@ -38,6 +39,13 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 app.use(cookieParser());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+
+// CSRF protection (must come after cookieParser)
+app.use(
+  csrfProtection({
+    ignorePaths: ["/", "/api/auth/csrf"],
+  })
+);
 
 // Static files for uploaded documents
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));

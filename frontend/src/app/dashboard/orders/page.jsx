@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { formatTooman } from '@/utils/currency';
 import DashboardNavbar from '@/app/components/DashboardNavbar';
 import DashboardSkeleton from '@/app/components/DashboardSkeleton';
@@ -34,6 +35,182 @@ const STATUS_MAP = {
     completed: 'completed',
     rejected: 'cancelled',
 };
+
+function prettyFileSize(bytes) {
+    if (!bytes && bytes !== 0) return '';
+    const sizes = ['بایت', 'کیلوبایت', 'مگابایت'];
+    if (bytes === 0) return '0 بایت';
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), sizes.length - 1);
+    const value = bytes / Math.pow(1024, i);
+    return `${value.toFixed(value < 10 ? 1 : 0)} ${sizes[i]}`;
+}
+
+function PassportUploadArea({
+    orderId,
+    file,
+    onFileChange,
+    onUpload,
+    isUploading,
+}) {
+    const [isDragging, setIsDragging] = useState(false);
+
+    const fileLabel = useMemo(() => {
+        if (!file) return 'فایلی انتخاب نشده است';
+        return `${file.name} (${prettyFileSize(file.size)})`;
+    }, [file]);
+
+    const handleFileInputChange = (e) => {
+        const newFile = e.target.files?.[0] || null;
+        onFileChange(newFile);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        const droppedFile = e.dataTransfer.files?.[0] || null;
+        if (droppedFile) {
+            onFileChange(droppedFile);
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isDragging) setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Only reset when leaving the container, not children
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+        setIsDragging(false);
+    };
+
+    return (
+        <div className="mt-4 space-y-3">
+            <label
+                htmlFor={`file_input_${orderId}`}
+                className="block text-xs font-medium text-gray-900 dark:text-white"
+            >
+                آپلود تصویر پاسپورت
+            </label>
+
+            <motion.label
+                htmlFor={`file_input_${orderId}`}
+                className={[
+                    'relative flex flex-col items-center justify-center w-full px-4 py-5',
+                    'rounded-lg border-2 border-dashed cursor-pointer transition-all',
+                    'bg-gray-50 dark:bg-gray-800/60',
+                    isDragging
+                        ? 'border-indigo-500 bg-indigo-50/60 dark:border-indigo-400 dark:bg-indigo-900/40'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700/80',
+                    isUploading ? 'opacity-80' : '',
+                ].join(' ')}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+            >
+                <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300">
+                        <svg
+                            className="w-5 h-5"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16"
+                            />
+                        </svg>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                            فایل پاسپورت را اینجا بکشید و رها کنید
+                        </p>
+                        <p className="text-[11px] text-gray-500 dark:text-gray-300">
+                            یا کلیک کنید و فایل را انتخاب کنید
+                        </p>
+                    </div>
+                    <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-300 line-clamp-1 max-w-full">
+                        {fileLabel}
+                    </p>
+                </div>
+
+                <input
+                    id={`file_input_${orderId}`}
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileInputChange}
+                />
+
+                {isUploading && (
+                    <div className="mt-3 w-full">
+                        <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                            <motion.div
+                                className="h-full bg-gradient-to-l from-indigo-500 via-indigo-400 to-indigo-600 dark:from-indigo-400 dark:via-indigo-300 dark:to-indigo-500"
+                                initial={{ x: '-100%' }}
+                                animate={{ x: '100%' }}
+                                transition={{
+                                    repeat: Infinity,
+                                    duration: 1.2,
+                                    ease: 'easeInOut',
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+            </motion.label>
+
+            <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-300">
+                فرمت مجاز: تصویر (JPG، PNG) یا PDF، حداکثر ۱۰ مگابایت.
+            </p>
+
+            <button
+                type="button"
+                onClick={onUpload}
+                disabled={isUploading}
+                className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800"
+            >
+                {isUploading && (
+                    <svg
+                        className="w-4 h-4 ms-1 animate-spin"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                        />
+                        <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                    </svg>
+                )}
+                <span className="ms-1">
+                    {isUploading ? 'در حال آپلود...' : 'آپلود فایل'}
+                </span>
+            </button>
+        </div>
+    );
+}
 
 export default function OrdersPage() {
     const { user, loading: authLoading, showSkeleton } = useRequireAuth();
@@ -94,8 +271,7 @@ export default function OrdersPage() {
 
                                 const isPendingDocs = order.status === 'pending_docs';
 
-                                const handleFileChange = (e) => {
-                                    const file = e.target.files?.[0];
+                                const handleFileChange = (file) => {
                                     setFileMap((prev) => ({
                                         ...prev,
                                         [order._id]: file || null,
@@ -182,31 +358,13 @@ export default function OrdersPage() {
                                                 )}
 
                                                 {isPendingDocs && (
-                                                    <div className="mt-4 space-y-2">
-                                                        <label
-                                                            htmlFor={`file_input_${order._id}`}
-                                                            className="block mb-1 text-xs font-medium text-gray-900 dark:text-white"
-                                                        >
-                                                            آپلود تصویر پاسپورت
-                                                        </label>
-                                                        <input
-                                                            id={`file_input_${order._id}`}
-                                                            type="file"
-                                                            className="cursor-pointer bg-neutral-secondary-medium border border-gray-300 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600 shadow-sm"
-                                                            onChange={handleFileChange}
-                                                        />
-                                                        <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-300">
-                                                            فرمت مجاز: تصویر (JPG، PNG) یا PDF، حداکثر ۱۰ مگابایت.
-                                                        </p>
-                                                        <button
-                                                            type="button"
-                                                            onClick={handleUpload}
-                                                            disabled={uploadingId === order._id}
-                                                            className="mt-1 inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800"
-                                                        >
-                                                            {uploadingId === order._id ? 'در حال آپلود...' : 'آپلود فایل'}
-                                                        </button>
-                                                    </div>
+                                                    <PassportUploadArea
+                                                        orderId={order._id}
+                                                        file={fileMap[order._id]}
+                                                        onFileChange={handleFileChange}
+                                                        onUpload={handleUpload}
+                                                        isUploading={uploadingId === order._id}
+                                                    />
                                                 )}
                                             </div>
                                         </div>

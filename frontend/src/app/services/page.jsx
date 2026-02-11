@@ -638,10 +638,9 @@ export default function ServicesPage() {
         return;
       }
 
-      // Cart-first flow: add to cart and go to cart page
+      // Cart-first flow: only add to cart and stay on page
       addToCart(item);
       showToast('پلن با موفقیت به سبد خرید اضافه شد', 'success');
-      router.push('/cart');
     },
     [user, addToCart, showToast, router]
   );

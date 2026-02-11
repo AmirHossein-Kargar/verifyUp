@@ -91,7 +91,7 @@ export default function CheckoutPage() {
     <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl">
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <h1 className="mb-4 text-xl font-bold text-gray-900 dark:text-white text-center">
-          مرحله پرداخت (آزمایشی)
+          مرحله پرداخت و ثبت سفارش
         </h1>
 
         <div className="mb-6 space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -107,7 +107,8 @@ export default function CheckoutPage() {
 
         <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
           در نسخه واقعی، در این مرحله به درگاه پرداخت هدایت می‌شوید. در این نسخه
-          آزمایشی، روی «پرداخت موفق» کلیک کنید تا سفارش به عنوان پرداخت‌شده ایجاد شود.
+          آزمایشی، روی «پرداخت موفق» کلیک کنید تا سفارش پرداخت‌شده‌ای ایجاد شود که
+          همچنان در انتظار ارسال مدارک شما خواهد بود.
         </p>
 
         <div className="flex flex-col gap-3 mt-4">

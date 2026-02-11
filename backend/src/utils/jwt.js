@@ -10,12 +10,20 @@ const COOKIE_OPTIONS = {
   path: "/",
 };
 
+/**
+ * Generate a short-lived access token.
+ * Payload is expected to contain at least: { userId, role, tokenVersion }
+ */
 function generateAccessToken(payload) {
   return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
   });
 }
 
+/**
+ * Generate a refresh token. We embed the same payload (including tokenVersion)
+ * so that the backend can reject old tokens after rotation / logout-all.
+ */
 function generateRefreshToken(payload) {
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRY,

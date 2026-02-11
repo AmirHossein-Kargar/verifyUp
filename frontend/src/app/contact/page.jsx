@@ -1,14 +1,12 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import Image from 'next/image';
+import MotionWrapper from '../components/MotionWrapper';
 
 export default function Contact() {
     return (
         <div className="min-h-screen px-4 py-8 sm:py-12 md:py-16" dir="rtl">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <motion.div
+                <MotionWrapper
                     className="text-center mb-12"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -18,11 +16,11 @@ export default function Contact() {
                         پشتیبانی و <span className="text-indigo-600 dark:text-indigo-500">تماس با ما</span>
                     </h1>
 
-                </motion.div>
+                </MotionWrapper>
 
                 {/* Contact Info */}
                 <div className="max-w-6xl mx-auto">
-                    <motion.div
+                    <MotionWrapper
                         className="bg-white dark:bg-gray-800 p-6 sm:p-8 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -30,7 +28,7 @@ export default function Contact() {
                     >
                         {/* Profile Section */}
                         <div className="flex flex-col items-center mb-8">
-                            <motion.div
+                            <MotionWrapper
                                 className="relative w-24 h-24 sm:w-28 sm:h-28 mb-4 rounded-full overflow-hidden ring-4 ring-indigo-100 dark:ring-indigo-900"
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
@@ -43,7 +41,7 @@ export default function Contact() {
                                     sizes="(max-width: 640px) 96px, 112px"
                                     className="object-cover"
                                 />
-                            </motion.div>
+                            </MotionWrapper>
                             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
                                 تیم پشتیبانی وریفای آپ
                             </h3>
@@ -58,7 +56,8 @@ export default function Contact() {
 
                         {/* Horizontal Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <motion.a
+                            <MotionWrapper
+                                as="a"
                                 href="tel:+989123456789"
                                 className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all cursor-pointer border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
                                 initial={{ opacity: 0, y: 20 }}
@@ -86,9 +85,10 @@ export default function Contact() {
                                     <h5 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm sm:text-base">تلفن تماس</h5>
                                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400" dir="ltr">021-12345678</p>
                                 </div>
-                            </motion.a>
+                            </MotionWrapper>
 
-                            <motion.a
+                            <MotionWrapper
+                                as="a"
                                 href="mailto:support@verifyup.com"
                                 className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all cursor-pointer border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
                                 initial={{ opacity: 0, y: 20 }}
@@ -115,9 +115,10 @@ export default function Contact() {
                                     <h5 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm sm:text-base">ایمیل</h5>
                                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-all">support@verifyup.com</p>
                                 </div>
-                            </motion.a>
+                            </MotionWrapper>
 
-                            <motion.a
+                            <MotionWrapper
+                                as="a"
                                 href="https://t.me/verifyup_support"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -141,9 +142,9 @@ export default function Contact() {
                                     <h5 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm sm:text-base">تلگرام</h5>
                                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">verifyup_support</p>
                                 </div>
-                            </motion.a>
+                            </MotionWrapper>
 
-                            <motion.div
+                            <MotionWrapper
                                 className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -170,9 +171,9 @@ export default function Contact() {
                                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">شنبه تا پنجشنبه</p>
                                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">۹ صبح تا ۶ عصر</p>
                                 </div>
-                            </motion.div>
+                            </MotionWrapper>
                         </div>
-                    </motion.div>
+                    </MotionWrapper>
                 </div>
             </div>
         </div>
