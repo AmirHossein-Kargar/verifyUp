@@ -81,7 +81,14 @@ exports.login = async (req, res, next) => {
   try {
     const data = loginSchema.parse(req.body);
 
-    const identifier = (data.email || data.phone || "").toLowerCase();
+    // Use a composite key of identifier + IP to better isolate brute-force attempts.
+    const baseIdentifier = (data.email || data.phone || "").toLowerCase();
+    const ip =
+      req.ip ||
+      req.headers["x-forwarded-for"] ||
+      req.connection?.remoteAddress ||
+      "unknown";
+    const identifier = baseIdentifier ? `${baseIdentifier}:${ip}` : ip;
     if (identifier) {
       const existing = failedLoginAttempts.get(identifier);
       const now = Date.now();

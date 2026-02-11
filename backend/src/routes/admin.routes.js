@@ -8,9 +8,10 @@ const ctrl = require("../controllers/admin.controller");
 router.use(auth, admin);
 
 // Additional limiter for sensitive admin mutations
+// Keeps a relatively low cap to reduce automated abuse while allowing normal workflows.
 const adminWriteLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 50,
   message:
     "تعداد درخواست‌های مدیریتی بیش از حد مجاز است، لطفاً بعداً دوباره تلاش کنید",
   standardHeaders: true,
