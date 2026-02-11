@@ -29,13 +29,19 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
 
     // * Default fetch configuration
+    const isFormData = options.body instanceof FormData;
+
+    const baseHeaders = isFormData
+      ? options.headers || {}
+      : {
+          // * Send and receive JSON
+          "Content-Type": "application/json",
+          ...options.headers,
+        };
+
     const config = {
       ...options,
-      headers: {
-        // * Send and receive JSON
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers: baseHeaders,
       // * Required for HttpOnly cookie-based auth
       credentials: "include",
     };
@@ -134,6 +140,39 @@ class ApiClient {
   async refreshToken() {
     return this.request("/auth/refresh", {
       method: "POST",
+    });
+  }
+
+  // ===============================
+  // * Order Endpoints
+  // ===============================
+
+  // * Create a new order for the authenticated user
+  async createOrder(data) {
+    return this.request("/orders", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // * Create a paid/completed order after successful payment
+  async createPaidOrder(data) {
+    return this.request("/orders/complete", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // * Get all orders for the current authenticated user
+  async getMyOrders() {
+    return this.request("/orders/me");
+  }
+
+  // * Upload a document for a specific order (multipart/form-data)
+  async uploadOrderDocument(orderId, formData) {
+    return this.request(`/orders/${orderId}/upload`, {
+      method: "POST",
+      body: formData,
     });
   }
 }

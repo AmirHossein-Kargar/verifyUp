@@ -8,6 +8,7 @@ import CountrySelect from './CountrySelect';
 import { formatTooman } from '@/utils/currency';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/contexts/AuthContext';
 
 function CheckIcon({ className = '' }) {
   return (
@@ -623,16 +624,27 @@ export default function ServicesPage() {
   const { addToCart, cart } = useCart();
   const { showToast } = useToast();
   const router = useRouter();
+  const { user } = useAuth();
 
-  const handleAddToCart = useCallback((item) => {
-    addToCart(item);
-    showToast('محصول با موفقیت به سبد خرید اضافه شد', 'success');
+  const handleAddToCart = useCallback(
+    (item) => {
+      // If not authenticated, keep local cart behaviour and send user to login
+      if (!user) {
+        addToCart(item);
+        showToast('برای ادامه لطفاً ابتدا وارد حساب کاربری خود شوید', 'error');
+        setTimeout(() => {
+          router.push('/login');
+        }, 1000);
+        return;
+      }
 
-    // Redirect to cart after a short delay
-    setTimeout(() => {
+      // Cart-first flow: add to cart and go to cart page
+      addToCart(item);
+      showToast('پلن با موفقیت به سبد خرید اضافه شد', 'success');
       router.push('/cart');
-    }, 1000);
-  }, [addToCart, showToast, router]);
+    },
+    [user, addToCart, showToast, router]
+  );
 
   // Check if a plan is already in cart
   const isPlanInCart = useCallback((planId) => {

@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatTooman } from '@/utils/currency';
 import { useToast } from '@/hooks/useToast';
+import { buildOrderPayloadFromItem } from '@/utils/orderPayload';
 
 export default function CartPage() {
   const { cart, removeFromCart, getCartTotal, clearCart, isLoaded } = useCart();
@@ -26,7 +27,7 @@ export default function CartPage() {
   const totalPrice = useMemo(() => getCartTotal(), [getCartTotal, cart]);
   const itemsCount = cart.length;
 
-  const handleCheckout = useCallback(() => {
+  const handleCheckout = useCallback(async () => {
     if (!user) {
       showToast('لطفاً ابتدا وارد حساب کاربری خود شوید', 'error');
 
@@ -38,8 +39,25 @@ export default function CartPage() {
       return;
     }
 
-    showToast('قابلیت پرداخت به‌زودی اضافه می‌شود', 'info');
-  }, [user, showToast, router]);
+    if (cart.length === 0) {
+      showToast('سبد خرید خالی است', 'warning');
+      return;
+    }
+
+    // برای جریان پرداخت، فقط اولویت را به پلن اصلی می‌دهیم و به مرحله پرداخت هدایت می‌کنیم
+    const mainItem = cart[0];
+    const payload = buildOrderPayloadFromItem(mainItem);
+    window.localStorage.setItem(
+      'pendingCheckout',
+      JSON.stringify({
+        item: mainItem,
+        orderPayload: payload,
+      }),
+    );
+
+    showToast('در حال انتقال به مرحله پرداخت...', 'info');
+    router.push('/checkout');
+  }, [user, cart, showToast, router]);
 
   const handleRemoveItem = useCallback(
     (itemId) => {
@@ -160,8 +178,8 @@ export default function CartPage() {
                             {item.options.simType === 'physical'
                               ? 'فیزیکی'
                               : item.options.simType === 'virtual'
-                              ? 'مجازی'
-                              : 'دارم'}
+                                ? 'مجازی'
+                                : 'دارم'}
                           </p>
                         )}
                         {item.options.country && (

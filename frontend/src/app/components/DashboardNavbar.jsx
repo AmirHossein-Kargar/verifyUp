@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardNavbar({ user }) {
     const router = useRouter();
+    const { logout } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -22,10 +23,12 @@ export default function DashboardNavbar({ user }) {
 
     const handleLogout = async () => {
         try {
-            await api.logout();
+            await logout();
             router.push('/login');
         } catch (error) {
-            console.error('Logout error:', error);
+            if (process.env.NODE_ENV !== 'production') {
+                console.warn('Logout error in navbar:', error);
+            }
         }
     };
 

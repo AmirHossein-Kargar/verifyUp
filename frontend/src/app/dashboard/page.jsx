@@ -7,19 +7,21 @@ import DashboardNavbar from '@/app/components/DashboardNavbar';
 import DashboardSkeleton from '@/app/components/DashboardSkeleton';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useLocalOrders } from '@/hooks/useLocalOrders';
+import { useOrders } from '@/hooks/useOrders';
 
 export default function DashboardPage() {
-    const { user, loading, showSkeleton } = useRequireAuth();
+    const { user, loading: authLoading, showSkeleton } = useRequireAuth();
     const { getCartCount } = useCart();
-    const orders = useLocalOrders();
+    const { orders, loading: ordersLoading } = useOrders();
 
     const counts = useMemo(() => {
         let completed = 0;
         let active = 0;
         for (const o of orders) {
-            if (o?.status === 'completed') completed++;
-            else if (o?.status === 'active') active++;
+            if (!o?.status) continue;
+            // Map backend statuses to simple completed/active buckets
+            if (o.status === 'approved' || o.status === 'completed') completed++;
+            else active++;
         }
         return { completed, active };
     }, [orders]);
@@ -81,13 +83,13 @@ export default function DashboardPage() {
         []
     );
 
-    if (loading || showSkeleton) return <DashboardSkeleton sidebarOpen={false} />;
+    if (authLoading || showSkeleton || ordersLoading) return <DashboardSkeleton sidebarOpen={false} />;
     if (!user) return null;
 
     return (
         <div dir="rtl">
             <DashboardNavbar user={user} />
-            <DashboardSidebar />
+            <DashboardSidebar ordersCount={orders.length} />
 
             <div className="p-4 sm:mr-64 sm:p-6 mt-14">
                 <div className="w-full">
