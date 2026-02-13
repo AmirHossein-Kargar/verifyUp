@@ -3,64 +3,84 @@ const jwt = require("jsonwebtoken");
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "7d";
 
-const COOKIE_OPTIONS = {
+const JWT_ALG = "HS256";
+const JWT_ISSUER = process.env.JWT_ISSUER || "verifyup";
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE || "verifyup-web";
+
+const BASE_COOKIE = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict",
-  path: "/",
 };
 
-/**
- * Generate a short-lived access token.
- * Payload is expected to contain at least: { userId, role, tokenVersion }
- */
+// paths (least privilege)
+const ACCESS_COOKIE = {
+  ...BASE_COOKIE,
+  path: "/api",
+};
+
+const REFRESH_COOKIE = {
+  ...BASE_COOKIE,
+  path: "/api/auth/refresh",
+};
+
 function generateAccessToken(payload) {
   return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
+    algorithm: JWT_ALG,
+    issuer: JWT_ISSUER,
+    audience: JWT_AUDIENCE,
   });
 }
 
-/**
- * Generate a refresh token. We embed the same payload (including tokenVersion)
- * so that the backend can reject old tokens after rotation / logout-all.
- */
 function generateRefreshToken(payload) {
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRY,
+    algorithm: JWT_ALG,
+    issuer: JWT_ISSUER,
+    audience: JWT_AUDIENCE,
   });
 }
 
 function verifyAccessToken(token) {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch (err) {
+    return jwt.verify(token, process.env.JWT_SECRET, {
+      algorithms: [JWT_ALG],
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
+  } catch {
     return null;
   }
 }
 
 function verifyRefreshToken(token) {
   try {
-    return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-  } catch (err) {
+    return jwt.verify(token, process.env.JWT_REFRESH_SECRET, {
+      algorithms: [JWT_ALG],
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
+  } catch {
     return null;
   }
 }
 
 function setAuthCookies(res, accessToken, refreshToken) {
   res.cookie("accessToken", accessToken, {
-    ...COOKIE_OPTIONS,
-    maxAge: 15 * 60 * 1000, // 15 minutes
+    ...ACCESS_COOKIE,
+    maxAge: 15 * 60 * 1000,
   });
 
   res.cookie("refreshToken", refreshToken, {
-    ...COOKIE_OPTIONS,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    ...REFRESH_COOKIE,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
 
 function clearAuthCookies(res) {
-  res.clearCookie("accessToken", COOKIE_OPTIONS);
-  res.clearCookie("refreshToken", COOKIE_OPTIONS);
+  res.clearCookie("accessToken", ACCESS_COOKIE);
+  res.clearCookie("refreshToken", REFRESH_COOKIE);
 }
 
 module.exports = {

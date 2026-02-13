@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test:sms": "node test-sms.js",
+    "examples:sms": "node src/examples/sms-examples.js"
   },
   "keywords": [],
   "author": "",

@@ -1,12 +1,22 @@
 const ApiResponse = require("../utils/response");
 
-function admin(req, res, next) {
-  if (req.user?.role !== "admin") {
-    return ApiResponse.forbidden(res, {
-      message: "دسترسی ادمین الزامی است",
+/**
+ * Middleware to ensure the authenticated user has admin role.
+ */
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    return ApiResponse.unauthorized(res, {
+      message: "احراز هویت لازم است",
     });
   }
+
+  if (req.user.role !== "admin") {
+    return ApiResponse.forbidden(res, {
+      message: "دسترسی محدود به ادمین‌ها",
+    });
+  }
+
   next();
 }
 
-module.exports = admin;
+module.exports = requireAdmin;

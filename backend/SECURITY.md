@@ -111,7 +111,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
     credentials: true, // Allow cookies
-  }),
+  })
 );
 ```
 
@@ -194,6 +194,36 @@ email: { type: String, unique: true, sparse: true, index: true }
 - Use connection string with authentication
 - Enable SSL/TLS for MongoDB in production
 - Restrict database user permissions
+
+### Database User Permissions (Least Privilege)
+
+In production, the application should connect using a **non-admin MongoDB user**
+that has only the permissions it needs for the specific database.
+
+Example (Mongo shell):
+
+```javascript
+use VerifyUp;
+
+db.createUser({
+  user: "verifyup_app",
+  pwd: "<strong-unique-password>",
+  roles: [
+    {
+      role: "readWrite",
+      db: "VerifyUp",
+    },
+  ],
+});
+```
+
+Recommendations:
+
+- ✅ Use a dedicated app user (e.g. `verifyup_app`) with `readWrite` on the app DB only
+- ✅ Store the full connection string (including user/password) in `MONGO_URI` via environment variables
+- ❌ Do **not** use built-in `admin` or `root` users for the application
+- ❌ Do **not** grant `dbAdmin`, `userAdminAnyDatabase`, or cluster-wide roles to the app user
+- ✅ Consider separate users for read-only analytics/reporting if needed
 
 ## 10. Role-Based Access Control (RBAC)
 

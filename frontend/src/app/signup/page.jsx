@@ -7,129 +7,69 @@ import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGuestOnly } from '@/hooks/useAuthGuard';
 
 const ErrorText = ({ children }) =>
   children ? <p className="mt-2 text-xs text-red-500">{children}</p> : null;
 
 export default function SignupPage() {
-  const router = useRouter();
   const { toast, showToast, hideToast } = useToast();
-  const { user, loading, login } = useAuth();
+  const { login } = useAuth();
+  const { user, loading } = useGuestOnly();
+  const router = useRouter();
 
-  const redirectTimerRef = useRef(null);
-
-  // برای بستن popover با کلیک بیرون / ESC
-  const passwordWrapRef = useRef(null);
+  const [step, setStep] = useState('register');
+  const [registeredData, setRegisteredData] = useState(null);
+  const [otpTimer, setOtpTimer] = useState(0);
 
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     mode: 'onChange',
-    defaultValues: { name: '', email: '', password: '', confirmPassword: '', terms: false },
+    defaultValues: { name: '', email: '', phone: '', password: '', confirmPassword: '', terms: false },
   });
 
-  const passwordValue = watch('password');
-  const [showPasswordPopover, setShowPasswordPopover] = useState(false);
-
-  const [passwordStrength, setPasswordStrength] = useState({
-    hasMinLength: false,
-    hasUpperLower: false,
-    hasSymbol: false,
-    hasLongPassword: false,
-    strength: 0,
+  const {
+    register: registerOtp,
+    handleSubmit: handleSubmitOtp,
+    reset: resetOtp,
+    formState: { errors: errorsOtp, isSubmitting: isSubmittingOtp },
+  } = useForm({
+    defaultValues: { otp: '' },
   });
-
-  useEffect(() => {
-    return () => {
-      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
-    };
-  }, []);
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (!loading && user) router.replace('/dashboard');
-  }, [user, loading, router]);
-
-  // Password strength calc
-  useEffect(() => {
-    if (!passwordValue) {
-      setPasswordStrength({
-        hasMinLength: false,
-        hasUpperLower: false,
-        hasSymbol: false,
-        hasLongPassword: false,
-        strength: 0,
-      });
-      return;
-    }
-
-    const hasMinLength = passwordValue.length >= 6;
-    const hasUpperLower = /(?=.*[a-z])(?=.*[A-Z])/.test(passwordValue);
-    const hasSymbol = /[#$&!@%^*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordValue);
-    const hasLongPassword = passwordValue.length >= 12;
-
-    let strength = 0;
-    if (hasMinLength) strength++;
-    if (hasUpperLower) strength++;
-    if (hasSymbol) strength++;
-    if (hasLongPassword) strength++;
-
-    setPasswordStrength({ hasMinLength, hasUpperLower, hasSymbol, hasLongPassword, strength });
-  }, [passwordValue]);
-
-  // ✅ بستن popover با کلیک بیرون و ESC
-  useEffect(() => {
-    if (!showPasswordPopover) return;
-
-    const onPointerDown = (e) => {
-      const wrap = passwordWrapRef.current;
-      if (!wrap) return;
-
-      // اگر کلیک داخل input + popover بود، نبند
-      if (wrap.contains(e.target)) return;
-
-      setShowPasswordPopover(false);
-    };
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') setShowPasswordPopover(false);
-    };
-
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  }, [showPasswordPopover]);
 
   const onSubmit = async (data) => {
     try {
       const response = await api.register({
         name: data.name,
         email: data.email,
+        phone: data.phone,
         password: data.password,
       });
 
-      if (response.data?.user) login(response.data.user);
+      if (response.data?.requiresVerification) {
+        setRegisteredData({
+          email: response.data.email,
+          phone: response.data.phone,
+          otp: response.data.otp, // Store OTP for development
+        });
 
-      showToast(response.message || 'ثبت‌ نام با موفقیت انجام شد', 'success');
+        showToast(response.message || 'ثبت‌نام با موفقیت انجام شد', 'success');
 
-      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
-      redirectTimerRef.current = setTimeout(() => {
-        router.replace('/dashboard');
-      }, 900);
-    } catch (error) {
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.error('Signup error:', error);
+        // Show OTP in development mode
+        if (response.data.otp) {
+          setTimeout(() => {
+            showToast(`🔑 کد تایید شما: ${response.data.otp}`, 'info', 15000);
+          }, 1000);
+        }
+
+        setStep('verify-choice');
       }
+    } catch (error) {
       const message =
         (error && Array.isArray(error.errors) && error.errors[0]) ||
         error.message ||
@@ -138,244 +78,354 @@ export default function SignupPage() {
     }
   };
 
+  const handleVerifyOtp = async (data) => {
+    try {
+      const response = await api.verifyOtp({
+        phone: registeredData.phone,
+        otp: data.otp,
+      });
+
+      if (response.data?.user) {
+        login(response.data.user);
+        showToast(response.message || 'تأیید با موفقیت انجام شد', 'success');
+        setTimeout(() => router.push('/dashboard'), 600);
+      }
+    } catch (error) {
+      const message =
+        (error && Array.isArray(error.errors) && error.errors[0]) ||
+        error.message ||
+        'خطا در تأیید کد';
+      showToast(message, 'error');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const response = await api.resendOtp({ phone: registeredData.phone });
+      showToast('کد تأیید مجدداً ارسال شد', 'success');
+
+      // Show new OTP in development mode
+      if (response.otp) {
+        setTimeout(() => {
+          showToast(`🔑 کد تایید جدید: ${response.otp}`, 'info', 15000);
+        }, 1000);
+
+        // Update stored OTP
+        setRegisteredData(prev => ({ ...prev, otp: response.otp }));
+      }
+
+      setOtpTimer(60);
+    } catch (error) {
+      showToast(error.message || 'خطا در ارسال مجدد کد', 'error');
+    }
+  };
+
+  useEffect(() => {
+    if (otpTimer > 0) {
+      const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpTimer]);
+
   if (loading || user) return null;
 
   return (
     <>
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={hideToast}
-          duration={toast.duration}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} duration={toast.duration} />}
 
       <div className="min-h-screen bg-white dark:bg-gray-900" dir="rtl">
         <div className="flex min-h-screen items-center justify-center p-4 sm:pt-20">
           <motion.div
-            className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-8 select-none"
+            className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-8"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
+            transition={{ duration: 0.4 }}
           >
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
-              <h1 className="mb-6 text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                ثبت‌ نام در سایت
-              </h1>
+            {step === 'register' && (
+              <>
+                <h1 className="mb-6 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                  ثبت‌نام در VerifyUp
+                </h1>
 
-              {/* NAME */}
-              <div className="mb-4">
-                <label
-                  htmlFor="name"
-                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  نام و نام خانوادگی
-                </label>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                      نام و نام خانوادگی
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      {...register('name', {
+                        required: 'نام و نام خانوادگی الزامی است',
+                        minLength: { value: 3, message: 'حداقل ۳ کاراکتر وارد کنید' },
+                      })}
+                    />
+                    <ErrorText>{errors.name?.message}</ErrorText>
+                  </div>
 
-                <input
-                  id="name"
-                  type="text"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                  placeholder="نام خود را وارد کنید"
-                  {...register('name', {
-                    required: 'نام و نام خانوادگی الزامی است',
-                    minLength: { value: 3, message: 'حداقل ۳ کاراکتر وارد کنید' },
-                  })}
-                />
-                <ErrorText>{errors.name?.message}</ErrorText>
-              </div>
+                  <div>
+                    <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                      ایمیل
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      {...register('email', {
+                        required: 'ایمیل الزامی است',
+                        pattern: { value: /^\S+@\S+$/i, message: 'فرمت ایمیل نامعتبر است' },
+                      })}
+                    />
+                    <ErrorText>{errors.email?.message}</ErrorText>
+                  </div>
 
-              {/* EMAIL */}
-              <div className="mb-4">
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  ایمیل شما
-                </label>
+                  <div>
+                    <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                      شماره موبایل
+                    </label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      dir="ltr"
+                      placeholder="09123456789"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      {...register('phone', {
+                        required: 'شماره موبایل الزامی است',
+                        pattern: { value: /^09\d{9}$/, message: 'شماره موبایل باید با 09 شروع شود و ۱۱ رقم باشد' },
+                      })}
+                    />
+                    <ErrorText>{errors.phone?.message}</ErrorText>
+                  </div>
 
-                <input
-                  id="email"
-                  type="email"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                  placeholder="example@company.com"
-                  {...register('email', {
-                    required: 'ایمیل الزامی است',
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: 'فرمت ایمیل معتبر نیست',
-                    },
-                  })}
-                />
-                <ErrorText>{errors.email?.message}</ErrorText>
-              </div>
+                  <div>
+                    <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                      رمز عبور
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      {...register('password', {
+                        required: 'رمز عبور الزامی است',
+                        minLength: { value: 8, message: 'رمز عبور باید حداقل ۸ کاراکتر باشد' },
+                      })}
+                    />
+                    <ErrorText>{errors.password?.message}</ErrorText>
+                  </div>
 
-              {/* PASSWORD */}
-              <div className="mb-4">
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  رمز عبور
-                </label>
+                  <div>
+                    <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                      تکرار رمز عبور
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      {...register('confirmPassword', {
+                        required: 'تکرار رمز عبور الزامی است',
+                        validate: (value, formValues) => value === formValues.password || 'رمز عبور و تکرار آن یکسان نیستند',
+                      })}
+                    />
+                    <ErrorText>{errors.confirmPassword?.message}</ErrorText>
+                  </div>
 
-                <div className="relative" ref={passwordWrapRef}>
-                  <input
-                    id="password"
-                    type="password"
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                    placeholder="•••••••••"
-                    onFocus={() => setShowPasswordPopover(true)}
-                    {...register('password', {
-                      required: 'رمز عبور الزامی است',
-                      minLength: { value: 6, message: 'رمز عبور باید حداقل ۶ کاراکتر باشد' },
-                      pattern: {
-                        value: /^(?=.*[A-Za-z])(?=.*\d).+$/,
-                        message: 'رمز عبور باید حداقل یک حرف و یک عدد داشته باشد',
-                      },
-                    })}
-                  />
+                  <div className="flex items-start">
+                    <input
+                      id="terms"
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 rounded border-gray-300 bg-gray-100 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
+                      {...register('terms', { required: 'پذیرش قوانین الزامی است' })}
+                    />
+                    <label htmlFor="terms" className="mr-2 text-sm text-gray-900 dark:text-gray-300">
+                      قوانین و مقررات را می‌پذیرم
+                    </label>
+                  </div>
+                  <ErrorText>{errors.terms?.message}</ErrorText>
 
-                  {showPasswordPopover && (
-                    <div
-                      className="absolute left-0 top-full z-10 mt-2 w-72 rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-700 shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                      role="dialog"
-                      aria-label="راهنمای قدرت رمز عبور"
-                    >
-                      <h3 className="mb-3 font-semibold text-gray-900 dark:text-white">
-                        راهنمای قدرت رمز عبور
-                      </h3>
-
-                      <div className="mb-3 grid grid-cols-4 gap-2">
-                        <div
-                          className={`h-1 rounded-full ${passwordStrength.strength >= 1
-                              ? 'bg-yellow-500'
-                              : 'bg-gray-300 dark:bg-gray-600'
-                            }`}
-                        />
-                        <div
-                          className={`h-1 rounded-full ${passwordStrength.strength >= 2
-                              ? 'bg-yellow-500'
-                              : 'bg-gray-300 dark:bg-gray-600'
-                            }`}
-                        />
-                        <div
-                          className={`h-1 rounded-full ${passwordStrength.strength >= 3
-                              ? 'bg-green-500'
-                              : 'bg-gray-300 dark:bg-gray-600'
-                            }`}
-                        />
-                        <div
-                          className={`h-1 rounded-full ${passwordStrength.strength >= 4
-                              ? 'bg-green-500'
-                              : 'bg-gray-300 dark:bg-gray-600'
-                            }`}
-                        />
-                      </div>
-
-                      <p className="mb-2">پیشنهاد می‌شود:</p>
-                      <ul className="space-y-1">
-                        <li className="flex items-center gap-2">
-                          <span
-                            className={`h-2 w-2 rounded-full ${passwordStrength.hasUpperLower ? 'bg-green-500' : 'bg-gray-400'
-                              }`}
-                          />
-                          ترکیب حروف بزرگ و کوچک
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span
-                            className={`h-2 w-2 rounded-full ${passwordStrength.hasSymbol ? 'bg-green-500' : 'bg-gray-400'
-                              }`}
-                          />
-                          استفاده از یک نماد (#$&)
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span
-                            className={`h-2 w-2 rounded-full ${passwordStrength.hasLongPassword ? 'bg-green-500' : 'bg-gray-400'
-                              }`}
-                          />
-                          رمز عبور طولانی‌تر (حداقل ۱۲ کاراکتر)
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                <ErrorText>{errors.password?.message}</ErrorText>
-              </div>
-
-              {/* CONFIRM PASSWORD */}
-              <div className="mb-4">
-                <label
-                  htmlFor="confirm-password"
-                  className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  تکرار رمز عبور
-                </label>
-
-                <input
-                  id="confirm-password"
-                  type="password"
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                  placeholder="•••••••••"
-                  {...register('confirmPassword', {
-                    required: 'تکرار رمز عبور الزامی است',
-                    validate: (value) => value === passwordValue || 'رمز عبور و تکرار آن یکسان نیستند',
-                  })}
-                />
-                <ErrorText>{errors.confirmPassword?.message}</ErrorText>
-              </div>
-
-              {/* TERMS */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    id="checkbox-terms"
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
-                    {...register('terms', {
-                      validate: (v) => v === true || 'برای ادامه باید قوانین را بپذیرید',
-                    })}
-                  />
-
-                  <label
-                    htmlFor="checkbox-terms"
-                    className="text-sm font-medium text-gray-900 dark:text-gray-300"
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-60 dark:bg-indigo-600 dark:hover:bg-indigo-700"
                   >
-                    قوانین و مقررات را می‌پذیرم{' '}
-                    <Link
-                      href="/terms"
-                      className="text-indigo-700 hover:text-indigo-800 dark:text-indigo-400"
-                    >
-                      (مشاهده)
+                    {isSubmitting ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
+                  </button>
+
+                  <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                    قبلاً ثبت‌نام کرده‌اید؟{' '}
+                    <Link href="/login" className="font-medium text-indigo-600 hover:underline dark:text-indigo-500">
+                      ورود
                     </Link>
-                  </label>
+                  </p>
+                </form>
+              </>
+            )}
+
+            {step === 'verify-choice' && (
+              <>
+                <h1 className="mb-4 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                  انتخاب روش تأیید
+                </h1>
+                <p className="mb-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                  لطفاً یکی از روش‌های زیر را برای تأیید حساب خود انتخاب کنید
+                </p>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setStep('verify-otp');
+                      setOtpTimer(60);
+                    }}
+                    className="w-full rounded-lg border-2 border-indigo-600 bg-indigo-50 p-4 text-right hover:bg-indigo-100 dark:border-indigo-500 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40"
+                  >
+                    <div className="flex items-center">
+                      <svg className="ml-3 h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">تأیید با پیامک (OTP)</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">کد تأیید به شماره {registeredData?.phone} ارسال می‌شود</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      showToast('لینک تأیید به ایمیل شما ارسال شد', 'success');
+                      setStep('verify-email');
+                    }}
+                    className="w-full rounded-lg border-2 border-gray-300 bg-white p-4 text-right hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+                  >
+                    <div className="flex items-center">
+                      <svg className="ml-3 h-6 w-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">تأیید با ایمیل</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">لینک تأیید به {registeredData?.email} ارسال می‌شود</p>
+                      </div>
+                    </div>
+                  </button>
                 </div>
+              </>
+            )}
 
-                <ErrorText>{errors.terms?.message}</ErrorText>
-              </div>
+            {step === 'verify-otp' && (
+              <>
+                <h1 className="mb-4 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                  تأیید شماره موبایل
+                </h1>
+                <p className="mb-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                  کد تأیید ۶ رقمی به شماره {registeredData?.phone} ارسال شد
+                </p>
 
-              <motion.button
-                type="submit"
-                className="mb-4 w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
-                disabled={isSubmitting}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {isSubmitting ? 'در حال ارسال...' : 'ثبت‌ نام'}
-              </motion.button>
+                {/* Development helper - Show OTP code */}
+                {registeredData?.otp && (
+                  <div className="mb-4 rounded-lg border-2 border-dashed border-yellow-400 bg-yellow-50 p-3 dark:border-yellow-600 dark:bg-yellow-900/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                          🔑 کد تایید (حالت توسعه):
+                        </span>
+                        <span className="mr-2 font-mono text-lg font-bold text-yellow-900 dark:text-yellow-200">
+                          {registeredData.otp}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(registeredData.otp);
+                          showToast('کد کپی شد!', 'success', 2000);
+                        }}
+                        className="rounded bg-yellow-200 px-2 py-1 text-xs font-medium text-yellow-800 hover:bg-yellow-300 dark:bg-yellow-800 dark:text-yellow-200 dark:hover:bg-yellow-700"
+                      >
+                        📋 کپی
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-              <div className="text-center text-sm font-medium text-gray-500 dark:text-gray-300">
-                قبلاً ثبت‌ نام کرده‌ اید؟{' '}
-                <Link
-                  href="/login"
-                  className="text-indigo-700 transition-colors hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 px-1"
-                >
-                  ورود به حساب
-                </Link>
-              </div>
-            </form>
+                <form onSubmit={handleSubmitOtp(handleVerifyOtp)} className="space-y-4">
+                  <div>
+                    <label htmlFor="otp" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                      کد تأیید
+                    </label>
+                    <input
+                      id="otp"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength="6"
+                      dir="ltr"
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-center text-lg tracking-widest text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      placeholder="••••••"
+                      {...registerOtp('otp', {
+                        required: 'کد تأیید الزامی است',
+                        pattern: { value: /^\d{6}$/, message: 'کد تأیید باید ۶ رقم باشد' },
+                      })}
+                    />
+                    <ErrorText>{errorsOtp.otp?.message}</ErrorText>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmittingOtp}
+                    className="w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-60"
+                  >
+                    {isSubmittingOtp ? 'در حال تأیید...' : 'تأیید کد'}
+                  </button>
+
+                  <div className="text-center">
+                    {otpTimer > 0 ? (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        ارسال مجدد کد تا {otpTimer} ثانیه دیگر
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                      >
+                        ارسال مجدد کد
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setStep('verify-choice')}
+                    className="w-full text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    بازگشت به انتخاب روش
+                  </button>
+                </form>
+              </>
+            )}
+
+            {step === 'verify-email' && (
+              <>
+                <h1 className="mb-4 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                  تأیید ایمیل
+                </h1>
+                <div className="text-center">
+                  <svg className="mx-auto mb-4 h-16 w-16 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                    لینک تأیید به ایمیل <span className="font-medium text-gray-900 dark:text-white">{registeredData?.email}</span> ارسال شد.
+                  </p>
+                  <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                    لطفاً ایمیل خود را بررسی کرده و روی لینک تأیید کلیک کنید.
+                  </p>
+
+                  <button
+                    onClick={() => setStep('verify-choice')}
+                    className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                  >
+                    بازگشت به انتخاب روش
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
         </div>
       </div>

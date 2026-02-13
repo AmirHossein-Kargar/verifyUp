@@ -24,7 +24,23 @@ export function CartProvider({ children }) {
     // Save cart to localStorage whenever it changes (only after initial load)
     useEffect(() => {
         if (isLoaded) {
-            localStorage.setItem('cart', JSON.stringify(cart));
+            // Strip out non-serializable values (like React elements) before saving
+            const serializableCart = cart.map((item) => {
+                const { icon, ...rest } = item; // remove possible React elements
+
+                let safeLogo = rest.logo;
+                if (safeLogo && typeof safeLogo === 'object') {
+                    // Handle imported image objects or similar
+                    safeLogo = safeLogo.src || null;
+                }
+
+                return {
+                    ...rest,
+                    logo: safeLogo ?? null,
+                };
+            });
+
+            localStorage.setItem('cart', JSON.stringify(serializableCart));
         }
     }, [cart, isLoaded]);
 

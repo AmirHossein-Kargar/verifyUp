@@ -4,63 +4,69 @@ const objectIdSchema = z
   .string()
   .regex(/^[0-9a-fA-F]{24}$/i, "شناسه نامعتبر است");
 
-// Admin orders listing (query params)
-const adminListOrdersQuerySchema = z.object({
-  status: z.string().min(1, "وضعیت نمی‌تواند خالی باشد").optional(),
-  page: z.coerce
-    .number()
-    .int("صفحه باید عدد صحیح باشد")
-    .positive("شماره صفحه باید مثبت باشد")
-    .default(1),
-  limit: z.coerce
-    .number()
-    .int("تعداد در هر صفحه باید عدد صحیح باشد")
-    .min(1, "حداقل یک مورد در هر صفحه")
-    .max(100, "حداکثر ۱۰۰ مورد در هر صفحه")
-    .default(20),
-});
+const orderStatusEnum = z.enum([
+  "pending_docs",
+  "in_review",
+  "needs_resubmit",
+  "approved",
+  "rejected",
+  "completed",
+]);
 
-// Path params for order / document
+const adminListOrdersQuerySchema = z
+  .object({
+    status: orderStatusEnum.optional(),
+
+    from: z
+      .string()
+      .datetime()
+      .optional()
+      .describe("ISO datetime string for start of createdAt range"),
+
+    to: z
+      .string()
+      .datetime()
+      .optional()
+      .describe("ISO datetime string for end of createdAt range"),
+
+    userQuery: z
+      .string()
+      .trim()
+      .min(3, "عبارت جستجو باید حداقل ۳ کاراکتر باشد")
+      .max(64, "عبارت جستجوی کاربر خیلی طولانی است")
+      .optional(),
+
+    page: z.coerce
+      .number()
+      .int("صفحه باید عدد صحیح باشد")
+      .positive("شماره صفحه باید مثبت باشد")
+      .default(1),
+
+    limit: z.coerce
+      .number()
+      .int("تعداد در هر صفحه باید عدد صحیح باشد")
+      .min(1, "حداقل یک مورد در هر صفحه")
+      .max(100, "حداکثر ۱۰۰ مورد در هر صفحه")
+      .default(20),
+
+    sortBy: z.enum(["createdAt", "amount", "status"]).default("createdAt"),
+
+    sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  })
+  .refine(
+    (q) => !q.from || !q.to || new Date(q.from) <= new Date(q.to),
+    {
+      message: "بازه تاریخ نامعتبر است (از باید قبل از تا باشد)",
+      path: ["to"],
+    }
+  );
+
 const adminOrderParamsSchema = z.object({
   orderId: objectIdSchema,
 });
 
-const adminDocParamsSchema = z.object({
-  docId: objectIdSchema,
-});
-
-// Review a document
-const reviewDocBodySchema = z.object({
-  status: z.enum(["accepted", "resubmit"], {
-    errorMap: () => ({
-      message: "وضعیت نامعتبر است. باید 'accepted' یا 'resubmit' باشد",
-    }),
-  }),
-  adminNote: z
-    .string()
-    .trim()
-    .max(2000, "یادداشت مدیر حداکثر می‌تواند ۲۰۰۰ کاراکتر باشد")
-    .optional(),
-});
-
-// Update order status
 const updateOrderStatusBodySchema = z.object({
-  status: z.enum(
-    [
-      "pending_docs",
-      "in_review",
-      "needs_resubmit",
-      "approved",
-      "rejected",
-      "completed",
-    ],
-    {
-      errorMap: () => ({
-        message:
-          "وضعیت نامعتبر است. باید یکی از وضعیت‌های مجاز سفارش انتخاب شود",
-      }),
-    }
-  ),
+  status: orderStatusEnum,
   adminNote: z
     .string()
     .trim()
@@ -70,9 +76,8 @@ const updateOrderStatusBodySchema = z.object({
 
 module.exports = {
   objectIdSchema,
+  orderStatusEnum,
   adminListOrdersQuerySchema,
   adminOrderParamsSchema,
-  adminDocParamsSchema,
-  reviewDocBodySchema,
   updateOrderStatusBodySchema,
 };

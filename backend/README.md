@@ -62,6 +62,13 @@ npm run dev
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference
 - **[Security Guide](./SECURITY.md)** - Security implementation details
 
+### SMS Integration
+
+- **[📱 SMS Index](./SMS_INDEX.md)** - Complete SMS documentation index
+- **[SMS Quick Start](./SMS_QUICK_START.md)** - Get SMS working in 5 minutes
+- **[SMS Integration Guide](./SMS_INTEGRATION.md)** - Complete guide (English)
+- **[راهنمای SMS](./راهنمای-SMS.md)** - راهنمای کامل (فارسی)
+
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -73,6 +80,11 @@ MONGO_URI=mongodb://localhost:27017/VerifyUp
 JWT_SECRET=your_access_token_secret_min_32_chars
 JWT_REFRESH_SECRET=your_refresh_token_secret_min_32_chars
 FRONTEND_URL=http://localhost:3000
+
+# SMS Configuration (sms.ir)
+SMS_API_KEY=your_sms_ir_api_key
+SMS_ENVIRONMENT=sandbox  # or production
+SMS_TEMPLATE_ID=123456
 ```
 
 ### Generate Secure Secrets
@@ -91,12 +103,14 @@ backend/
 │   ├── middleware/      # Custom middleware
 │   ├── models/          # Mongoose schemas
 │   ├── routes/          # API routes
-│   ├── services/        # Business logic
+│   ├── services/        # Business logic (SMS, etc.)
 │   ├── utils/           # Helper functions
 │   ├── validators/      # Input validation schemas
+│   ├── examples/        # Usage examples
 │   ├── app.js           # Express app setup
 │   └── server.js        # Server entry point
 ├── .env                 # Environment variables
+├── test-sms.js          # SMS testing script
 ├── package.json
 └── README.md
 ```

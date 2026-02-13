@@ -12,8 +12,10 @@ export default function AdminDashboardPage() {
   const { user, loading, showSkeleton } = useRequireAuth({
     allowedRoles: ['admin'],
   });
+
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
 
   useEffect(() => {
     if (!user || loading) return;
@@ -22,10 +24,13 @@ export default function AdminDashboardPage() {
 
     const loadStats = async () => {
       try {
+        setStatsError(null);
         const res = await api.getAdminStats();
         if (cancelled) return;
         setStats(res.data);
       } catch (e) {
+        if (cancelled) return;
+        setStatsError(e?.message || 'خطا در دریافت آمار');
         if (process.env.NODE_ENV !== 'production') {
           console.warn('Failed to load admin stats:', e);
         }
@@ -67,6 +72,12 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
+          {statsError && (
+            <div className="rounded-md bg-red-50 p-3 text-xs text-red-700 dark:bg-red-900/20 dark:text-red-300">
+              {statsError}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5">
               <div className="flex items-center justify-between">
@@ -79,20 +90,8 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 7h16M4 12h16M4 17h10"
-                    />
+                  <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7h16M4 12h16M4 17h10" />
                   </svg>
                 </div>
               </div>
@@ -109,20 +108,8 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-yellow-50 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-300">
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 6v6l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                    />
+                  <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                   </svg>
                 </div>
               </div>
@@ -139,20 +126,8 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-green-50 text-green-600 dark:bg-green-900/40 dark:text-green-300">
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
+                  <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
               </div>
@@ -169,20 +144,8 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300">
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 6v12m-6-6h12"
-                    />
+                  <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v12m-6-6h12" />
                   </svg>
                 </div>
               </div>
@@ -194,8 +157,7 @@ export default function AdminDashboardPage() {
               فعالیت‌ها
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              بخش‌های مدیریت سفارشات، بررسی مدارک و جزئیات بیشتر به زودی از طریق
-              منوی سمت راست (`مدیریت سفارشات`) در دسترس خواهد بود.
+              بخش‌ های مدیریت سفارشات، بررسی مدارک و جزئیات بیشتر از طریق منوی سمت راست در دسترس است.
             </p>
           </div>
         </div>
@@ -203,4 +165,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-

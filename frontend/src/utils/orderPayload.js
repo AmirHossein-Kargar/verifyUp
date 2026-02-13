@@ -2,11 +2,22 @@
 // matching backend createOrderSchema: { service, priceToman, requiredDocs }
 
 export function buildOrderPayloadFromItem(item) {
-  // For this plan we only require one document: passport
-  const requiredDocs = ["passport_front"];
+  // Documents are managed by admin, no upload required from users
+  const requiredDocs = [];
+
+  // Map planId to service name
+  let serviceName = "upwork_verification"; // default
+
+  if (item.planId === "plan1") {
+    serviceName = "upwork_verification";
+  } else if (item.planId === "plan2") {
+    serviceName = "account_optimization";
+  } else if (item.planId === "plan3") {
+    serviceName = "paypal_account";
+  }
 
   return {
-    service: "upwork_verification",
+    service: serviceName,
     priceToman: item.price || 0,
     requiredDocs,
   };

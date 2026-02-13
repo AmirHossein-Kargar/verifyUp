@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { formatTooman } from '@/utils/currency';
 import { useToast } from '@/hooks/useToast';
 import { api } from '@/lib/api';
+import { useCart } from '@/contexts/CartContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { clearCart } = useCart();
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,7 +51,10 @@ export default function CheckoutPage() {
       // در حالت واقعی این نقطه بعد از تأیید درگاه پرداخت (وبهوک) فراخوانی می‌شود
       const response = await api.createPaidOrder(pending.orderPayload);
 
+      // Clear cart and pending checkout after successful order
       window.localStorage.removeItem('pendingCheckout');
+      clearCart();
+
       showToast(response.message || 'پرداخت با موفقیت انجام شد و سفارش ثبت شد', 'success');
       router.push('/dashboard/orders');
     } catch (error) {

@@ -2,15 +2,12 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { formatTooman } from '@/utils/currency';
 import DashboardNavbar from '@/app/components/DashboardNavbar';
 import DashboardSkeleton from '@/app/components/DashboardSkeleton';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useOrders } from '@/hooks/useOrders';
-import { api } from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 
 const STATUS_BADGES = {
@@ -22,8 +19,8 @@ const STATUS_BADGES = {
 
 const STATUS_TEXT = {
     completed: 'تکمیل شده',
-    active: 'در حال انجام',
-    pending: 'در انتظار دریافت مدارک',
+    active: 'در حال بررسی',
+    pending: 'در انتظار بررسی',
     cancelled: 'لغو شده',
 };
 
@@ -36,188 +33,32 @@ const STATUS_MAP = {
     rejected: 'cancelled',
 };
 
-function prettyFileSize(bytes) {
-    if (!bytes && bytes !== 0) return '';
-    const sizes = ['بایت', 'کیلوبایت', 'مگابایت'];
-    if (bytes === 0) return '0 بایت';
-    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), sizes.length - 1);
-    const value = bytes / Math.pow(1024, i);
-    return `${value.toFixed(value < 10 ? 1 : 0)} ${sizes[i]}`;
-}
+// Service configurations
+const SERVICE_CONFIG = {
+    upwork_verification: {
+        title: 'ساخت اکانت اپورک + احراز هویت',
+        logo: 'https://cdn.worldvectorlogo.com/logos/upwork-roundedsquare-1.svg',
+    },
+    account_optimization: {
+        title: 'مشاوره بهینه‌سازی اکانت',
+        icon: (
+            <svg className="w-12 h-12 text-blue-600 dark:text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+            </svg>
+        ),
+    },
+    paypal_account: {
+        title: 'اکانت پی پال',
+        logo: '/paypal.svg',
+    },
+};
 
-function PassportUploadArea({
-    orderId,
-    file,
-    onFileChange,
-    onUpload,
-    isUploading,
-}) {
-    const [isDragging, setIsDragging] = useState(false);
-
-    const fileLabel = useMemo(() => {
-        if (!file) return 'فایلی انتخاب نشده است';
-        return `${file.name} (${prettyFileSize(file.size)})`;
-    }, [file]);
-
-    const handleFileInputChange = (e) => {
-        const newFile = e.target.files?.[0] || null;
-        onFileChange(newFile);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-        const droppedFile = e.dataTransfer.files?.[0] || null;
-        if (droppedFile) {
-            onFileChange(droppedFile);
-        }
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!isDragging) setIsDragging(true);
-    };
-
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Only reset when leaving the container, not children
-        if (e.currentTarget.contains(e.relatedTarget)) return;
-        setIsDragging(false);
-    };
-
-    return (
-        <div className="mt-4 space-y-3">
-            <label
-                htmlFor={`file_input_${orderId}`}
-                className="block text-xs font-medium text-gray-900 dark:text-white"
-            >
-                آپلود تصویر پاسپورت
-            </label>
-
-            <motion.label
-                htmlFor={`file_input_${orderId}`}
-                className={[
-                    'relative flex flex-col items-center justify-center w-full px-4 py-5',
-                    'rounded-lg border-2 border-dashed cursor-pointer transition-all',
-                    'bg-gray-50 dark:bg-gray-800/60',
-                    isDragging
-                        ? 'border-indigo-500 bg-indigo-50/60 dark:border-indigo-400 dark:bg-indigo-900/40'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700/80',
-                    isUploading ? 'opacity-80' : '',
-                ].join(' ')}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-            >
-                <div className="flex flex-col items-center text-center space-y-2">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300">
-                        <svg
-                            className="w-5 h-5"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M12 4v12m0 0 4-4m-4 4-4-4M4 20h16"
-                            />
-                        </svg>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-xs font-medium text-gray-900 dark:text-gray-100">
-                            فایل پاسپورت را اینجا بکشید و رها کنید
-                        </p>
-                        <p className="text-[11px] text-gray-500 dark:text-gray-300">
-                            یا کلیک کنید و فایل را انتخاب کنید
-                        </p>
-                    </div>
-                    <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-300 line-clamp-1 max-w-full">
-                        {fileLabel}
-                    </p>
-                </div>
-
-                <input
-                    id={`file_input_${orderId}`}
-                    type="file"
-                    className="hidden"
-                    onChange={handleFileInputChange}
-                />
-
-                {isUploading && (
-                    <div className="mt-3 w-full">
-                        <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                            <motion.div
-                                className="h-full bg-gradient-to-l from-indigo-500 via-indigo-400 to-indigo-600 dark:from-indigo-400 dark:via-indigo-300 dark:to-indigo-500"
-                                initial={{ x: '-100%' }}
-                                animate={{ x: '100%' }}
-                                transition={{
-                                    repeat: Infinity,
-                                    duration: 1.2,
-                                    ease: 'easeInOut',
-                                }}
-                            />
-                        </div>
-                    </div>
-                )}
-            </motion.label>
-
-            <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-300">
-                فرمت مجاز: تصویر (JPG، PNG) یا PDF، حداکثر ۱۰ مگابایت.
-            </p>
-
-            <button
-                type="button"
-                onClick={onUpload}
-                disabled={isUploading}
-                className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800"
-            >
-                {isUploading && (
-                    <svg
-                        className="w-4 h-4 ms-1 animate-spin"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                        />
-                        <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        />
-                    </svg>
-                )}
-                <span className="ms-1">
-                    {isUploading ? 'در حال آپلود...' : 'آپلود فایل'}
-                </span>
-            </button>
-        </div>
-    );
-}
+// Passport upload removed - admin manages order status directly
 
 export default function OrdersPage() {
     const { user, loading: authLoading, showSkeleton } = useRequireAuth();
     const { orders, loading: ordersLoading, error, refetch } = useOrders();
     const { showToast } = useToast();
-    const [uploadingId, setUploadingId] = useState(null);
-    const [fileMap, setFileMap] = useState({});
 
     if (authLoading || showSkeleton || ordersLoading) return <DashboardSkeleton sidebarOpen={false} />;
     if (!user) return null;
@@ -269,44 +110,8 @@ export default function OrdersPage() {
                                     })
                                     : '';
 
-                                const isPendingDocs = order.status === 'pending_docs';
-
-                                const handleFileChange = (file) => {
-                                    setFileMap((prev) => ({
-                                        ...prev,
-                                        [order._id]: file || null,
-                                    }));
-                                };
-
-                                const handleUpload = async () => {
-                                    const file = fileMap[order._id];
-                                    if (!file) {
-                                        showToast('لطفاً ابتدا فایل موردنظر را انتخاب کنید', 'warning');
-                                        return;
-                                    }
-
-                                    const formData = new FormData();
-                                    formData.append('file', file);
-                                    // برای این پلن فقط پاسپورت لازم است
-                                    formData.append('type', 'passport_front');
-
-                                    try {
-                                        setUploadingId(order._id);
-                                        showToast('در حال آپلود فایل...', 'info', 2000);
-                                        await api.uploadOrderDocument(order._id, formData);
-                                        showToast('فایل با موفقیت آپلود شد', 'success');
-                                        setFileMap((prev) => ({ ...prev, [order._id]: null }));
-                                        await refetch();
-                                    } catch (err) {
-                                        const message =
-                                            (err && Array.isArray(err.errors) && err.errors[0]) ||
-                                            err.message ||
-                                            'خطا در آپلود فایل';
-                                        showToast(message, 'error');
-                                    } finally {
-                                        setUploadingId(null);
-                                    }
-                                };
+                                // Get service configuration
+                                const serviceConfig = SERVICE_CONFIG[order.service] || SERVICE_CONFIG.upwork_verification;
 
                                 return (
                                     <div
@@ -315,17 +120,23 @@ export default function OrdersPage() {
                                     >
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                             <div className="flex items-start gap-4">
-                                                <Image
-                                                    src="https://cdn.worldvectorlogo.com/logos/upwork-roundedsquare-1.svg"
-                                                    alt="Upwork"
-                                                    width={48}
-                                                    height={48}
-                                                    className="object-contain"
-                                                />
+                                                {serviceConfig.logo ? (
+                                                    <Image
+                                                        src={serviceConfig.logo}
+                                                        alt={serviceConfig.title}
+                                                        width={48}
+                                                        height={48}
+                                                        className="object-contain"
+                                                    />
+                                                ) : serviceConfig.icon ? (
+                                                    <div className="shrink-0">
+                                                        {serviceConfig.icon}
+                                                    </div>
+                                                ) : null}
 
                                                 <div>
                                                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                                                        سفارش احراز هویت آپورک
+                                                        {serviceConfig.title}
                                                     </h3>
                                                     {dateText && (
                                                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -344,9 +155,9 @@ export default function OrdersPage() {
                                                     {formatTooman(order.priceToman || 0)}
                                                 </p>
 
-                                                {order.requiredDocs && order.requiredDocs.length > 0 && (
+                                                {order.adminNote && (
                                                     <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                                                        مدرک موردنیاز: پاسپورت
+                                                        یادداشت ادمین: {order.adminNote}
                                                     </p>
                                                 )}
 
@@ -355,16 +166,6 @@ export default function OrdersPage() {
                                                         وضعیت مدارک: {order.docsSummary.accepted || 0} تایید شده،{' '}
                                                         {order.docsSummary.resubmit || 0} نیاز به ارسال مجدد
                                                     </p>
-                                                )}
-
-                                                {isPendingDocs && (
-                                                    <PassportUploadArea
-                                                        orderId={order._id}
-                                                        file={fileMap[order._id]}
-                                                        onFileChange={handleFileChange}
-                                                        onUpload={handleUpload}
-                                                        isUploading={uploadingId === order._id}
-                                                    />
                                                 )}
                                             </div>
                                         </div>

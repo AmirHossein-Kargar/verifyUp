@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Require authenticated user.
  * Optionally restricts access to specific roles.
+ *
+ * Server-side RBAC is the source of truth; this hook only improves UX
+ * and client-side redirection. It must always stay in sync with backend
+ * role rules (admin vs user-only routes).
  *
  * @param {Object} options
  * @param {string[]} [options.allowedRoles] - Allowed user roles (e.g. ['admin'])
@@ -14,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export function useRequireAuth(options = {}) {
   const { allowedRoles } = options;
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading } = useAuth();
   const [showSkeleton, setShowSkeleton] = useState(true);
 
@@ -26,15 +31,28 @@ export function useRequireAuth(options = {}) {
       return;
     }
 
+    const userRole = user.role || "user";
+
     // Role-based guard when allowedRoles is provided
     if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
-      const userRole = user.role || "user";
       if (!allowedRoles.includes(userRole)) {
-        // Non-authorized role → send to main user dashboard
+        // Non-authorized role → send to main user dashboard or admin dashboard
+        router.replace(userRole === "admin" ? "/admin" : "/dashboard");
+        return;
+      }
+    }
+
+    // Strict separation UX hint:
+    // - Admins should not stay on /dashboard routes → send them to /admin
+    // - Regular users should not stay on /admin routes → send them to /dashboard
+    if (pathname) {
+      if (pathname.startsWith("/dashboard") && userRole === "admin") {
+        router.replace("/admin");
+      } else if (pathname.startsWith("/admin") && userRole === "user") {
         router.replace("/dashboard");
       }
     }
-  }, [loading, user, router, allowedRoles]);
+  }, [loading, user, router, allowedRoles, pathname]);
 
   useEffect(() => {
     if (loading) return;

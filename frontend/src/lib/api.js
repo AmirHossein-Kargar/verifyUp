@@ -174,6 +174,30 @@ class ApiClient {
     });
   }
 
+  // * Verify phone with OTP
+  async verifyOtp(data) {
+    return this.request("/auth/verify-otp", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // * Verify email with token
+  async verifyEmail(data) {
+    return this.request("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // * Resend OTP to phone
+  async resendOtp(data) {
+    return this.request("/auth/resend-otp", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
   // * Login user with credentials
   async login(data) {
     return this.request("/auth/login", {
@@ -215,7 +239,7 @@ class ApiClient {
   }
 
   // * Create an order after successful payment
-  // * Status starts as `pending_docs` so user can upload documents
+  // * Admin will manage order status directly
   async createPaidOrder(data) {
     return this.request("/orders/complete", {
       method: "POST",
@@ -228,13 +252,7 @@ class ApiClient {
     return this.request("/orders/me");
   }
 
-  // * Upload a document for a specific order (multipart/form-data)
-  async uploadOrderDocument(orderId, formData) {
-    return this.request(`/orders/${orderId}/upload`, {
-      method: "POST",
-      body: formData,
-    });
-  }
+  // Document upload removed - admin manages order status directly
 
   // ===============================
   // * Admin Endpoints
@@ -249,6 +267,13 @@ class ApiClient {
     const searchParams = new URLSearchParams(params).toString();
     const qs = searchParams ? `?${searchParams}` : "";
     return this.request(`/admin/orders${qs}`);
+  }
+
+  async updateOrderStatus(orderId, data) {
+    return this.request(`/admin/orders/${orderId}/status`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
   }
 }
 
