@@ -2,9 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-// اگر badge داینامیک می‌خوای، این props رو از بیرون پاس بده
-// مثلا <DashboardSidebar isOpen={...} ordersCount={orders.length} cartCount={getCartCount()} />
+import { useState } from 'react';
 
 const MENU_ITEMS = [
     {
@@ -27,7 +25,7 @@ const MENU_ITEMS = [
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z" />
             </svg>
         ),
-        badgeKey: 'ordersCount', // داینامیک از prop
+        badgeKey: 'ordersCount',
     },
     {
         name: 'خدمات',
@@ -38,6 +36,8 @@ const MENU_ITEMS = [
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v14M9 5v14M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
             </svg>
         ),
+        badge: 'Pro',
+        badgeType: 'pro',
     },
     {
         name: 'پروفایل',
@@ -51,57 +51,82 @@ const MENU_ITEMS = [
     },
 ];
 
-export default function DashboardSidebar({ isOpen = true, ordersCount = 0 }) {
+export default function DashboardSidebar({ ordersCount = 0 }) {
     const pathname = usePathname();
+    const [isOpen, setIsOpen] = useState(false);
 
     const isItemActive = (item) => {
-        // دقیق‌تر برای زیرمسیرها:
-        // /dashboard/orders/123 هم آیتم سفارشات رو active نگه می‌داره
-        return pathname === item.match || pathname.startsWith(item.match + '/');
+        // Exact match
+        if (pathname === item.match) {
+            return true;
+        }
+
+        // For dashboard root, only match exact path
+        if (item.match === '/dashboard') {
+            return pathname === '/dashboard';
+        }
+
+        // For other items, check if pathname starts with match + '/'
+        return pathname.startsWith(item.match + '/');
     };
 
     return (
-        <aside
-            id="dashboard-sidebar"
-            className={[
-                'fixed top-14 right-0 z-40 w-64 h-[calc(100vh-3.5rem)] transition-transform duration-300',
-                'translate-x-full sm:translate-x-0',
-                'bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700',
-            ].join(' ')}
-            aria-label="Sidebar"
-        >
-            <div className="h-full px-3 py-4 overflow-y-auto">
-                <ul className="space-y-2 font-medium">
-                    {MENU_ITEMS.map((item) => {
-                        const active = isItemActive(item);
-                        const badgeValue = item.badgeKey === 'ordersCount' ? ordersCount : null;
-                        const showBadge = typeof badgeValue === 'number' && badgeValue > 0;
+        <>
+            {/* Mobile toggle button */}
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                type="button"
+                className="text-gray-900 dark:text-white bg-transparent border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 font-medium rounded-lg ms-3 mt-3 text-sm p-2 focus:outline-none inline-flex sm:hidden"
+            >
+                <span className="sr-only">Open sidebar</span>
+                <svg className="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M5 7h14M5 12h14M5 17h10" />
+                </svg>
+            </button>
 
-                        return (
-                            <li key={item.href}>
-                                <Link
-                                    href={item.href}
-                                    className={[
-                                        'flex items-center px-2 py-1.5 rounded-lg group transition-colors',
-                                        active
-                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
-                                            : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700',
-                                    ].join(' ')}
-                                >
-                                    {item.icon}
-                                    <span className="flex-1 ms-3 whitespace-nowrap">{item.name}</span>
+            {/* Sidebar */}
+            <aside
+                id="dashboard-sidebar"
+                className={`fixed top-14 right-0 z-40 w-64 h-[calc(100vh-3.5rem)] transition-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} sm:translate-x-0`}
+                aria-label="Sidebar"
+            >
+                <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700">
+                    <ul className="space-y-2 font-medium">
+                        {MENU_ITEMS.map((item) => {
+                            const active = isItemActive(item);
+                            const badgeValue = item.badgeKey === 'ordersCount' ? ordersCount : null;
+                            const showBadge = typeof badgeValue === 'number' && badgeValue > 0;
 
-                                    {showBadge && (
-                                        <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 ms-2 text-xs font-medium text-white bg-indigo-600 rounded-full">
-                                            {badgeValue > 99 ? '99+' : badgeValue}
-                                        </span>
-                                    )}
-                                </Link>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </div>
-        </aside>
+                            return (
+                                <li key={item.href}>
+                                    <Link
+                                        href={item.href}
+                                        className={`flex items-center px-2 py-1.5 rounded-lg group ${active
+                                            ? 'text-indigo-600 dark:text-indigo-400 bg-gray-100 dark:bg-gray-700'
+                                            : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                            }`}
+                                    >
+                                        {item.icon}
+                                        <span className="flex-1 ms-3 whitespace-nowrap">{item.name}</span>
+
+                                        {showBadge && (
+                                            <span className="inline-flex items-center justify-center w-4.5 h-4.5 ms-2 text-xs font-medium text-red-800 bg-red-100 border border-red-300 rounded-full">
+                                                {badgeValue > 99 ? '99+' : badgeValue}
+                                            </span>
+                                        )}
+
+                                        {item.badgeType === 'pro' && (
+                                            <span className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs font-medium px-1.5 py-0.5 rounded-sm">
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            </aside>
+        </>
     );
 }

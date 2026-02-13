@@ -136,7 +136,7 @@ exports.login = async (req, res, next) => {
     // Find user
     const user = await User.findOne(
       data.email ? { email: data.email.toLowerCase() } : { phone: data.phone },
-    ).select("+passwordHash"); // Explicitly select passwordHash
+    ).select("+passwordHash +tokenVersion"); // Explicitly select passwordHash and tokenVersion
 
     if (!user) {
       if (identifier) {
@@ -272,10 +272,8 @@ exports.refresh = async (req, res, next) => {
       });
     }
 
-    // Rotate refresh token: bump tokenVersion and issue new pair
-    user.tokenVersion += 1;
-    await user.save();
-
+    // Issue new tokens with the SAME tokenVersion (don't increment here)
+    // Only increment tokenVersion on logout to invalidate all sessions
     const payload = {
       userId: user._id.toString(),
       role: user.role,
@@ -342,7 +340,7 @@ exports.verifyOtp = async (req, res, next) => {
     const data = verifyOtpSchema.parse(req.body);
 
     const user = await User.findOne({ phone: data.phone }).select(
-      "+phoneOtp +phoneOtpExpires",
+      "+phoneOtp +phoneOtpExpires +tokenVersion",
     );
 
     if (!user) {
@@ -421,7 +419,9 @@ exports.verifyEmail = async (req, res, next) => {
 
     const user = await User.findOne({
       emailVerificationToken: data.token,
-    }).select("+emailVerificationToken +emailVerificationExpires");
+    }).select(
+      "+emailVerificationToken +emailVerificationExpires +tokenVersion",
+    );
 
     if (!user) {
       return ApiResponse.notFound(res, {

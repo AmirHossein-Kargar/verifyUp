@@ -3,22 +3,37 @@
 import Link from "next/link";
 import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import CartIcon from "./CartIcon";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from 'framer-motion';
 
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const { user, loading, logout } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
+    const isDashboard = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
+    const dropdownRef = useRef(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsUserDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleLogout = async () => {
         await logout();
-        router.push('/');
-        setIsMenuOpen(false);
+        window.location.href = '/';
     };
 
     return <header className="fixed top-2 sm:top-4 right-1/2 translate-x-1/2 w-[96%] sm:w-[95%] max-w-7xl z-50" dir="rtl">
@@ -68,11 +83,65 @@ export default function Header() {
 
                     {!loading && (
                         user ? (
-                            // Logged in state
-                            <>
-                                <Link href="/dashboard" className="hidden sm:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">داشبورد</Link>
-                                <button onClick={handleLogout} className="hidden xs:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">خروج</button>
-                            </>
+                            // Logged in state - Show avatar dropdown
+                            <div className="relative" ref={dropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                    className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full cursor-pointer bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors"
+                                >
+                                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                                </button>
+
+                                {/* Dropdown menu */}
+                                {isUserDropdownOpen && (
+                                    <div className="absolute left-0 top-10 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-44">
+                                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 text-sm">
+                                            <div className="font-medium text-gray-900 dark:text-white truncate">{user?.name || 'کاربر'}</div>
+                                            <div className="truncate text-gray-500 dark:text-gray-400">{user?.email || user?.phone}</div>
+                                        </div>
+                                        <ul className="p-2 text-sm text-gray-700 dark:text-gray-200 font-medium">
+                                            <li>
+                                                <Link
+                                                    href="/dashboard"
+                                                    onClick={() => setIsUserDropdownOpen(false)}
+                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right"
+                                                >
+                                                    داشبورد
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    href="/dashboard/profile"
+                                                    onClick={() => setIsUserDropdownOpen(false)}
+                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right"
+                                                >
+                                                    تنظیمات
+                                                </Link>
+                                            </li>
+                                            {user?.role === 'admin' && (
+                                                <li>
+                                                    <Link
+                                                        href="/admin"
+                                                        onClick={() => setIsUserDropdownOpen(false)}
+                                                        className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right"
+                                                    >
+                                                        پنل ادمین
+                                                    </Link>
+                                                </li>
+                                            )}
+                                            <li>
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-500 rounded-md text-right"
+                                                >
+                                                    خروج
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             // Logged out state
                             <>
@@ -144,9 +213,25 @@ export default function Header() {
                                         >
                                             داشبورد
                                         </Link>
+                                        <Link
+                                            href="/dashboard/profile"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                        >
+                                            تنظیمات
+                                        </Link>
+                                        {user?.role === 'admin' && (
+                                            <Link
+                                                href="/admin"
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                            >
+                                                پنل ادمین
+                                            </Link>
+                                        )}
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                            className="w-full text-red-600 dark:text-red-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
                                         >
                                             خروج
                                         </button>

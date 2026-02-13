@@ -8,6 +8,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const checkAuth = async () => {
         try {
@@ -34,17 +35,20 @@ export function AuthProvider({ children }) {
 
     const logout = async () => {
         try {
+            setIsLoggingOut(true);
             await api.logout();
             setUser(null);
+            // Redirect will happen via window.location.href in the component
         } catch (error) {
             if (process.env.NODE_ENV !== 'production') {
                 console.warn('Logout error:', error);
             }
+            setIsLoggingOut(false);
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, checkAuth }}>
+        <AuthContext.Provider value={{ user, loading, isLoggingOut, login, logout, checkAuth }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,9 +1,12 @@
 const { z } = require("zod");
 
 const createOrderSchema = z.object({
-  service: z.literal("upwork_verification", {
-    errorMap: () => ({ message: "سرویس باید 'upwork_verification' باشد" }),
-  }),
+  service: z.enum(
+    ["upwork_verification", "account_optimization", "paypal_account"],
+    {
+      errorMap: () => ({ message: "سرویس انتخاب شده معتبر نیست" }),
+    },
+  ),
   priceToman: z.number().int().positive("قیمت باید یک عدد صحیح مثبت باشد"),
   requiredDocs: z.array(z.string()).optional().default([]),
 });

@@ -2,6 +2,7 @@ import HomeClient from './HomeClient';
 import MotionSection from './MotionSection';
 import StepCard from './components/StepCard';
 import FAQ from './components/FAQ';
+import JsonLd from './components/JsonLd';
 
 const steps = [
   {
@@ -66,33 +67,86 @@ const steps = [
   },
 ];
 
+// JSON-LD Schema for SEO
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'VerifyUp',
+  alternateName: 'وریفای آپ',
+  url: 'https://verifyup.ir',
+  logo: 'https://verifyup.ir/Logo.png',
+  description: 'پلتفرم تخصصی احراز هویت کاربران آپورک (Upwork)',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+98-21-12345678',
+    contactType: 'customer service',
+    availableLanguage: ['Persian', 'English'],
+  },
+  sameAs: [
+    'https://t.me/verifyup_support',
+  ],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'VerifyUp',
+  url: 'https://verifyup.ir',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://verifyup.ir/services?q={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'احراز هویت آپورک',
+  provider: {
+    '@type': 'Organization',
+    name: 'VerifyUp',
+  },
+  areaServed: {
+    '@type': 'Country',
+    name: 'Iran',
+  },
+  description: 'خدمات احراز هویت و تایید مدارک برای کاربران آپورک',
+};
+
 export default function HomePage() {
   return (
-    <main className="bg-white dark:bg-gray-900" dir="rtl">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
-        {/* Hero */}
-        <HomeClient />
+    <>
+      <JsonLd data={organizationSchema} />
+      <JsonLd data={websiteSchema} />
+      <JsonLd data={serviceSchema} />
 
-        {/* Steps */}
-        <MotionSection className="mx-auto max-w-6xl px-2 sm:px-4" delay={0.15}>
-          <h2 className="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-            مراحل احراز هویت
-          </h2>
+      <main className="bg-white dark:bg-gray-900" dir="rtl">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
+          {/* Hero */}
+          <HomeClient />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-            {steps.map((s, index) => (
-              <div key={s.step} className={index === 2 ? 'sm:col-span-2 lg:col-span-1' : ''}>
-                <StepCard step={s.step} title={s.title} description={s.description} icon={s.icon} index={index} />
-              </div>
-            ))}
-          </div>
-        </MotionSection>
+          {/* Steps */}
+          <MotionSection className="mx-auto max-w-6xl px-2 sm:px-4" delay={0.15}>
+            <h2 className="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+              مراحل احراز هویت
+            </h2>
 
-        {/* FAQ */}
-        <MotionSection delay={0.25}>
-          <FAQ />
-        </MotionSection>
-      </div>
-    </main>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+              {steps.map((s, index) => (
+                <div key={s.step} className={index === 2 ? 'sm:col-span-2 lg:col-span-1' : ''}>
+                  <StepCard step={s.step} title={s.title} description={s.description} icon={s.icon} index={index} />
+                </div>
+              ))}
+            </div>
+          </MotionSection>
+
+          {/* FAQ */}
+          <MotionSection delay={0.25}>
+            <FAQ />
+          </MotionSection>
+        </div>
+      </main>
+    </>
   );
 }

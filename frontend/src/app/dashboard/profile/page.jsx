@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import DashboardNavbar from '@/app/components/DashboardNavbar';
 import DashboardSkeleton from '@/app/components/DashboardSkeleton';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
 import { useToast } from '@/hooks/useToast';
@@ -67,7 +66,6 @@ export default function ProfilePage() {
 
     return (
         <div dir="rtl">
-            <DashboardNavbar user={user} />
             <DashboardSidebar />
 
             <div className="p-4 sm:mr-64 sm:p-6 mt-14">

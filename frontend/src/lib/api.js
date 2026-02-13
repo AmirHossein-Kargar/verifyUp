@@ -105,12 +105,31 @@ class ApiClient {
       credentials: "include",
     };
 
+    // Log request details for debugging
+    if (process.env.NODE_ENV !== "production") {
+      console.log("API Request:", {
+        method,
+        url,
+        hasCSRF: !!this.csrfToken,
+        headers: headersWithCsrf,
+      });
+    }
+
     try {
       // * Send request to API
       const response = await fetch(url, config);
 
       // * Parse JSON response
       const data = await response.json();
+
+      // Log response for debugging
+      if (process.env.NODE_ENV !== "production") {
+        console.log("API Response:", {
+          status: response.status,
+          ok: response.ok,
+          data,
+        });
+      }
 
       // * Handle non-success responses from backend
       if (!response.ok) {

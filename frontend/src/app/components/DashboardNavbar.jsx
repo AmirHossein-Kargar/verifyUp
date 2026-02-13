@@ -24,7 +24,8 @@ export default function DashboardNavbar({ user }) {
     const handleLogout = async () => {
         try {
             await logout();
-            router.push('/login');
+            // Force immediate redirect
+            window.location.href = '/login';
         } catch (error) {
             if (process.env.NODE_ENV !== 'production') {
                 console.warn('Logout error in navbar:', error);

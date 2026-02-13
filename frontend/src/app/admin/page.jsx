@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DashboardNavbar from '@/app/components/DashboardNavbar';
 import AdminSidebar from '@/app/components/AdminSidebar';
 import DashboardSkeleton from '@/app/components/DashboardSkeleton';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -56,7 +55,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <DashboardNavbar user={user} />
       <AdminSidebar />
 
       <div className="p-4 sm:mr-64 sm:p-6 mt-14">

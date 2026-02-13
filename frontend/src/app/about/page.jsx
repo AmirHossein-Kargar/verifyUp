@@ -1,9 +1,17 @@
-// app/about/page.jsx
 import MotionDiv from './MotionDiv';
 
 export const metadata = {
     title: 'درباره وریفای آپ',
-    description: 'پلتفرم تخصصی برای کمک به احراز هویت کاربران ایرانی در آپورک',
+    description: 'پلتفرم تخصصی برای کمک به احراز هویت کاربران ایرانی در آپورک. تیم حرفه‌ای، امنیت بالا، پشتیبانی ۲۴ ساعته و قیمت‌گذاری شفاف.',
+    keywords: ['درباره وریفای آپ', 'تیم وریفای آپ', 'احراز هویت آپورک', 'خدمات احراز هویت', 'پشتیبانی آپورک'],
+    openGraph: {
+        title: 'درباره وریفای آپ | احراز هویت حرفه‌ای آپورک',
+        description: 'آشنایی با تیم و خدمات وریفای آپ - پلتفرم تخصصی احراز هویت کاربران آپورک',
+        type: 'website',
+    },
+    alternates: {
+        canonical: 'https://verifyup.ir/about',
+    },
 };
 
 const features = [
@@ -53,7 +61,7 @@ export default function AboutPage() {
     return (
         <main className="bg-white dark:bg-gray-900" dir="rtl">
             <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
-                {/* Header (Flowbite typography style) */}
+                {/* Header */}
                 <MotionDiv
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -69,7 +77,7 @@ export default function AboutPage() {
                     </p>
                 </MotionDiv>
 
-                {/* Features (Flowbite card pattern) */}
+                {/* Features */}
                 <section className="mx-auto mb-10 max-w-6xl">
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                         {features.map((f, idx) => (
@@ -95,7 +103,7 @@ export default function AboutPage() {
                     </div>
                 </section>
 
-                {/* Mission (Flowbite content block) */}
+                {/* Mission */}
                 <section className="mx-auto max-w-6xl">
                     <MotionDiv
                         initial={{ opacity: 0, y: 12 }}

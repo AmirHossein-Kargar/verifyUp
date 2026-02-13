@@ -9,7 +9,7 @@ export const metadata = {
   metadataBase: new URL('https://verifyup.ir'),
 
   title: {
-    default: 'VerifyUp | وریفای آپ',
+    default: '32510191 - VerifyUp | وریفای آپ - احراز هویت آپورک',
     template: '%s | VerifyUp'
   },
 
@@ -21,13 +21,18 @@ export const metadata = {
     'احراز هویت Upwork',
     'تایید مدارک آپورک',
     'VerifyUp',
+    'وریفای آپ',
     'احراز هویت فریلنسر',
     'تایید هویت آنلاین',
     'KYC',
     'احراز هویت دیجیتال',
     'تایید اسناد آنلاین',
     'Upwork verification',
-    'احراز هویت کاربران آپورک'
+    'احراز هویت کاربران آپورک',
+    'IP Residential',
+    'VPS آپورک',
+    'سیم‌کارت فیزیکی',
+    'ساخت اکانت آپورک'
   ],
 
   authors: [{ name: 'VerifyUp Team' }],
@@ -89,9 +94,19 @@ export const metadata = {
   },
 
   category: 'technology',
+
+  verification: {
+    // Add your verification codes here when available
+    // google: 'your-google-verification-code',
+    // yandex: 'your-yandex-verification-code',
+  },
+
+  other: {
+    enamad: '32510191',
+  },
 };
 
-// * Font
+// * Font with display swap for better performance
 const iranYekan = localFont({
   src: [
     {
@@ -151,16 +166,21 @@ const iranYekan = localFont({
     },
   ],
   variable: '--font-iran-yekan',
+  display: 'swap',
+  preload: true,
 });
 
 export default function RootLayout({ children }) {
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning className={iranYekan.variable}>
       <head>
+        {/* Enamad Verification Meta Tag */}
+        <meta name="enamad" content="32510191" />
+
+        {/* Theme script - inline to prevent FOUC */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // On page load or when changing themes, best to add inline in head to avoid FOUC
               if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                   document.documentElement.classList.add('dark');
               } else {
@@ -169,12 +189,20 @@ export default function RootLayout({ children }) {
             `,
           }}
         />
+
+        {/* Preconnect to external domains for better performance */}
+        <link rel="preconnect" href="https://flowbite.com" />
+        <link rel="preconnect" href="https://cdn.worldvectorlogo.com" />
+        <link rel="dns-prefetch" href="https://flowbite.com" />
+        <link rel="dns-prefetch" href="https://cdn.worldvectorlogo.com" />
       </head>
       <body className={`bg-gray-50 dark:bg-gray-900 ${iranYekan.className}`}>
         <AuthProvider>
           <LayoutClient>{children}</LayoutClient>
         </AuthProvider>
-        <Script src="/flowbite.min.js" strategy="beforeInteractive" />
+
+        {/* Load Flowbite after interactive for better performance */}
+        <Script src="/flowbite.min.js" strategy="lazyOnload" />
       </body>
     </html>
   );

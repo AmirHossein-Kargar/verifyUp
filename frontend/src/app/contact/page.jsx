@@ -1,6 +1,20 @@
 import Image from 'next/image';
 import MotionWrapper from '../components/MotionWrapper';
 
+export const metadata = {
+    title: 'تماس با ما',
+    description: 'ارتباط با تیم پشتیبانی وریفای آپ از طریق تلفن، ایمیل و تلگرام. پاسخگویی سریع و حرفه‌ای در ساعات کاری.',
+    keywords: ['تماس با وریفای آپ', 'پشتیبانی آپورک', 'شماره تماس', 'ایمیل پشتیبانی', 'تلگرام وریفای آپ'],
+    openGraph: {
+        title: 'تماس با ما | وریفای آپ',
+        description: 'راه‌های ارتباطی با تیم پشتیبانی وریفای آپ - تلفن، ایمیل، تلگرام',
+        type: 'website',
+    },
+    alternates: {
+        canonical: 'https://verifyup.ir/contact',
+    },
+};
+
 export default function Contact() {
     return (
         <div className="min-h-screen px-4 py-8 sm:py-12 md:py-16" dir="rtl">

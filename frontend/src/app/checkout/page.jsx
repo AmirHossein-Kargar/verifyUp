@@ -6,15 +6,24 @@ import { formatTooman } from '@/utils/currency';
 import { useToast } from '@/hooks/useToast';
 import { api } from '@/lib/api';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const { clearCart } = useCart();
+  const { user, loading: authLoading } = useAuth();
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    // Check if user is authenticated
+    if (!authLoading && !user) {
+      showToast('لطفاً ابتدا وارد حساب کاربری خود شوید', 'error');
+      router.push('/login');
+      return;
+    }
+
     try {
       const raw = window.localStorage.getItem('pendingCheckout');
       if (!raw) return;
@@ -25,7 +34,7 @@ export default function CheckoutPage() {
     } catch (e) {
       console.warn('Failed to read pendingCheckout:', e);
     }
-  }, []);
+  }, [authLoading, user, router, showToast]);
 
   const price = useMemo(
     () => (pending?.item?.price ? pending.item.price : 0),
@@ -44,29 +53,87 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Check if user is authenticated
+    if (!user) {
+      showToast('لطفاً ابتدا وارد حساب کاربری خود شوید', 'error');
+      router.push('/login');
+      return;
+    }
+
     try {
       setSubmitting(true);
       showToast('در حال نهایی‌سازی سفارش...', 'info', 2000);
 
+      console.log('User:', user);
+      console.log('Sending order payload:', pending.orderPayload);
+
+      // Ensure we have a fresh CSRF token
+      await api.ensureCsrfToken();
+      console.log('CSRF token ensured');
+
       // در حالت واقعی این نقطه بعد از تأیید درگاه پرداخت (وبهوک) فراخوانی می‌شود
       const response = await api.createPaidOrder(pending.orderPayload);
+
+      console.log('Order response:', response);
 
       // Clear cart and pending checkout after successful order
       window.localStorage.removeItem('pendingCheckout');
       clearCart();
 
       showToast(response.message || 'پرداخت با موفقیت انجام شد و سفارش ثبت شد', 'success');
-      router.push('/dashboard/orders');
+
+      // Small delay before redirect
+      setTimeout(() => {
+        router.push('/dashboard/orders');
+      }, 500);
     } catch (error) {
-      const message =
-        (error && Array.isArray(error.errors) && error.errors[0]) ||
-        error.message ||
-        'خطا در نهایی‌سازی سفارش پس از پرداخت';
+      console.error('=== Order Creation Error ===');
+      console.error('Error object:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error keys:', Object.keys(error || {}));
+      console.error('Error status:', error?.status);
+      console.error('Error message:', error?.message);
+      console.error('Error errors:', error?.errors);
+      console.error('========================');
+
+      let message = 'خطا در نهایی‌سازی سفارش پس از پرداخت';
+
+      if (error?.status === 401) {
+        message = 'نشست شما منقضی شده است. لطفاً دوباره وارد شوید';
+        showToast(message, 'error');
+        setTimeout(() => {
+          window.localStorage.removeItem('pendingCheckout');
+          router.push('/login');
+        }, 1500);
+        return;
+      } else if (error?.status === 403) {
+        message = 'خطای CSRF. لطفاً صفحه را رفرش کنید و دوباره تلاش کنید';
+      } else if (error?.status === 429) {
+        message = 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی صبر کنید';
+      } else if (error?.message) {
+        message = error.message;
+      } else if (error?.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+        message = error.errors[0];
+      }
+
       showToast(message, 'error');
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl">
+        <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="text-center space-y-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">در حال بارگذاری...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!pending) {
     return (
@@ -139,4 +206,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

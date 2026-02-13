@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 const ADMIN_MENU_ITEMS = [
   {
@@ -56,46 +57,66 @@ const ADMIN_MENU_ITEMS = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   const isItemActive = (item) => {
-    return pathname === item.match || pathname.startsWith(item.match + '/');
+    // Exact match
+    if (pathname === item.match) {
+      return true;
+    }
+
+    // For admin root, only match exact path
+    if (item.match === '/admin') {
+      return pathname === '/admin';
+    }
+
+    // For other items, check if pathname starts with match + '/'
+    return pathname.startsWith(item.match + '/');
   };
 
   return (
-    <aside
-      id="admin-sidebar"
-      className={[
-        'fixed top-14 right-0 z-40 w-64 h-[calc(100vh-3.5rem)] transition-transform duration-300',
-        'translate-x-full sm:translate-x-0',
-        'bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700',
-      ].join(' ')}
-      aria-label="Admin sidebar"
-    >
-      <div className="h-full px-3 py-4 overflow-y-auto">
-        <ul className="space-y-2 font-medium">
-          {ADMIN_MENU_ITEMS.map((item) => {
-            const active = isItemActive(item);
+    <>
+      {/* Mobile toggle button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+        className="text-gray-900 dark:text-white bg-transparent border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 font-medium rounded-lg ms-3 mt-3 text-sm p-2 focus:outline-none inline-flex sm:hidden"
+      >
+        <span className="sr-only">Open sidebar</span>
+        <svg className="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M5 7h14M5 12h14M5 17h10" />
+        </svg>
+      </button>
 
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={[
-                    'flex items-center px-2 py-1.5 rounded-lg group transition-colors',
-                    active
-                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
-                      : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700',
-                  ].join(' ')}
-                >
-                  {item.icon}
-                  <span className="flex-1 ms-3 whitespace-nowrap">{item.name}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </aside>
+      {/* Sidebar */}
+      <aside
+        id="admin-sidebar"
+        className={`fixed top-14 right-0 z-40 w-64 h-[calc(100vh-3.5rem)] transition-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} sm:translate-x-0`}
+        aria-label="Admin sidebar"
+      >
+        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700">
+          <ul className="space-y-2 font-medium">
+            {ADMIN_MENU_ITEMS.map((item) => {
+              const active = isItemActive(item);
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center px-2 py-1.5 rounded-lg group ${active
+                      ? 'text-indigo-600 dark:text-indigo-400 bg-gray-100 dark:bg-gray-700'
+                      : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400'
+                      }`}
+                  >
+                    {item.icon}
+                    <span className="flex-1 ms-3 whitespace-nowrap">{item.name}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </aside>
+    </>
   );
 }
-

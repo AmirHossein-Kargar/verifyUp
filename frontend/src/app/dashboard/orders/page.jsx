@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatTooman } from '@/utils/currency';
-import DashboardNavbar from '@/app/components/DashboardNavbar';
 import DashboardSkeleton from '@/app/components/DashboardSkeleton';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -65,7 +64,6 @@ export default function OrdersPage() {
 
     return (
         <div dir="rtl">
-            <DashboardNavbar user={user} />
             <DashboardSidebar ordersCount={orders.length} />
 
             <div className="p-4 sm:mr-64 sm:p-6 mt-14">

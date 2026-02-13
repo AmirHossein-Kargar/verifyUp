@@ -8,7 +8,8 @@ import { api } from '@/lib/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import LoginSkeleton from '@/app/components/LoginSkeleton';
 
 const ErrorText = ({ children }) => (children ? <p className="mt-2 text-xs text-red-500">{children}</p> : null);
 
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const { user, loading, login } = useAuth();
 
   const redirectTimerRef = useRef(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const {
     register,
@@ -41,6 +43,8 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     try {
+      setIsRedirecting(true); // Show skeleton immediately
+
       const response = await api.login({
         email: data.email,
         password: data.password,
@@ -55,6 +59,7 @@ export default function LoginPage() {
         router.replace('/dashboard');
       }, 900);
     } catch (error) {
+      setIsRedirecting(false); // Hide skeleton on error
       if (process.env.NODE_ENV !== 'production') {
         // eslint-disable-next-line no-console
         console.error('Login error:', error);
@@ -68,6 +73,8 @@ export default function LoginPage() {
   };
 
   if (loading || user) return null;
+
+  if (isRedirecting) return <LoginSkeleton />;
 
   return (
     <>
