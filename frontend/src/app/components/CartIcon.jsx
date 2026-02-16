@@ -10,6 +10,7 @@ export default function CartIcon() {
     return (
         <Link
             href="/cart"
+            prefetch={true}
             className="relative p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 inline-flex"
             aria-label="Shopping cart"
         >

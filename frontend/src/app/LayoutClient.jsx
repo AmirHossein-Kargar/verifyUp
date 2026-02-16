@@ -12,14 +12,21 @@ export default function LayoutClient({ children }) {
     const hideFooter = pathname === '/cart';
     const isDashboardLike = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
 
+    // Debug log
+    if (typeof window !== 'undefined') {
+        console.log('LayoutClient - pathname:', pathname, 'isDashboardLike:', isDashboardLike);
+    }
+
     return (
         <CartProvider>
-            {/* Header - show everywhere */}
-            <Header />
+            {/* Header - hide on dashboard and admin pages */}
+            {!isDashboardLike && <Header />}
+
             {/* Main Content with padding for fixed header */}
-            <main className="pt-24">
+            <main className={isDashboardLike ? '' : 'pt-24'}>
                 {children}
             </main>
+
             {/* Footer - hide on cart, dashboard, admin, and during logout */}
             {!hideFooter && !isDashboardLike && !isLoggingOut && <Footer />}
         </CartProvider>

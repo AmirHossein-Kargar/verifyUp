@@ -1,29 +1,8 @@
-import HeaderSkeleton from './HeaderSkeleton';
-
-export default function DashboardSkeleton({ sidebarOpen = false }) {
+export default function DashboardSkeleton() {
     return (
-        <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-            {/* Header Skeleton */}
-            <HeaderSkeleton />
-
-            {/* Sidebar Skeleton */}
-            <aside className="fixed top-0 right-0 z-40 w-64 h-screen pt-24 transition-transform translate-x-full sm:translate-x-0 bg-white border-l border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                <div className="h-full px-3 pb-4 overflow-y-auto">
-                    <ul className="space-y-2 font-medium">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <li key={i}>
-                                <div className="flex items-center p-2 rounded-lg">
-                                    <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                    <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded mr-3 animate-pulse"></div>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </aside>
-
+        <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen pb-20">
             {/* Main Content Skeleton */}
-            <div className="p-4 sm:mr-64 sm:p-6 mt-14">
+            <div className="p-4 max-w-7xl mx-auto">
                 <div className="w-full space-y-6">
                     {/* Title Section Skeleton */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -66,6 +45,22 @@ export default function DashboardSkeleton({ sidebarOpen = false }) {
                                         </div>
                                     </div>
                                     <div className="h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse"></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Navigation Skeleton */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 w-full">
+                <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="grid h-16 grid-cols-4 gap-2">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="inline-flex flex-col items-center justify-center py-2">
+                                    <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                    <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-1"></div>
                                 </div>
                             ))}
                         </div>

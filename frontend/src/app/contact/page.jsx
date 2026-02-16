@@ -1,6 +1,9 @@
 import Image from 'next/image';
 import MotionWrapper from '../components/MotionWrapper';
 
+// Static page - can be cached for 1 hour
+export const revalidate = 3600;
+
 export const metadata = {
     title: 'تماس با ما',
     description: 'ارتباط با تیم پشتیبانی وریفای آپ از طریق تلفن، ایمیل و تلگرام. پاسخگویی سریع و حرفه‌ای در ساعات کاری.',

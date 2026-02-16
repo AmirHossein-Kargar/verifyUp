@@ -1,5 +1,8 @@
 import { MetadataRoute } from "next";
 
+// Cache sitemap for 1 hour
+export const revalidate = 3600;
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://verifyup.ir";
 

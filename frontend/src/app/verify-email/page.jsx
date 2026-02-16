@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -101,12 +102,12 @@ export default function VerifyEmailPage() {
                             <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
                                 {message}
                             </p>
-                            <button
-                                onClick={() => router.push('/login')}
-                                className="rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                            <Link
+                                href="/login"
+                                className="inline-block rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                             >
                                 بازگشت به صفحه ورود
-                            </button>
+                            </Link>
                         </>
                     )}
                 </motion.div>

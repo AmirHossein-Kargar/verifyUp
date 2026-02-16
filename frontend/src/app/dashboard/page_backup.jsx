@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatTooman } from '@/utils/currency';
 import DashboardNavbar from '@/app/components/DashboardNavbar';
-import DashboardSkeleton from '@/app/components/DashboardSkeleton';
+import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
 
 export default function OrdersPage() {
     const router = useRouter();

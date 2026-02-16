@@ -10,7 +10,7 @@ import Toast from '@/components/Toast';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGuestOnly } from '@/hooks/useAuthGuard';
-import SignupSkeleton from '@/app/components/SignupSkeleton';
+import SignupSkeleton from '@/components/skeletons/SignupSkeleton';
 
 const ErrorText = ({ children }) =>
   children ? <p className="mt-2 text-xs text-red-500">{children}</p> : null;

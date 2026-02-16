@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { formatTooman } from '@/utils/currency';
 import { useToast } from '@/hooks/useToast';
 import { api } from '@/lib/api';
@@ -146,13 +147,12 @@ export default function CheckoutPage() {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               لطفاً ابتدا از صفحه خدمات پلن موردنظر خود را انتخاب کنید.
             </p>
-            <button
-              type="button"
-              onClick={() => router.push('/services')}
-              className="mt-2 inline-flex items-center justify-center rounded-lg bg-indigo-700 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
+            <Link
+              href="/services"
+              className="mt-2 inline-block rounded-lg bg-indigo-700 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
             >
               بازگشت به خدمات
-            </button>
+            </Link>
           </div>
         </div>
       </div>

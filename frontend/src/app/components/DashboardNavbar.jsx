@@ -1,128 +1,48 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import BottomNav from './BottomNav';
 
-export default function DashboardNavbar({ user }) {
-    const router = useRouter();
-    const { logout } = useAuth();
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const dropdownRef = useRef(null);
+const MENU_ITEMS = [
+    {
+        name: 'داشبورد',
+        href: '/dashboard',
+        icon: (
+            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6.025A7.5 7.5 0 1 0 17.975 14H10V6.025Z" />
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.5 3c-.169 0-.334.014-.5.025V11h7.975c.011-.166.025-.331.025-.5A7.5 7.5 0 0 0 13.5 3Z" />
+            </svg>
+        ),
+    },
+    {
+        name: 'سفارشات',
+        href: '/dashboard/orders',
+        icon: (
+            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z" />
+            </svg>
+        ),
+        badgeKey: 'ordersCount',
+    },
+    {
+        name: 'خدمات',
+        href: '/services',
+        icon: (
+            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v14M9 5v14M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
+            </svg>
+        ),
+    },
+    {
+        name: 'پروفایل',
+        href: '/dashboard/profile',
+        icon: (
+            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M16 19h4a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-2m-2.236-4a3 3 0 1 0 0-4M3 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+        ),
+    },
+];
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setDropdownOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            // Force immediate redirect
-            window.location.href = '/login';
-        } catch (error) {
-            if (process.env.NODE_ENV !== 'production') {
-                console.warn('Logout error in navbar:', error);
-            }
-        }
-    };
-
-    const toggleSidebar = () => {
-        // Support both user and admin sidebars on small screens
-        const dashboardSidebar = document.getElementById('dashboard-sidebar');
-        const adminSidebar = document.getElementById('admin-sidebar');
-
-        if (dashboardSidebar) {
-            dashboardSidebar.classList.toggle('translate-x-full');
-        }
-
-        if (adminSidebar) {
-            adminSidebar.classList.toggle('translate-x-full');
-        }
-    };
-
-    return (
-        <nav className="fixed top-0 z-50 w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <div className="px-3 py-3 lg:px-5 lg:pr-3">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center justify-start rtl:justify-end">
-                        <button
-                            onClick={toggleSidebar}
-                            type="button"
-                            className="sm:hidden text-gray-500 hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg text-sm p-2 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                        >
-                            <span className="sr-only">Open sidebar</span>
-                            <svg className="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M5 7h14M5 12h14M5 17h10" />
-                            </svg>
-                        </button>
-                        <a href="/" className="flex ms-2 md:me-24">
-                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg flex items-center justify-center me-3">
-                                <span className="text-white font-bold text-lg">و</span>
-                            </div>
-                            <span className="self-center text-lg font-semibold whitespace-nowrap dark:text-white">VerifyUp</span>
-                        </a>
-                    </div>
-                    <div className="flex items-center">
-                        <div className="flex items-center ms-3" ref={dropdownRef}>
-                            <div>
-                                <button
-                                    type="button"
-                                    className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                                >
-                                    <span className="sr-only">Open user menu</span>
-                                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
-                                        {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-                                    </div>
-                                </button>
-                            </div>
-                            {dropdownOpen && (
-                                <div className="absolute left-0 top-12 z-50 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg w-44">
-                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600 text-center">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                            {user?.name || user?.email || user?.phone || 'کاربر'}
-                                        </p>
-                                    </div>
-                                    <ul className="p-2 text-sm text-gray-700 dark:text-gray-200 font-medium">
-                                        <li>
-                                            <a href="/dashboard" className="inline-flex items-center w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                                داشبورد
-                                            </a>
-                                        </li>
-                                        {user?.role === 'admin' && (
-                                            <li>
-                                                <a href="/admin" className="inline-flex items-center w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                                    پنل ادمین
-                                                </a>
-                                            </li>
-                                        )}
-                                        <li>
-                                            <a href="/dashboard/profile" className="inline-flex items-center w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded">
-                                                تنظیمات
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <button
-                                                onClick={handleLogout}
-                                                className="inline-flex items-center w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-right"
-                                            >
-                                                خروج
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    );
+export default function DashboardNavbar({ user, ordersCount = 0 }) {
+    return <BottomNav items={MENU_ITEMS} ordersCount={ordersCount} />;
 }

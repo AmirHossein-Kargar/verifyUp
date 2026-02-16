@@ -1,4 +1,7 @@
-import MotionDiv from './MotionDiv';
+import MotionDiv from '../components/MotionDiv';
+
+// Static page - can be cached for 1 hour
+export const revalidate = 3600;
 
 export const metadata = {
     title: 'درباره وریفای آپ',

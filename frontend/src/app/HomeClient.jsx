@@ -53,12 +53,11 @@ export default function HomeClient() {
             </div>
           ))}
 
-          <a
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-700 text-xs font-medium text-white hover:bg-gray-600 dark:border-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500"
-            href="#"
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-700 text-xs font-medium text-white dark:border-gray-800 dark:bg-gray-600"
           >
             +99
-          </a>
+          </div>
         </div>
 
         <span className="rounded bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
@@ -70,6 +69,7 @@ export default function HomeClient() {
       {!loading && (
         <Link
           href={user ? '/dashboard' : '/signup'}
+          prefetch={true}
           className="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-900 sm:text-base"
         >
           {user ? 'داشبورد' : 'شروع کنید'}

@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatTooman } from '@/utils/currency';
-import DashboardSkeleton from '@/app/components/DashboardSkeleton';
-import DashboardSidebar from '@/app/components/DashboardSidebar';
+import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
+import DashboardNavbar from '@/app/components/DashboardNavbar';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useOrders } from '@/hooks/useOrders';
 import { useToast } from '@/hooks/useToast';
@@ -59,41 +59,40 @@ export default function OrdersPage() {
     const { orders, loading: ordersLoading, error, refetch } = useOrders();
     const { showToast } = useToast();
 
-    if (authLoading || showSkeleton || ordersLoading) return <DashboardSkeleton sidebarOpen={false} />;
+    if (authLoading || showSkeleton || ordersLoading) return <DashboardSkeleton />;
     if (!user) return null;
 
     return (
-        <div dir="rtl">
-            <DashboardSidebar ordersCount={orders.length} />
-
-            <div className="p-4 sm:mr-64 sm:p-6 mt-14">
-                <div className="w-full">
-                    <div className="mb-6 text-center">
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">سفارشات من</h1>
+        <>
+            <DashboardNavbar user={user} ordersCount={orders.length} />
+            <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen pb-20">
+                <div className="p-3 md:p-4 max-w-7xl mx-auto">
+                    <div className="mb-4 md:mb-6 text-center">
+                        <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">سفارشات من</h1>
                     </div>
 
                     {error && (
-                        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200">
+                        <div className="mb-3 md:mb-4 rounded-lg border border-red-200 bg-red-50 p-2 md:p-3 text-xs md:text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200">
                             خطا در دریافت سفارشات. لطفاً بعداً دوباره تلاش کنید.
                         </div>
                     )}
 
                     {orders.length === 0 && !error ? (
-                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-12">
+                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 md:p-12">
                             <div className="text-center">
-                                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-3 md:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
 
-                                <p className="text-gray-600 dark:text-gray-400 mb-4">هنوز سفارشی ثبت نشده است</p>
+                                <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-3 md:mb-4">هنوز سفارشی ثبت نشده است</p>
 
-                                <Link href="/services" className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                                <Link href="/services" className="inline-flex items-center px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                                     سفارش جدید
                                 </Link>
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-3 md:space-y-4">
                             {orders.map((order) => {
                                 const uiStatusKey = STATUS_MAP[order.status] || 'pending';
                                 const badge = STATUS_BADGES[uiStatusKey] || STATUS_BADGES.pending;
@@ -114,53 +113,53 @@ export default function OrdersPage() {
                                 return (
                                     <div
                                         key={order._id}
-                                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 hover:shadow-md transition-shadow"
+                                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-5 hover:shadow-md transition-shadow"
                                     >
-                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                            <div className="flex items-start gap-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
+                                            <div className="flex items-start gap-3 md:gap-4">
                                                 {serviceConfig.logo ? (
                                                     <Image
                                                         src={serviceConfig.logo}
                                                         alt={serviceConfig.title}
-                                                        width={48}
-                                                        height={48}
-                                                        className="object-contain"
+                                                        width={40}
+                                                        height={40}
+                                                        className="object-contain md:w-12 md:h-12"
                                                     />
                                                 ) : serviceConfig.icon ? (
-                                                    <div className="shrink-0">
+                                                    <div className="shrink-0 scale-75 md:scale-100">
                                                         {serviceConfig.icon}
                                                     </div>
                                                 ) : null}
 
                                                 <div>
-                                                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                                                    <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-1">
                                                         {serviceConfig.title}
                                                     </h3>
                                                     {dateText && (
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-1 md:mb-2">
                                                             تاریخ ثبت: {dateText}
                                                         </p>
                                                     )}
 
-                                                    <span className={`inline-block px-2.5 py-0.5 text-xs font-medium rounded ${badge}`}>
+                                                    <span className={`inline-block px-2 md:px-2.5 py-0.5 text-[10px] md:text-xs font-medium rounded ${badge}`}>
                                                         {text}
                                                     </span>
                                                 </div>
                                             </div>
 
                                             <div className="text-left sm:text-right">
-                                                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                                <p className="text-base md:text-lg font-bold text-gray-900 dark:text-white">
                                                     {formatTooman(order.priceToman || 0)}
                                                 </p>
 
                                                 {order.adminNote && (
-                                                    <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                                    <p className="mt-1 md:mt-2 text-[10px] md:text-xs text-gray-600 dark:text-gray-400">
                                                         یادداشت ادمین: {order.adminNote}
                                                     </p>
                                                 )}
 
                                                 {order.docsSummary && (
-                                                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                                                    <p className="mt-1 text-[10px] md:text-xs text-gray-600 dark:text-gray-400">
                                                         وضعیت مدارک: {order.docsSummary.accepted || 0} تایید شده،{' '}
                                                         {order.docsSummary.resubmit || 0} نیاز به ارسال مجدد
                                                     </p>
@@ -174,6 +173,6 @@ export default function OrdersPage() {
                     )}
                 </div>
             </div>
-        </div>
+        </>
     );
 }

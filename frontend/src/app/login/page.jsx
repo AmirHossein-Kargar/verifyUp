@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useRef, useState } from 'react';
-import LoginSkeleton from '@/app/components/LoginSkeleton';
+import LoginSkeleton from '@/components/skeletons/LoginSkeleton';
 
 const ErrorText = ({ children }) => (children ? <p className="mt-2 text-xs text-red-500">{children}</p> : null);
 

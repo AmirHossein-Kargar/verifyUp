@@ -1,8 +1,8 @@
 export default function LoginSkeleton() {
     return (
-        <div className="min-h-screen flex flex-col" dir="rtl">
-            <div className="flex-1 flex items-center justify-center p-4 sm:pt-20">
-                <div className="w-full max-w-md bg-neutral-primary-soft p-6 sm:p-8 border border-default rounded-base shadow-lg">
+        <div className="min-h-screen bg-white dark:bg-gray-900" dir="rtl">
+            <div className="flex min-h-screen items-center justify-center p-4 sm:pt-20">
+                <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-8">
                     {/* Title Skeleton */}
                     <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded-lg w-48 mx-auto mb-4 sm:mb-6 animate-pulse"></div>
 

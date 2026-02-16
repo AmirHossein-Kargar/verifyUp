@@ -1,19 +1,3 @@
-import { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'خدمات احراز هویت آپورک',
-  description: 'خدمات تخصصی احراز هویت آپورک شامل ساخت اکانت، احراز هویت کامل، مشاوره بهینه‌سازی و اکانت پی‌پال. IP Residential، VPS، سیم‌کارت فیزیکی و مجازی.',
-  keywords: ['خدمات احراز هویت', 'ساخت اکانت آپورک', 'احراز هویت Upwork', 'IP Residential', 'VPS', 'سیم‌کارت فیزیکی', 'مشاوره آپورک', 'اکانت پی‌پال'],
-  openGraph: {
-    title: 'خدمات احراز هویت آپورک | وریفای آپ',
-    description: 'انتخاب بهترین پلن برای احراز هویت آپورک با IP Residential، VPS و سیم‌کارت فیزیکی یا مجازی',
-    type: 'website',
-  },
-  alternates: {
-    canonical: 'https://verifyup.ir/services',
-  },
-};
-
 'use client';
 
 import React, { useMemo, useState, useCallback } from 'react';

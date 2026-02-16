@@ -4,6 +4,9 @@ import StepCard from './components/StepCard';
 import FAQ from './components/FAQ';
 import JsonLd from './components/JsonLd';
 
+// Homepage - cache for 30 minutes (more frequent updates possible)
+export const revalidate = 1800;
+
 const steps = [
   {
     step: '۱',

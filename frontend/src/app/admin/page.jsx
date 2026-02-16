@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AdminSidebar from '@/app/components/AdminSidebar';
-import DashboardSkeleton from '@/app/components/DashboardSkeleton';
+import AdminNavbar from '@/app/components/AdminNavbar';
+import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { api } from '@/lib/api';
 import { formatTooman } from '@/utils/currency';
@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
   }, [user, loading]);
 
   if (loading || showSkeleton) {
-    return <DashboardSkeleton sidebarOpen={false} />;
+    return <DashboardSkeleton />;
   }
 
   if (!user) return null;
@@ -54,11 +54,10 @@ export default function AdminDashboardPage() {
   const totalRevenue = stats?.revenueToman || 0;
 
   return (
-    <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <AdminSidebar />
-
-      <div className="p-4 sm:mr-64 sm:p-6 mt-14">
-        <div className="w-full space-y-6">
+    <>
+      <AdminNavbar user={user} />
+      <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen pb-20">
+        <div className="p-4 max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -160,6 +159,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

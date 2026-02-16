@@ -19,6 +19,14 @@ export default function Header() {
     const isDashboard = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
     const dropdownRef = useRef(null);
 
+    // Helper function to check if a route is active
+    const isActiveRoute = (route) => {
+        if (route === '/') {
+            return pathname === '/';
+        }
+        return pathname?.startsWith(route);
+    };
+
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -33,14 +41,14 @@ export default function Header() {
 
     const handleLogout = async () => {
         await logout();
-        window.location.href = '/';
+        router.push('/');
     };
 
     return <header className="fixed top-2 sm:top-4 right-1/2 translate-x-1/2 w-[96%] sm:w-[95%] max-w-7xl z-50" dir="rtl">
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2 sm:py-2.5">
             <div className="flex items-center justify-between relative">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 sm:gap-3">
+                <Link href="/" prefetch={true} className="flex items-center gap-2 sm:gap-3">
                     <motion.div
                         className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center overflow-hidden"
                         style={{ filter: 'contrast(1.1) brightness(1.05) saturate(1.1)' }}
@@ -70,10 +78,46 @@ export default function Header() {
 
                 {/* Desktop Navigation - Centered */}
                 <nav className="hidden md:flex items-center gap-4 lg:gap-5 absolute left-1/2 -translate-x-1/2">
-                    <Link href="/" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">خانه</Link>
-                    <Link href="/services" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">سرویس ها</Link>
-                    <Link href="/contact" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">تماس با ما</Link>
-                    <Link href="/about" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm whitespace-nowrap">درباره ما</Link>
+                    <Link
+                        href="/"
+                        prefetch={true}
+                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/')
+                            ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                            : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        خانه
+                    </Link>
+                    <Link
+                        href="/services"
+                        prefetch={true}
+                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/services')
+                            ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                            : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        سرویس ها
+                    </Link>
+                    <Link
+                        href="/contact"
+                        prefetch={true}
+                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/contact')
+                            ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                            : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        تماس با ما
+                    </Link>
+                    <Link
+                        href="/about"
+                        prefetch={true}
+                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/about')
+                            ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                            : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        درباره ما
+                    </Link>
                 </nav>
 
                 {/* Right Side - Auth Buttons & Menu */}
@@ -145,8 +189,8 @@ export default function Header() {
                         ) : (
                             // Logged out state
                             <>
-                                <Link href="/login" className="hidden sm:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">ورود</Link>
-                                <Link href="/signup" className="hidden xs:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">ثبت نام</Link>
+                                <Link href="/login" prefetch={true} className="hidden sm:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">ورود</Link>
+                                <Link href="/signup" prefetch={true} className="hidden xs:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">ثبت نام</Link>
                             </>
                         )
                     )}
@@ -175,28 +219,40 @@ export default function Header() {
                         <Link
                             href="/"
                             onClick={() => setIsMenuOpen(false)}
-                            className="w-full text-center text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-all text-sm py-3 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 font-medium"
+                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/')
+                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                }`}
                         >
                             خانه
                         </Link>
                         <Link
-                            href="/features"
+                            href="/services"
                             onClick={() => setIsMenuOpen(false)}
-                            className="w-full text-center text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-all text-sm py-3 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 font-medium"
+                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/services')
+                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                }`}
                         >
                             سرویس ها
                         </Link>
                         <Link
                             href="/contact"
                             onClick={() => setIsMenuOpen(false)}
-                            className="w-full text-center text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-all text-sm py-3 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 font-medium"
+                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/contact')
+                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                }`}
                         >
                             تماس با ما
                         </Link>
                         <Link
                             href="/about"
                             onClick={() => setIsMenuOpen(false)}
-                            className="w-full text-center text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-all text-sm py-3 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 font-medium"
+                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/about')
+                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                }`}
                         >
                             درباره ما
                         </Link>

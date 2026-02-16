@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import AdminSidebar from '@/app/components/AdminSidebar';
-import DashboardSkeleton from '@/app/components/DashboardSkeleton';
+import AdminNavbar from '@/app/components/AdminNavbar';
+import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useToast } from '@/hooks/useToast';
 import { api } from '@/lib/api';
@@ -390,103 +390,102 @@ export default function AdminOrdersPage() {
   }, [filters]);
 
   if (loading || showSkeleton) {
-    return <DashboardSkeleton sidebarOpen={false} />;
+    return <DashboardSkeleton />;
   }
 
   if (!user) return null;
 
   return (
-    <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <AdminSidebar />
-
-      <div className="p-4 sm:mr-64 sm:p-6 mt-14">
-        <div className="w-full space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <>
+      <AdminNavbar user={user} />
+      <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen pb-20">
+        <div className="p-3 md:p-4 max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 md:gap-3 mb-4 md:mb-6">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <h1 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">
                 مدیریت سفارشات
               </h1>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-1 text-xs md:text-sm text-gray-600 dark:text-gray-400">
                 مشاهده، فیلتر و پیگیری لحظه‌ای سفارشات کاربران.
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-2 text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
                 <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
                 <span>به‌روزرسانی خودکار هر ۱۰ ثانیه</span>
               </div>
-              <span className="text-xs text-gray-400 dark:text-gray-500">{realTimeLabel}</span>
+              <span className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">{realTimeLabel}</span>
             </div>
           </div>
 
           {(statsError || ordersError) && (
-            <div className="rounded-md bg-red-50 p-3 text-xs text-red-700 dark:bg-red-900/20 dark:text-red-300">
+            <div className="rounded-md bg-red-50 p-2 md:p-3 text-[10px] md:text-xs text-red-700 dark:bg-red-900/20 dark:text-red-300 mb-4">
               {ordersError || statsError}
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">کل سفارشات</p>
-              <p className="text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-3 md:p-4 lg:p-5">
+              <p className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">کل سفارشات</p>
+              <p className="text-xl md:text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
                 {statsLoading ? '—' : stats?.ordersTotal ?? 0}
               </p>
             </div>
 
-            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">در انتظار مدارک / بررسی</p>
-              <p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">
+            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-3 md:p-4 lg:p-5">
+              <p className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">در انتظار مدارک / بررسی</p>
+              <p className="text-xl md:text-2xl font-semibold text-yellow-600 dark:text-yellow-400">
                 {statsLoading ? '—' : stats?.pendingOrInReview ?? 0}
               </p>
             </div>
 
-            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">تکمیل‌شده / تایید شده</p>
-              <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
+            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-3 md:p-4 lg:p-5">
+              <p className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">تکمیل‌شده / تایید شده</p>
+              <p className="text-xl md:text-2xl font-semibold text-green-600 dark:text-green-400">
                 {statsLoading ? '—' : stats?.completed ?? 0}
               </p>
             </div>
 
-            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">مجموع درآمد (تومان)</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-3 md:p-4 lg:p-5">
+              <p className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">مجموع درآمد (تومان)</p>
+              <p className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">
                 {statsLoading ? '—' : formatTooman(totalRevenue)}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="xl:col-span-2 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="xl:col-span-2 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-3 md:p-4 lg:p-5">
+              <div className="flex items-center justify-between mb-3 md:mb-4">
+                <h2 className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white">
                   روند درآمد (۱۴ روز اخیر)
                 </h2>
               </div>
 
               {revenueLinePoints ? (
                 <div className="w-full overflow-x-auto">
-                  <svg viewBox="0 0 320 120" className="w-full h-32" role="img" aria-label="نمودار خطی درآمد">
+                  <svg viewBox="0 0 320 120" className="w-full h-24 md:h-32" role="img" aria-label="نمودار خطی درآمد">
                     <polyline fill="none" stroke="currentColor" className="text-emerald-500" strokeWidth="2" points={revenueLinePoints} />
                   </svg>
                 </div>
               ) : (
-                <p className="text-xs text-gray-500 dark:text-gray-400">هنوز داده کافی برای نمایش روند درآمد وجود ندارد.</p>
+                <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">هنوز داده کافی برای نمایش روند درآمد وجود ندارد.</p>
               )}
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5 flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-white">وضعیت سفارشات</h2>
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-3 md:p-4 lg:p-5 flex flex-col gap-3 md:gap-4">
+              <h2 className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white">وضعیت سفارشات</h2>
 
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-24 rounded-full border border-gray-200 dark:border-gray-700 shadow-inner" style={statusPieStyle} />
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border border-gray-200 dark:border-gray-700 shadow-inner" style={statusPieStyle} />
                 <div className="flex-1 space-y-1">
                   {Object.entries(STATUS_LABELS).map(([key, label]) => {
                     const count = ordersByStatus[key] || 0;
                     if (!count) return null;
                     return (
-                      <div key={key} className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
-                        <div className="flex items-center gap-2">
+                      <div key={key} className="flex items-center justify-between text-[10px] md:text-xs text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-1 md:gap-2">
                           <span className={`inline-block h-2 w-2 rounded-full ${STATUS_DOT_CLASSES[key] || 'bg-gray-400'}`} />
                           <span>{label}</span>
                         </div>
@@ -495,7 +494,7 @@ export default function AdminOrdersPage() {
                     );
                   })}
                   {Object.keys(ordersByStatus || {}).length === 0 && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">سفارشی برای نمایش وجود ندارد.</p>
+                    <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">سفارشی برای نمایش وجود ندارد.</p>
                   )}
                 </div>
               </div>
@@ -503,9 +502,9 @@ export default function AdminOrdersPage() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4 md:p-5 space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-3 md:p-4 lg:p-5 space-y-3 md:space-y-4 mb-4 md:mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 md:gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 w-full">
                 <div className="flex flex-col gap-1">
                   <label htmlFor="status" className="text-xs font-medium text-gray-600 dark:text-gray-300">
                     فیلتر وضعیت
@@ -611,15 +610,15 @@ export default function AdminOrdersPage() {
 
             {/* Table */}
             <div className="overflow-x-auto border border-gray-200 rounded-lg dark:border-gray-700">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-[10px] md:text-xs">
                 <thead className="bg-gray-50 dark:bg-gray-900/60">
                   <tr>
-                    <th className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400">شناسه سفارش</th>
-                    <th className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400">کاربر</th>
-                    <th className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400">سرویس</th>
+                    <th className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400">شناسه سفارش</th>
+                    <th className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400 hidden sm:table-cell">کاربر</th>
+                    <th className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400 hidden md:table-cell">سرویس</th>
 
                     <th
-                      className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none"
+                      className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none"
                       onClick={() => toggleSort('status')}
                     >
                       وضعیت
@@ -631,10 +630,10 @@ export default function AdminOrdersPage() {
                     </th>
 
                     <th
-                      className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none"
+                      className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none"
                       onClick={() => toggleSort('amount')}
                     >
-                      مبلغ (تومان)
+                      مبلغ
                       {filters.sortBy === 'amount' && (
                         <span className="mr-1 text-2xs align-middle">
                           {filters.sortOrder === 'asc' ? '↑' : '↓'}
@@ -642,10 +641,10 @@ export default function AdminOrdersPage() {
                       )}
                     </th>
 
-                    <th className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400">وضعیت پرداخت</th>
+                    <th className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400 hidden lg:table-cell">وضعیت پرداخت</th>
 
                     <th
-                      className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none"
+                      className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none hidden xl:table-cell"
                       onClick={() => toggleSort('createdAt')}
                     >
                       تاریخ ایجاد
@@ -656,21 +655,21 @@ export default function AdminOrdersPage() {
                       )}
                     </th>
 
-                    <th className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400">آخرین تغییر</th>
-                    <th className="px-3 py-2 text-right font-medium text-gray-500 dark:text-gray-400">عملیات</th>
+                    <th className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400 hidden xl:table-cell">آخرین تغییر</th>
+                    <th className="px-2 md:px-3 py-1.5 md:py-2 text-right font-medium text-gray-500 dark:text-gray-400">عملیات</th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-gray-200 bg-white dark:bg-gray-900/40 dark:divide-gray-700">
                   {loadingOrders ? (
                     <tr>
-                      <td colSpan={8} className="px-3 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                      <td colSpan={9} className="px-2 md:px-3 py-4 md:py-6 text-center text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
                         در حال بارگذاری سفارشات...
                       </td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-3 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                      <td colSpan={9} className="px-2 md:px-3 py-4 md:py-6 text-center text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
                         سفارشی مطابق فیلترهای فعلی یافت نشد.
                       </td>
                     </tr>
@@ -684,59 +683,61 @@ export default function AdminOrdersPage() {
                           selectedOrder?._id === order._id ? 'bg-indigo-50/60 dark:bg-indigo-900/30' : '',
                         ].join(' ')}
                       >
-                        <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-gray-700 dark:text-gray-200">
-                          {order._id}
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 font-mono text-[9px] md:text-[11px] text-gray-700 dark:text-gray-200">
+                          <span className="hidden sm:inline">{order._id}</span>
+                          <span className="sm:hidden">{order._id?.slice(-6)}</span>
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-700 dark:text-gray-200">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-gray-700 dark:text-gray-200 hidden sm:table-cell">
                           <div className="flex flex-col">
                             <span className="font-medium">{order.userId?.name || 'بدون نام'}</span>
-                            <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                            <span className="text-[9px] md:text-[11px] text-gray-500 dark:text-gray-400">
                               {order.userId?.email || order.userId?.phone || '—'}
                             </span>
                           </div>
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-700 dark:text-gray-200">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-gray-700 dark:text-gray-200 hidden md:table-cell">
                           {SERVICE_NAMES[order.service] || order.service}
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2">
                           <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_BADGE_CLASSES[order.status] ||
+                            className={`inline-flex items-center rounded-full px-1.5 md:px-2 py-0.5 text-[9px] md:text-[11px] font-medium ${STATUS_BADGE_CLASSES[order.status] ||
                               'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                               }`}
                           >
-                            {STATUS_LABELS[order.status] || order.status}
+                            <span className="hidden sm:inline">{STATUS_LABELS[order.status] || order.status}</span>
+                            <span className="sm:hidden">{(STATUS_LABELS[order.status] || order.status).split(' ')[0]}</span>
                           </span>
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-700 dark:text-gray-200">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-gray-700 dark:text-gray-200">
                           {formatTooman(order.priceToman || 0)}
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-emerald-700 dark:text-emerald-300 hidden lg:table-cell">
                           {order.paymentStatus
                             ? order.paymentStatus
                             : 'پرداخت شده'}
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-700 dark:text-gray-200">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-gray-700 dark:text-gray-200 hidden xl:table-cell">
                           {formatDateTime(order.createdAt)}
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-700 dark:text-gray-200">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs text-gray-700 dark:text-gray-200 hidden xl:table-cell">
                           {formatDateTime(order.updatedAt)}
                         </td>
 
-                        <td className="whitespace-nowrap px-3 py-2 text-left">
+                        <td className="whitespace-nowrap px-2 md:px-3 py-1.5 md:py-2 text-left">
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               loadOrderDetails(order);
                             }}
-                            className="inline-flex items-center rounded-md border border-transparent bg-indigo-50 px-2 py-1 text-[11px] font-medium text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:bg-indigo-900/30 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
+                            className="inline-flex items-center rounded-md border border-transparent bg-indigo-50 px-1.5 md:px-2 py-0.5 md:py-1 text-[9px] md:text-[11px] font-medium text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:bg-indigo-900/30 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
                           >
                             جزئیات
                           </button>
@@ -835,61 +836,61 @@ export default function AdminOrdersPage() {
                     <p><span className="font-medium">نقش:</span> {selectedOrderDetails.order.userId?.role || 'user'}</p>
                   </div>
                 </div>
-            )}
+
+                {/* Update Status Section */}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                    تغییر وضعیت سفارش
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="newStatus" className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                        وضعیت جدید
+                      </label>
+                      <select
+                        id="newStatus"
+                        value={newStatus}
+                        onChange={(e) => setNewStatus(e.target.value)}
+                        className="block w-full rounded-md border-gray-300 bg-white py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                      >
+                        {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="adminNote" className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                        یادداشت ادمین (اختیاری)
+                      </label>
+                      <textarea
+                        id="adminNote"
+                        value={adminNote}
+                        onChange={(e) => setAdminNote(e.target.value)}
+                        rows={3}
+                        placeholder="توضیحات یا یادداشت برای این سفارش..."
+                        className="block w-full rounded-md border-gray-300 bg-white py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleUpdateStatus}
+                      disabled={updatingStatus || !newStatus}
+                      className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                    >
+                      {updatingStatus ? 'در حال به‌روزرسانی...' : 'به‌روزرسانی وضعیت'}
+                    </button>
+                  </div>
+                </div>
               </div>
-        </div>
+            )}
+          </div>
         </div>
       </div>
-      );
+    </>
+  );
 }
-
-
-      {/* Update Status Section */}
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-          تغییر وضعیت سفارش
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="newStatus" className="text-xs font-medium text-gray-600 dark:text-gray-300">
-              وضعیت جدید
-            </label>
-            <select
-              id="newStatus"
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-              className="block w-full rounded-md border-gray-300 bg-white py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-            >
-              {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="adminNote" className="text-xs font-medium text-gray-600 dark:text-gray-300">
-              یادداشت ادمین (اختیاری)
-            </label>
-            <textarea
-              id="adminNote"
-              value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
-              rows={3}
-              placeholder="توضیحات یا یادداشت برای این سفارش..."
-              className="block w-full rounded-md border-gray-300 bg-white py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
-            />
-          </div>
-        </div>
-
-        <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={handleUpdateStatus}
-            disabled={updatingStatus || !newStatus}
-            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-indigo-500 dark:hover:bg-indigo-600"
-          >
-            {updatingStatus ? 'در حال به‌روزرسانی...' : 'به‌روزرسانی وضعیت'}
-          </button>
-        </div>
-      </div>

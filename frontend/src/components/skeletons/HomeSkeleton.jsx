@@ -1,4 +1,4 @@
-export default function HomePageSkeleton() {
+export default function HomeSkeleton() {
     return (
         <div className="min-h-screen px-4 py-8 sm:py-12 md:py-16 flex items-center justify-center animate-pulse" dir="rtl">
             <div className="w-full">

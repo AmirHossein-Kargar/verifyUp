@@ -1,5 +1,8 @@
 import { MetadataRoute } from "next";
 
+// Cache manifest for 24 hours
+export const revalidate = 86400;
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "VerifyUp - احراز هویت آپورک",
