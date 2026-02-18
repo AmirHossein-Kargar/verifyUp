@@ -13,11 +13,17 @@ import { motion } from 'framer-motion';
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-    const { user, loading, logout } = useAuth();
+    const { user, logout } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
-    const isDashboard = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
     const dropdownRef = useRef(null);
+    const [mounted, setMounted] = useState(false);
+
+    // Prevent hydration mismatch by only showing auth UI after mount
+    useEffect(() => {
+        const timer = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Helper function to check if a route is active
     const isActiveRoute = (route) => {
@@ -71,7 +77,7 @@ export default function Header() {
                             priority
                         />
                     </motion.div>
-                    <span className="text-gray-900 dark:text-white font-semibold text-sm sm:text-base tracking-wider">
+                    <span className="text-base font-semibold text-gray-900 dark:text-white">
                         VerifyUp
                     </span>
                 </Link>
@@ -81,7 +87,7 @@ export default function Header() {
                     <Link
                         href="/"
                         prefetch={true}
-                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/')
+                        className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-out ${isActiveRoute('/')
                             ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
                             : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                             }`}
@@ -91,7 +97,7 @@ export default function Header() {
                     <Link
                         href="/services"
                         prefetch={true}
-                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/services')
+                        className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-out ${isActiveRoute('/services')
                             ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
                             : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                             }`}
@@ -101,7 +107,7 @@ export default function Header() {
                     <Link
                         href="/contact"
                         prefetch={true}
-                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/contact')
+                        className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-out ${isActiveRoute('/contact')
                             ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
                             : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                             }`}
@@ -111,7 +117,7 @@ export default function Header() {
                     <Link
                         href="/about"
                         prefetch={true}
-                        className={`text-sm whitespace-nowrap transition-colors ${isActiveRoute('/about')
+                        className={`text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-out ${isActiveRoute('/about')
                             ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
                             : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                             }`}
@@ -125,31 +131,32 @@ export default function Header() {
                     <ThemeToggle />
                     <CartIcon />
 
-                    {!loading && (
+                    {mounted && (
                         user ? (
                             // Logged in state - Show avatar dropdown
                             <div className="relative" ref={dropdownRef}>
                                 <button
                                     type="button"
+                                    data-testid="user-menu-button"
                                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                                    className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full cursor-pointer bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors"
+                                    className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full cursor-pointer bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors duration-200 ease-out"
                                 >
                                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                                 </button>
 
                                 {/* Dropdown menu */}
                                 {isUserDropdownOpen && (
-                                    <div className="absolute left-0 top-10 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-44">
-                                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 text-sm">
+                                    <div className="absolute left-0 top-10 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-44 animate-in fade-in duration-200">
+                                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 text-sm font-normal">
                                             <div className="font-medium text-gray-900 dark:text-white truncate">{user?.name || 'کاربر'}</div>
                                             <div className="truncate text-gray-500 dark:text-gray-400">{user?.email || user?.phone}</div>
                                         </div>
-                                        <ul className="p-2 text-sm text-gray-700 dark:text-gray-200 font-medium">
+                                        <ul className="p-2 text-sm font-medium text-gray-700 dark:text-gray-200">
                                             <li>
                                                 <Link
                                                     href="/dashboard"
                                                     onClick={() => setIsUserDropdownOpen(false)}
-                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right"
+                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right transition-colors duration-200 ease-out"
                                                 >
                                                     داشبورد
                                                 </Link>
@@ -158,7 +165,7 @@ export default function Header() {
                                                 <Link
                                                     href="/dashboard/profile"
                                                     onClick={() => setIsUserDropdownOpen(false)}
-                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right"
+                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right transition-colors duration-200 ease-out"
                                                 >
                                                     تنظیمات
                                                 </Link>
@@ -168,7 +175,7 @@ export default function Header() {
                                                     <Link
                                                         href="/admin"
                                                         onClick={() => setIsUserDropdownOpen(false)}
-                                                        className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right"
+                                                        className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-md text-right transition-colors duration-200 ease-out"
                                                     >
                                                         پنل ادمین
                                                     </Link>
@@ -176,8 +183,10 @@ export default function Header() {
                                             )}
                                             <li>
                                                 <button
+                                                    type="button"
+                                                    data-testid="logout-button"
                                                     onClick={handleLogout}
-                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-500 rounded-md text-right"
+                                                    className="block w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-500 rounded-md text-right transition-colors duration-200 ease-out"
                                                 >
                                                     خروج
                                                 </button>
@@ -189,8 +198,8 @@ export default function Header() {
                         ) : (
                             // Logged out state
                             <>
-                                <Link href="/login" prefetch={true} className="hidden sm:block text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 whitespace-nowrap">ورود</Link>
-                                <Link href="/signup" prefetch={true} className="hidden xs:block text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 whitespace-nowrap">ثبت نام</Link>
+                                <Link href="/login" prefetch={true} className="hidden sm:block text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 whitespace-nowrap transition-colors duration-200 ease-out">ورود</Link>
+                                <Link href="/signup" prefetch={true} className="hidden xs:block text-sm font-medium text-white bg-indigo-700 rounded-lg px-3 py-1.5 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 focus:outline-none dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800 whitespace-nowrap transition-colors duration-200 ease-out">ثبت نام</Link>
                             </>
                         )
                     )}
@@ -198,7 +207,7 @@ export default function Header() {
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ease-out"
                         aria-label="Toggle menu"
                     >
                         <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -219,9 +228,9 @@ export default function Header() {
                         <Link
                             href="/"
                             onClick={() => setIsMenuOpen(false)}
-                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/')
-                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                            className={`w-full text-center text-sm font-medium py-3 px-4 rounded-lg transition-all duration-200 ease-out ${isActiveRoute('/')
+                                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                 }`}
                         >
                             خانه
@@ -229,9 +238,9 @@ export default function Header() {
                         <Link
                             href="/services"
                             onClick={() => setIsMenuOpen(false)}
-                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/services')
-                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                            className={`w-full text-center transition-all duration-200 ease-out text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/services')
+                                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                 }`}
                         >
                             سرویس ها
@@ -239,9 +248,9 @@ export default function Header() {
                         <Link
                             href="/contact"
                             onClick={() => setIsMenuOpen(false)}
-                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/contact')
-                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                            className={`w-full text-center transition-all duration-200 ease-out text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/contact')
+                                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                 }`}
                         >
                             تماس با ما
@@ -249,30 +258,30 @@ export default function Header() {
                         <Link
                             href="/about"
                             onClick={() => setIsMenuOpen(false)}
-                            className={`w-full text-center transition-all text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/about')
-                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                                    : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                            className={`w-full text-center transition-all duration-200 ease-out text-sm py-3 px-4 rounded-lg font-medium ${isActiveRoute('/about')
+                                ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                                : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                 }`}
                         >
                             درباره ما
                         </Link>
 
                         {/* Mobile Auth Buttons */}
-                        {!loading && (
+                        {mounted && (
                             <div className="xs:hidden flex flex-col items-center gap-2 w-full mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 {user ? (
                                     <>
                                         <Link
                                             href="/dashboard"
                                             onClick={() => setIsMenuOpen(false)}
-                                            className="w-full text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800"
+                                            className="w-full text-sm font-medium text-white bg-indigo-700 rounded-lg px-5 py-2.5 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 focus:outline-none dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800 transition-colors duration-200 ease-out"
                                         >
                                             داشبورد
                                         </Link>
                                         <Link
                                             href="/dashboard/profile"
                                             onClick={() => setIsMenuOpen(false)}
-                                            className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                            className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg px-5 py-2.5 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 transition-colors duration-200 ease-out"
                                         >
                                             تنظیمات
                                         </Link>
@@ -280,14 +289,16 @@ export default function Header() {
                                             <Link
                                                 href="/admin"
                                                 onClick={() => setIsMenuOpen(false)}
-                                                className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                                className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg px-5 py-2.5 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 transition-colors duration-200 ease-out"
                                             >
                                                 پنل ادمین
                                             </Link>
                                         )}
                                         <button
+                                            type="button"
+                                            data-testid="logout-button"
                                             onClick={handleLogout}
-                                            className="w-full text-red-600 dark:text-red-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                            className="w-full text-sm font-medium text-red-600 dark:text-red-500 bg-white border border-gray-300 rounded-lg px-5 py-2.5 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 transition-colors duration-200 ease-out"
                                         >
                                             خروج
                                         </button>
@@ -297,14 +308,14 @@ export default function Header() {
                                         <Link
                                             href="/login"
                                             onClick={() => setIsMenuOpen(false)}
-                                            className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                                            className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg px-5 py-2.5 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 transition-colors duration-200 ease-out"
                                         >
                                             ورود
                                         </Link>
                                         <Link
                                             href="/signup"
                                             onClick={() => setIsMenuOpen(false)}
-                                            className="w-full text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800"
+                                            className="w-full text-sm font-medium text-white bg-indigo-700 rounded-lg px-5 py-2.5 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 focus:outline-none dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800 transition-colors duration-200 ease-out"
                                         >
                                             ثبت نام
                                         </Link>

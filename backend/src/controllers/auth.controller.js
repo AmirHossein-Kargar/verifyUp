@@ -305,6 +305,13 @@ exports.logout = async (req, res, next) => {
     }
 
     clearAuthCookies(res);
+    // Clear client-readable role cookie so middleware/UI don't see stale role
+    res.clearCookie("userRole", {
+      path: "/",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
 
     return ApiResponse.success(res, {
       message: "خروج با موفقیت انجام شد",
@@ -394,7 +401,7 @@ exports.verifyOtp = async (req, res, next) => {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return ApiResponse.success(res, {
@@ -510,16 +517,15 @@ exports.resendOtp = async (req, res, next) => {
     // Send OTP
     await sendOtp(data.phone, otp);
 
-    const responseData = {
+    const payload = {
       message: "کد تأیید مجدداً ارسال شد",
     };
-
-    // In development, include OTP in response for easy testing
+    // In development, include OTP in data so client can read response.data.otp
     if (process.env.NODE_ENV === "development") {
-      responseData.otp = otp; // ⚠️ Only for development!
+      payload.data = { otp }; // ⚠️ Only for development!
     }
 
-    return ApiResponse.success(res, responseData);
+    return ApiResponse.success(res, payload);
   } catch (err) {
     if (err?.issues) {
       return ApiResponse.badRequest(res, {

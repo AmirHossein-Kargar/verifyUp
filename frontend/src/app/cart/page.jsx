@@ -103,7 +103,7 @@ export default function CartPage() {
 
             <Link
               href="/services"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
+              className="inline-flex w-full items-center justify-center rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
             >
               مشاهده خدمات
             </Link>
@@ -122,7 +122,7 @@ export default function CartPage() {
           <button
             type="button"
             onClick={handleClearCart}
-            className="self-start text-sm font-medium text-red-600 transition-colors hover:text-red-700 dark:text-red-500 dark:hover:text-red-400 sm:self-auto"
+            className="self-start text-sm font-medium text-red-600 transition-colors duration-200 ease-out hover:text-red-700 dark:text-red-500 dark:hover:text-red-400 sm:self-auto"
           >
             پاک کردن همه
           </button>
@@ -198,7 +198,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(item.id)}
-                    className="p-1 text-red-600 transition-colors hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
+                    className="p-1 text-red-600 transition-colors duration-200 ease-out hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
                     aria-label="حذف محصول"
                   >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,14 +240,14 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={handleCheckout}
-                className="mb-3 w-full rounded-lg bg-indigo-700 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
+                className="mb-3 w-full rounded-lg bg-indigo-700 px-5 py-3 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
               >
                 {user ? 'تکمیل خرید' : 'ورود و تکمیل خرید'}
               </button>
 
               <Link
                 href="/services"
-                className="block w-full text-center text-sm font-medium text-indigo-700 transition-colors hover:text-indigo-800 dark:text-indigo-500 dark:hover:text-indigo-400"
+                className="block w-full text-center text-sm font-medium text-indigo-700 transition-colors duration-200 ease-out hover:text-indigo-800 dark:text-indigo-500 dark:hover:text-indigo-400"
               >
                 ادامه خرید
               </Link>

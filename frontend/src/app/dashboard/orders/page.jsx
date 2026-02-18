@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { formatTooman } from '@/utils/currency';
 import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
-import DashboardNavbar from '@/app/components/DashboardNavbar';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useOrders } from '@/hooks/useOrders';
 import { useToast } from '@/hooks/useToast';
@@ -63,116 +62,113 @@ export default function OrdersPage() {
     if (!user) return null;
 
     return (
-        <>
-            <DashboardNavbar user={user} ordersCount={orders.length} />
-            <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen pb-20">
-                <div className="p-3 md:p-4 max-w-7xl mx-auto">
-                    <div className="mb-4 md:mb-6 text-center">
-                        <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">سفارشات من</h1>
+        <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen pt-24 pb-20">
+            <div className="p-3 md:p-4 max-w-7xl mx-auto">
+                <div className="mb-4 md:mb-6 text-center">
+                    <h1 className="text-xl font-bold leading-tight text-gray-900 dark:text-white md:text-2xl">سفارشات من</h1>
+                </div>
+
+                {error && (
+                    <div className="mb-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm font-normal text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200 leading-relaxed md:mb-4 md:p-3">
+                        خطا در دریافت سفارشات. لطفاً بعداً دوباره تلاش کنید.
                     </div>
+                )}
 
-                    {error && (
-                        <div className="mb-3 md:mb-4 rounded-lg border border-red-200 bg-red-50 p-2 md:p-3 text-xs md:text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200">
-                            خطا در دریافت سفارشات. لطفاً بعداً دوباره تلاش کنید.
+                {orders.length === 0 && !error ? (
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 md:p-12">
+                        <div className="text-center">
+                            <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-3 md:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+
+                            <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed mb-3 md:mb-4">هنوز سفارشی ثبت نشده است</p>
+
+                            <Link href="/services" className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 md:px-4 transition-colors duration-200 ease-out">
+                                سفارش جدید
+                            </Link>
                         </div>
-                    )}
+                    </div>
+                ) : (
+                    <div className="space-y-3 md:space-y-4">
+                        {orders.map((order) => {
+                            const uiStatusKey = STATUS_MAP[order.status] || 'pending';
+                            const badge = STATUS_BADGES[uiStatusKey] || STATUS_BADGES.pending;
+                            const text = STATUS_TEXT[uiStatusKey] || 'نامشخص';
 
-                    {orders.length === 0 && !error ? (
-                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 md:p-12">
-                            <div className="text-center">
-                                <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-3 md:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                            const createdAt = order.createdAt ? new Date(order.createdAt) : null;
+                            const dateText = createdAt
+                                ? createdAt.toLocaleDateString('fa-IR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                })
+                                : '';
 
-                                <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-3 md:mb-4">هنوز سفارشی ثبت نشده است</p>
+                            // Get service configuration
+                            const serviceConfig = SERVICE_CONFIG[order.service] || SERVICE_CONFIG.upwork_verification;
 
-                                <Link href="/services" className="inline-flex items-center px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                                    سفارش جدید
-                                </Link>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-3 md:space-y-4">
-                            {orders.map((order) => {
-                                const uiStatusKey = STATUS_MAP[order.status] || 'pending';
-                                const badge = STATUS_BADGES[uiStatusKey] || STATUS_BADGES.pending;
-                                const text = STATUS_TEXT[uiStatusKey] || 'نامشخص';
-
-                                const createdAt = order.createdAt ? new Date(order.createdAt) : null;
-                                const dateText = createdAt
-                                    ? createdAt.toLocaleDateString('fa-IR', {
-                                        year: 'numeric',
-                                        month: '2-digit',
-                                        day: '2-digit',
-                                    })
-                                    : '';
-
-                                // Get service configuration
-                                const serviceConfig = SERVICE_CONFIG[order.service] || SERVICE_CONFIG.upwork_verification;
-
-                                return (
-                                    <div
-                                        key={order._id}
-                                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-5 hover:shadow-md transition-shadow"
-                                    >
-                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
-                                            <div className="flex items-start gap-3 md:gap-4">
-                                                {serviceConfig.logo ? (
-                                                    <Image
-                                                        src={serviceConfig.logo}
-                                                        alt={serviceConfig.title}
-                                                        width={40}
-                                                        height={40}
-                                                        className="object-contain md:w-12 md:h-12"
-                                                    />
-                                                ) : serviceConfig.icon ? (
-                                                    <div className="shrink-0 scale-75 md:scale-100">
-                                                        {serviceConfig.icon}
-                                                    </div>
-                                                ) : null}
-
-                                                <div>
-                                                    <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-1">
-                                                        {serviceConfig.title}
-                                                    </h3>
-                                                    {dateText && (
-                                                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-1 md:mb-2">
-                                                            تاریخ ثبت: {dateText}
-                                                        </p>
-                                                    )}
-
-                                                    <span className={`inline-block px-2 md:px-2.5 py-0.5 text-[10px] md:text-xs font-medium rounded ${badge}`}>
-                                                        {text}
-                                                    </span>
+                            return (
+                                <div
+                                    key={order._id}
+                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-5 hover:shadow-md transition-shadow duration-200 ease-out"
+                                >
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
+                                        <div className="flex items-start gap-3 md:gap-4">
+                                            {serviceConfig.logo ? (
+                                                <Image
+                                                    src={serviceConfig.logo}
+                                                    alt={serviceConfig.title}
+                                                    width={40}
+                                                    height={40}
+                                                    className="object-contain md:w-12 md:h-12"
+                                                />
+                                            ) : serviceConfig.icon ? (
+                                                <div className="shrink-0 scale-75 md:scale-100">
+                                                    {serviceConfig.icon}
                                                 </div>
-                                            </div>
+                                            ) : null}
 
-                                            <div className="text-left sm:text-right">
-                                                <p className="text-base md:text-lg font-bold text-gray-900 dark:text-white">
-                                                    {formatTooman(order.priceToman || 0)}
-                                                </p>
-
-                                                {order.adminNote && (
-                                                    <p className="mt-1 md:mt-2 text-[10px] md:text-xs text-gray-600 dark:text-gray-400">
-                                                        یادداشت ادمین: {order.adminNote}
+                                            <div>
+                                                <h3 className="text-sm font-semibold leading-snug text-gray-900 dark:text-white mb-1 md:text-base">
+                                                    {serviceConfig.title}
+                                                </h3>
+                                                {dateText && (
+                                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed mb-1 md:mb-2">
+                                                        تاریخ ثبت: {dateText}
                                                     </p>
                                                 )}
 
-                                                {order.docsSummary && (
-                                                    <p className="mt-1 text-[10px] md:text-xs text-gray-600 dark:text-gray-400">
-                                                        وضعیت مدارک: {order.docsSummary.accepted || 0} تایید شده،{' '}
-                                                        {order.docsSummary.resubmit || 0} نیاز به ارسال مجدد
-                                                    </p>
-                                                )}
+                                                <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded md:px-2.5 ${badge}`}>
+                                                    {text}
+                                                </span>
                                             </div>
                                         </div>
+
+                                        <div className="text-left sm:text-right">
+                                            <p className="text-base font-bold leading-tight text-gray-900 dark:text-white md:text-lg">
+                                                {formatTooman(order.priceToman || 0)}
+                                            </p>
+
+                                            {order.adminNote && (
+                                                <p className="mt-1 text-xs font-normal text-gray-600 dark:text-gray-400 leading-relaxed md:mt-2">
+                                                    یادداشت ادمین: {order.adminNote}
+                                                </p>
+                                            )}
+
+                                            {order.docsSummary && (
+                                                <p className="mt-1 text-xs font-normal text-gray-600 dark:text-gray-400 leading-relaxed">
+                                                    وضعیت مدارک: {order.docsSummary.accepted || 0} تایید شده،{' '}
+                                                    {order.docsSummary.resubmit || 0} نیاز به ارسال مجدد
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
-        </>
+        </div>
     );
 }

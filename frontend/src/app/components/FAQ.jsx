@@ -40,7 +40,7 @@ export default function FAQ() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.2 }}
         >
-            <h2 className="mb-8 sm:mb-10 md:mb-12 text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-white">
+            <h2 className="mb-8 sm:mb-10 md:mb-12 text-xl sm:text-2xl font-bold leading-tight text-center text-gray-900 dark:text-white">
                 سوالات متداول
             </h2>
 
@@ -52,14 +52,14 @@ export default function FAQ() {
                     >
                         <button
                             onClick={() => toggleAccordion(index)}
-                            className="w-full flex items-center justify-between p-4 sm:p-5 text-right bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            className="w-full flex items-center justify-between p-4 sm:p-5 text-right bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 ease-out"
                         >
-                            <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                            <span className="text-base font-semibold leading-snug text-gray-900 dark:text-white sm:text-lg">
                                 {faq.question}
                             </span>
                             <motion.svg
                                 animate={{ rotate: openIndex === index ? 180 : 0 }}
-                                transition={{ duration: 0.3 }}
+                                transition={{ duration: 0.2 }}
                                 className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500 dark:text-gray-400 flex-shrink-0 mr-3"
                                 fill="none"
                                 viewBox="0 0 24 24"
@@ -75,11 +75,11 @@ export default function FAQ() {
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
+                                    transition={{ duration: 0.2 }}
                                     className="overflow-hidden"
                                 >
                                     <div className="p-4 sm:p-5 pt-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                                        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-400 leading-relaxed">
+                                        <p className="text-sm font-normal text-gray-700 dark:text-gray-400 leading-relaxed sm:text-base">
                                             {faq.answer}
                                         </p>
                                     </div>

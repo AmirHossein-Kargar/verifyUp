@@ -11,8 +11,14 @@ const ApiResponse = require("../utils/response");
 const tooMany = (message) => (req, res) =>
   ApiResponse.tooManyRequests(res, { message });
 
+const disableRateLimit =
+  process.env.DISABLE_RATE_LIMIT === "true" || process.env.NODE_ENV === "test";
+const noRateLimit = (_req, _res, next) => next();
+
 // Strict rate limiter for auth endpoints (prefer Redis store in prod)
-const authLimiter = rateLimit({
+const authLimiter = disableRateLimit
+  ? noRateLimit
+  : rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   standardHeaders: true,
@@ -27,7 +33,9 @@ const authLimiter = rateLimit({
   ),
 });
 
-const refreshLimiter = rateLimit({
+const refreshLimiter = disableRateLimit
+  ? noRateLimit
+  : rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
@@ -37,7 +45,9 @@ const refreshLimiter = rateLimit({
   ),
 });
 
-const logoutLimiter = rateLimit({
+const logoutLimiter = disableRateLimit
+  ? noRateLimit
+  : rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30,
   standardHeaders: true,

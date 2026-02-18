@@ -115,7 +115,14 @@ const globalLimiter = rateLimit({
     }),
 });
 
-app.use(globalLimiter);
+// Allow disabling rate limiting for E2E/local testing to avoid 429s.
+// Keep it enabled by default for safety.
+const disableRateLimit =
+  process.env.DISABLE_RATE_LIMIT === "true" || process.env.NODE_ENV === "test";
+
+if (!disableRateLimit) {
+  app.use(globalLimiter);
+}
 
 // CSRF protection (must come after cookieParser)
 // بهتره ignorePaths فقط endpoint های لازم باشد

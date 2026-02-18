@@ -71,10 +71,10 @@ export default function AboutPage() {
                     transition={{ duration: 0.55 }}
                     className="mx-auto mb-10 max-w-3xl text-center"
                 >
-                    <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-4xl md:text-5xl">
+                    <h1 className="mb-4 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-3xl md:text-4xl">
                         درباره <span className="text-indigo-600 dark:text-indigo-500">وریفای آپ</span>
                     </h1>
-                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400 sm:text-lg">
+                    <p className="text-base font-normal leading-relaxed text-gray-500 dark:text-gray-400 sm:text-lg">
                         وریفای آپ یک پلتفرم تخصصی برای کمک به احراز هویت کاربران ایرانی در پلتفرم آپورک است.
                         ما فرآیند تأیید هویت را ساده‌ تر، سریع‌ تر و امن‌ تر میکنیم تا بتوانید بدون دغدغه در آپورک فعالیت کنید.
                     </p>
@@ -95,10 +95,10 @@ export default function AboutPage() {
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-400">
                                     {f.icon}
                                 </div>
-                                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                                <h3 className="mb-2 text-lg font-semibold leading-snug text-gray-900 dark:text-white">
                                     {f.title}
                                 </h3>
-                                <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+                                <p className="text-sm font-normal leading-relaxed text-gray-500 dark:text-gray-400">
                                     {f.description}
                                 </p>
                             </MotionDiv>
@@ -114,15 +114,15 @@ export default function AboutPage() {
                         transition={{ duration: 0.55, delay: 0.15 }}
                         className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-8"
                     >
-                        <h2 className="mb-4 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                        <h2 className="mb-4 text-xl font-bold leading-tight text-gray-900 dark:text-white sm:text-2xl">
                             ماموریت ما
                         </h2>
 
-                        <p className="mb-4 text-sm leading-relaxed text-gray-500 dark:text-gray-400 sm:text-base">
+                        <p className="mb-4 text-sm font-normal leading-relaxed text-gray-500 dark:text-gray-400 sm:text-base">
                             ماموریت وریفای‌ آپ فراهم‌ کردن مسیری امن، قابل‌ اعتماد و حرفه‌ ای برای کاربران ایرانی است تا بتوانند بدون محدودیت و نگرانی، در پلتفرم‌ های بین‌المللی فعالیت کنند.
                         </p>
 
-                        <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400 sm:text-base">
+                        <p className="text-sm font-normal leading-relaxed text-gray-500 dark:text-gray-400 sm:text-base">
                             ما میدانیم که فرآیند احراز هویت برای بسیاری از کاربران میتواند پیچیده و زمان‌ بر باشد. به همین دلیل، با استفاده از تجربهٔ تیم تخصصی خود، این مسیر را ساده سازی کرده‌ ایم تا کاربران بتوانند با اطمینان خاطر و در کوتاه‌ ترین زمان ممکن، احراز هویت خود را با موفقیت انجام دهند.
                         </p>
 

@@ -208,7 +208,7 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://flowbite.com" />
         <link rel="dns-prefetch" href="https://cdn.worldvectorlogo.com" />
       </head>
-      <body className={`bg-gray-50 dark:bg-gray-900 ${iranYekan.className}`}>
+      <body className={`font-sans bg-gray-50 dark:bg-gray-900 ${iranYekan.className}`}>
         <AuthProvider>
           <LayoutClient>{children}</LayoutClient>
         </AuthProvider>

@@ -1,0 +1,64 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "VerifyUp Logo VerifyUp" [ref=e5]:
+        - /url: /
+        - img "VerifyUp Logo" [ref=e7]
+        - generic [ref=e8]: VerifyUp
+      - navigation [ref=e9]:
+        - link "خانه" [ref=e10]:
+          - /url: /
+        - link "سرویس ها" [ref=e11]:
+          - /url: /services
+        - link "تماس با ما" [ref=e12]:
+          - /url: /contact
+        - link "درباره ما" [ref=e13]:
+          - /url: /about
+      - generic [ref=e14]:
+        - button [ref=e15]:
+          - img [ref=e16]
+        - link "Shopping cart" [ref=e18]:
+          - /url: /cart
+          - img [ref=e19]
+        - link "ورود" [ref=e21]:
+          - /url: /login
+  - main [ref=e22]:
+    - generic [ref=e26]:
+      - heading "ورود به حساب کاربری" [level=1] [ref=e27]
+      - generic [ref=e28]:
+        - generic [ref=e29]: ایمیل شما
+        - textbox "ایمیل شما" [ref=e30]:
+          - /placeholder: example@company.com
+          - text: test@example.com
+      - generic [ref=e31]:
+        - generic [ref=e32]: رمز عبور شما
+        - textbox "رمز عبور شما" [ref=e33]:
+          - /placeholder: •••••••••
+          - text: password123
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - checkbox "مرا به خاطر بسپار" [ref=e36]
+          - generic [ref=e37]: مرا به خاطر بسپار
+        - link "فراموشی رمز عبور؟" [ref=e38]:
+          - /url: /forgot-password
+      - button "ورود به حساب کاربری" [ref=e39]
+      - generic [ref=e40]:
+        - text: ثبت‌ نام نکرده‌ اید؟
+        - link "ایجاد حساب کاربری" [ref=e41]:
+          - /url: /signup
+  - generic [ref=e46] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e47]:
+      - img [ref=e48]
+    - generic [ref=e53]:
+      - button "Open issues overlay" [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]: "0"
+          - generic [ref=e57]: "1"
+        - generic [ref=e58]: Issue
+      - button "Collapse issues badge" [ref=e59]:
+        - img [ref=e60]
+  - alert [ref=e62]
+```

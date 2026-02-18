@@ -1,0 +1,74 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "VerifyUp Logo VerifyUp" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "VerifyUp Logo" [ref=e7]
+        - generic [ref=e8]: VerifyUp
+      - navigation [ref=e9]:
+        - link "خانه" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "سرویس ها" [ref=e11] [cursor=pointer]:
+          - /url: /services
+        - link "تماس با ما" [ref=e12] [cursor=pointer]:
+          - /url: /contact
+        - link "درباره ما" [ref=e13] [cursor=pointer]:
+          - /url: /about
+      - generic [ref=e14]:
+        - button [ref=e15]:
+          - img [ref=e16]
+        - link "Shopping cart" [ref=e18] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e19]
+        - link "ورود" [ref=e21] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e22]:
+    - generic [ref=e25]:
+      - list [ref=e26]:
+        - listitem [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: "1"
+            - generic [ref=e30]: ثبت‌نام
+        - listitem [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: "2"
+            - generic [ref=e34]: تأیید هویت
+        - listitem [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]: "3"
+            - generic [ref=e38]: تأیید
+      - generic [ref=e39]:
+        - heading "ثبت‌نام در VerifyUp" [level=1] [ref=e40]
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]: نام و نام خانوادگی
+            - textbox "نام و نام خانوادگی" [ref=e44]: Test User
+          - generic [ref=e45]:
+            - generic [ref=e46]: ایمیل
+            - textbox "ایمیل" [ref=e47]: e2e+1771410569582@example.com
+          - generic [ref=e48]:
+            - generic [ref=e49]: شماره موبایل
+            - textbox "شماره موبایل" [ref=e50]:
+              - /placeholder: "09123456789"
+              - text: "09410569615"
+          - generic [ref=e51]:
+            - generic [ref=e52]: رمز عبور
+            - textbox "رمز عبور" [ref=e53]: TestPassword123
+          - generic [ref=e54]:
+            - generic [ref=e55]: تکرار رمز عبور
+            - textbox "تکرار رمز عبور" [ref=e56]: TestPassword123
+          - generic [ref=e57]:
+            - checkbox "قوانین و مقررات را می‌پذیرم" [checked] [ref=e58]
+            - generic [ref=e59]: قوانین و مقررات را می‌پذیرم
+          - button "ثبت‌نام" [ref=e60]
+          - paragraph [ref=e61]:
+            - text: قبلاً ثبت‌نام کرده‌اید؟
+            - link "ورود" [ref=e62] [cursor=pointer]:
+              - /url: /login
+  - button "Open Next.js Dev Tools" [ref=e68] [cursor=pointer]:
+    - img [ref=e69]
+  - alert [ref=e72]
+```

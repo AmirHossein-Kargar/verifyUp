@@ -1,8 +1,26 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import MotionWrapper from './MotionWrapper';
 
 export default function Footer() {
+    const pathname = usePathname();
+    const { isLoggingOut } = useAuth();
+
+    const hideFooter =
+        pathname === '/cart' ||
+        pathname === '/login' ||
+        pathname === '/signup';
+    const isDashboardLike = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
+
+    // Don't render footer on cart, login, signup, dashboard, admin pages, or during logout
+    if (hideFooter || isDashboardLike || isLoggingOut) {
+        return null;
+    }
+
     return (
         <footer className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 m-4" dir="rtl">
             <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
@@ -29,30 +47,30 @@ export default function Footer() {
                                 }}
                             />
                         </MotionWrapper>
-                        <span className="text-gray-900 dark:text-white text-2xl font-semibold whitespace-nowrap tracking-wider">
+                        <span className="text-base font-semibold text-gray-900 dark:text-white whitespace-nowrap">
                             VerifyUp
                         </span>
                     </Link>
-                    <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-600 dark:text-gray-300 sm:mb-0 gap-4 md:gap-6">
+                    <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-600 dark:text-gray-300 sm:mb-0 gap-4 md:gap-6 leading-relaxed">
                         <MotionWrapper as="li" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300 }}>
-                            <Link href="/about" prefetch={true} className="transition-colors duration-300 hover:text-indigo-600 dark:hover:text-indigo-400">درباره ما</Link>
+                            <Link href="/about" prefetch={true} className="transition-colors duration-200 ease-out hover:text-indigo-600 dark:hover:text-indigo-400">درباره ما</Link>
                         </MotionWrapper>
                         <MotionWrapper as="li" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300 }}>
-                            <Link href="/privacy" prefetch={true} className="transition-colors duration-300 hover:text-indigo-600 dark:hover:text-indigo-400">حریم خصوصی</Link>
+                            <Link href="/privacy" prefetch={true} className="transition-colors duration-200 ease-out hover:text-indigo-600 dark:hover:text-indigo-400">حریم خصوصی</Link>
                         </MotionWrapper>
                         <MotionWrapper as="li" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300 }}>
-                            <Link href="/terms" prefetch={true} className="transition-colors duration-300 hover:text-indigo-600 dark:hover:text-indigo-400">قوانین و مقررات</Link>
+                            <Link href="/terms" prefetch={true} className="transition-colors duration-200 ease-out hover:text-indigo-600 dark:hover:text-indigo-400">قوانین و مقررات</Link>
                         </MotionWrapper>
                         <MotionWrapper as="li" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300 }}>
-                            <Link href="/contact" prefetch={true} className="transition-colors duration-300 hover:text-indigo-600 dark:hover:text-indigo-400">تماس با ما</Link>
+                            <Link href="/contact" prefetch={true} className="transition-colors duration-200 ease-out hover:text-indigo-600 dark:hover:text-indigo-400">تماس با ما</Link>
                         </MotionWrapper>
                     </ul>
                 </div>
                 <hr className="my-6 border-gray-200 dark:border-gray-700 sm:mx-auto lg:my-8" />
-                <span className="block text-sm text-gray-600 dark:text-gray-400 sm:text-center">
+                <span className="block text-sm font-normal text-gray-600 dark:text-gray-400 sm:text-center leading-relaxed">
                     © {new Date().getFullYear()}{' '}
                     <MotionWrapper as="span" className="inline-block" whileHover={{ scale: 1.05 }}>
-                        <Link href="/" prefetch={true} className="transition-colors duration-300 hover:text-indigo-600 dark:hover:text-indigo-400">VerifyUp</Link>
+                        <Link href="/" prefetch={true} className="transition-colors duration-200 ease-out hover:text-indigo-600 dark:hover:text-indigo-400">VerifyUp</Link>
                     </MotionWrapper>
                     . تمامی حقوق محفوظ است.
                 </span>

@@ -88,20 +88,21 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
           >
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
-              <h1 className="mb-6 text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <form onSubmit={handleSubmit(onSubmit)} noValidate data-testid="login-form">
+              <h1 className="mb-6 text-center text-2xl font-bold leading-tight text-gray-900 dark:text-white">
                 ورود به حساب کاربری
               </h1>
 
               {/* EMAIL */}
               <div className="mb-4">
-                <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                   ایمیل شما
                 </label>
 
                 <input
                   id="email"
                   type="email"
+                  data-testid="login-email"
                   className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                   placeholder="example@company.com"
                   {...register('email', {
@@ -115,13 +116,14 @@ export default function LoginPage() {
 
               {/* PASSWORD */}
               <div className="mb-4">
-                <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                   رمز عبور شما
                 </label>
 
                 <input
                   id="password"
                   type="password"
+                  data-testid="login-password"
                   className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                   placeholder="•••••••••"
                   {...register('password', {
@@ -148,7 +150,7 @@ export default function LoginPage() {
                 {/* اگر صفحه forgot ندارید، اینو موقت حذف کنید یا مسیر درست بذارید */}
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-medium text-indigo-700 hover:text-indigo-800 dark:text-indigo-400"
+                  className="text-sm font-medium text-indigo-700 hover:text-indigo-800 dark:text-indigo-400 transition-colors duration-200 ease-out"
                 >
                   فراموشی رمز عبور؟
                 </Link>
@@ -156,7 +158,8 @@ export default function LoginPage() {
 
               <motion.button
                 type="submit"
-                className="mb-4 w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
+                data-testid="login-submit"
+                className="mb-4 w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white text-center hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800 transition-colors duration-200 ease-out"
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -164,9 +167,9 @@ export default function LoginPage() {
                 {isSubmitting ? 'در حال ورود...' : 'ورود به حساب کاربری'}
               </motion.button>
 
-              <div className="text-center text-sm font-medium text-gray-500 dark:text-gray-300">
+              <div className="text-center text-sm font-normal text-gray-500 dark:text-gray-300 leading-relaxed">
                 ثبت‌ نام نکرده‌ اید؟{' '}
-                <Link href="/signup" className="text-indigo-700 hover:text-indigo-800 dark:text-indigo-400">
+                <Link href="/signup" className="text-indigo-700 hover:text-indigo-800 dark:text-indigo-400 transition-colors duration-200 ease-out">
                   ایجاد حساب کاربری
                 </Link>
               </div>

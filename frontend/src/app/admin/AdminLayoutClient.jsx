@@ -1,6 +1,7 @@
 'use client';
 
-import BottomNav from './BottomNav';
+import { useAuth } from '@/contexts/AuthContext';
+import BottomNav from '@/app/components/BottomNav';
 
 const ADMIN_MENU_ITEMS = [
     {
@@ -23,6 +24,13 @@ const ADMIN_MENU_ITEMS = [
     },
 ];
 
-export default function AdminNavbar({ user }) {
-    return <BottomNav items={ADMIN_MENU_ITEMS} />;
+export default function AdminLayoutClient({ children }) {
+    const { user } = useAuth();
+
+    return (
+        <>
+            {children}
+            {user && <BottomNav items={ADMIN_MENU_ITEMS} />}
+        </>
+    );
 }

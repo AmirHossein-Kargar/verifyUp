@@ -2,9 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function BottomNav({ items, ordersCount = 0 }) {
     const pathname = usePathname();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const isActive = (href) => {
         if (href === '/dashboard' || href === '/admin') {
@@ -12,6 +18,28 @@ export default function BottomNav({ items, ordersCount = 0 }) {
         }
         return pathname.startsWith(href);
     };
+
+    if (!mounted) {
+        return (
+            <div className="fixed bottom-0 left-0 right-0 z-50 w-full">
+                <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="grid h-16 grid-cols-4 gap-2">
+                            {items.map((item) => (
+                                <div
+                                    key={item.href}
+                                    className="relative inline-flex flex-col items-center justify-center py-2 text-gray-500 dark:text-gray-400"
+                                >
+                                    <div>{item.icon}</div>
+                                    <span className="text-xs font-medium mt-1">{item.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50 w-full">
@@ -27,7 +55,7 @@ export default function BottomNav({ items, ordersCount = 0 }) {
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`relative inline-flex flex-col items-center justify-center py-2 group transition-colors rounded-lg ${active
+                                    className={`relative inline-flex flex-col items-center justify-center py-2 group transition-colors duration-200 ease-out rounded-lg ${active
                                         ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
                                         : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         }`}
@@ -35,7 +63,7 @@ export default function BottomNav({ items, ordersCount = 0 }) {
                                     <div className={active ? 'text-indigo-600 dark:text-indigo-400' : ''}>
                                         {item.icon}
                                     </div>
-                                    <span className="text-xs mt-1">{item.name}</span>
+                                    <span className="text-xs font-medium mt-1">{item.name}</span>
 
                                     {showBadge && (
                                         <span className="absolute top-2 right-1/2 translate-x-1/2 inline-flex items-center justify-center min-w-[18px] h-5 px-1.5 text-xs font-semibold text-white bg-red-500 rounded-full">

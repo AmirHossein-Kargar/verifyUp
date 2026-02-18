@@ -1,8 +1,11 @@
 'use client';
 
-import BottomNav from './BottomNav';
+import { useAuth } from '@/contexts/AuthContext';
+import BottomNav from '@/app/components/BottomNav';
+import { useOrders } from '@/hooks/useOrders';
+import { useEffect, useState } from 'react';
 
-const MENU_ITEMS = [
+const DASHBOARD_MENU_ITEMS = [
     {
         name: 'داشبورد',
         href: '/dashboard',
@@ -43,6 +46,19 @@ const MENU_ITEMS = [
     },
 ];
 
-export default function DashboardNavbar({ user, ordersCount = 0 }) {
-    return <BottomNav items={MENU_ITEMS} ordersCount={ordersCount} />;
+export default function DashboardLayoutClient({ children }) {
+    const { user } = useAuth();
+    const { orders } = useOrders();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    return (
+        <>
+            {children}
+            {mounted && user && <BottomNav items={DASHBOARD_MENU_ITEMS} ordersCount={orders.length} />}
+        </>
+    );
 }

@@ -29,7 +29,7 @@ export default function Contact() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h1 className="mb-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white">
+                    <h1 className="mb-4 text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-3xl md:text-4xl">
                         پشتیبانی و <span className="text-indigo-600 dark:text-indigo-500">تماس با ما</span>
                     </h1>
 
@@ -59,15 +59,15 @@ export default function Contact() {
                                     className="object-cover"
                                 />
                             </MotionWrapper>
-                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                            <h3 className="text-lg font-bold leading-tight text-gray-900 dark:text-white mb-2 sm:text-xl">
                                 تیم پشتیبانی وریفای آپ
                             </h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6 px-4">
+                            <p className="text-sm font-normal text-gray-500 dark:text-gray-400 text-center mb-6 px-4 leading-relaxed">
                                 آماده پاسخگویی به سوالات و راهنمایی شما در تمام مراحل
                             </p>
                         </div>
 
-                        <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+                        <h4 className="text-base font-semibold leading-snug text-gray-900 dark:text-white mb-6 text-center sm:text-lg">
                             اطلاعات تماس
                         </h4>
 
@@ -76,7 +76,7 @@ export default function Contact() {
                             <MotionWrapper
                                 as="a"
                                 href="tel:+989123456789"
-                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all cursor-pointer border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
+                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200 ease-out cursor-pointer border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.4 }}
@@ -99,15 +99,15 @@ export default function Contact() {
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h5 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm sm:text-base">تلفن تماس</h5>
-                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400" dir="ltr">021-12345678</p>
+                                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:text-base">تلفن تماس</h5>
+                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed" dir="ltr">021-12345678</p>
                                 </div>
                             </MotionWrapper>
 
                             <MotionWrapper
                                 as="a"
                                 href="mailto:support@verifyup.com"
-                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all cursor-pointer border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
+                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200 ease-out cursor-pointer border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.5 }}
@@ -129,8 +129,8 @@ export default function Contact() {
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h5 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm sm:text-base">ایمیل</h5>
-                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-all">support@verifyup.com</p>
+                                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:text-base">ایمیل</h5>
+                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed break-all">support@verifyup.com</p>
                                 </div>
                             </MotionWrapper>
 
@@ -139,7 +139,7 @@ export default function Contact() {
                                 href="https://t.me/verifyup_support"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all cursor-pointer border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-800 select-none"
+                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 ease-out cursor-pointer border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-800 select-none"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.6 }}
@@ -156,13 +156,13 @@ export default function Contact() {
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h5 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm sm:text-base">تلگرام</h5>
-                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">verifyup_support</p>
+                                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:text-base">تلگرام</h5>
+                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed">verifyup_support</p>
                                 </div>
                             </MotionWrapper>
 
                             <MotionWrapper
-                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
+                                className="flex flex-col items-center gap-3 p-4 sm:p-5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200 ease-out border-2 border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 select-none"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.7 }}
@@ -184,9 +184,9 @@ export default function Contact() {
                                     </svg>
                                 </div>
                                 <div className="text-center">
-                                    <h5 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm sm:text-base">ساعات کاری</h5>
-                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">شنبه تا پنجشنبه</p>
-                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">۹ صبح تا ۶ عصر</p>
+                                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:text-base">ساعات کاری</h5>
+                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed">شنبه تا پنجشنبه</p>
+                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed">۹ صبح تا ۶ عصر</p>
                                 </div>
                             </MotionWrapper>
                         </div>

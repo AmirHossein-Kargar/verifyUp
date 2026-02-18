@@ -13,11 +13,14 @@ export function AuthProvider({ children }) {
     const checkAuth = async () => {
         try {
             const response = await api.getMe();
-            setUser(response.data.user);
+            setUser(response.data?.user ?? null);
+            if (process.env.NODE_ENV !== 'production' && response.data?.user) {
+                console.info('[Auth] Session restored for user:', response.data.user.email || response.data.user._id);
+            }
         } catch (error) {
             // 401 from /auth/me simply means "not logged in" – don't log as error
             if (process.env.NODE_ENV !== 'production' && error?.status !== 401) {
-                console.warn('Auth check (getMe) failed:', error);
+                console.warn('[Auth] getMe failed:', error?.status, error?.message);
             }
             setUser(null);
         } finally {
@@ -38,11 +41,14 @@ export function AuthProvider({ children }) {
             setIsLoggingOut(true);
             await api.logout();
             setUser(null);
-            // Redirect will happen via window.location.href in the component
+            // Clear cached CSRF so next login gets a fresh token
+            api.clearCsrfToken?.();
         } catch (error) {
             if (process.env.NODE_ENV !== 'production') {
-                console.warn('Logout error:', error);
+                console.warn('[Auth] Logout error:', error?.message || error);
             }
+            setUser(null);
+        } finally {
             setIsLoggingOut(false);
         }
     };

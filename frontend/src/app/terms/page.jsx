@@ -28,10 +28,10 @@ export default function TermsPage() {
                     transition={{ duration: 0.55 }}
                     className="mx-auto mb-10 max-w-3xl text-center"
                 >
-                    <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-4xl md:text-5xl">
+                    <h1 className="mb-4 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white sm:text-3xl md:text-4xl">
                         شرایط و <span className="text-indigo-600 dark:text-indigo-500">قوانین</span>
                     </h1>
-                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400 sm:text-lg">
+                    <p className="text-base font-normal leading-relaxed text-gray-500 dark:text-gray-400 sm:text-lg">
                         لطفاً قبل از استفاده از خدمات وریفای آپ، شرایط و قوانین زیر را با دقت مطالعه فرمایید.
                     </p>
                 </MotionDiv>

@@ -117,16 +117,15 @@ export default function SignupPage() {
   const handleResendOtp = async () => {
     try {
       const response = await api.resendOtp({ phone: registeredData.phone });
-      showToast('کد تأیید مجدداً ارسال شد', 'success');
+      showToast(response.message || 'کد تأیید مجدداً ارسال شد', 'success');
 
-      // Show new OTP in development mode
-      if (response.otp) {
+      // Show new OTP in development mode (backend returns response.data.otp)
+      const newOtp = response.data?.otp;
+      if (newOtp) {
         setTimeout(() => {
-          showToast(`🔑 کد تایید جدید: ${response.otp}`, 'info', 15000);
+          showToast(`🔑 کد تایید جدید: ${newOtp}`, 'info', 15000);
         }, 1000);
-
-        // Update stored OTP
-        setRegisteredData(prev => ({ ...prev, otp: response.otp }));
+        setRegisteredData(prev => ({ ...prev, otp: newOtp }));
       }
 
       setOtpTimer(60);
@@ -205,18 +204,19 @@ export default function SignupPage() {
               transition={{ duration: 0.4 }}
             >            {step === 'register' && (
               <>
-                <h1 className="mb-6 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="mb-6 text-center text-2xl font-bold leading-tight text-gray-900 dark:text-white">
                   ثبت‌نام در VerifyUp
                 </h1>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="signup-form">
                   <div>
-                    <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                       نام و نام خانوادگی
                     </label>
                     <input
                       id="name"
                       type="text"
+                      data-testid="signup-name"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                       {...register('name', {
                         required: 'نام و نام خانوادگی الزامی است',
@@ -227,12 +227,13 @@ export default function SignupPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                       ایمیل
                     </label>
                     <input
                       id="email"
                       type="email"
+                      data-testid="signup-email"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                       {...register('email', {
                         required: 'ایمیل الزامی است',
@@ -243,12 +244,13 @@ export default function SignupPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                       شماره موبایل
                     </label>
                     <input
                       id="phone"
                       type="tel"
+                      data-testid="signup-phone"
                       dir="ltr"
                       placeholder="09123456789"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -261,12 +263,13 @@ export default function SignupPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                       رمز عبور
                     </label>
                     <input
                       id="password"
                       type="password"
+                      data-testid="signup-password"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                       {...register('password', {
                         required: 'رمز عبور الزامی است',
@@ -277,12 +280,13 @@ export default function SignupPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                    <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                       تکرار رمز عبور
                     </label>
                     <input
                       id="confirmPassword"
                       type="password"
+                      data-testid="signup-confirm-password"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                       {...register('confirmPassword', {
                         required: 'تکرار رمز عبور الزامی است',
@@ -296,10 +300,11 @@ export default function SignupPage() {
                     <input
                       id="terms"
                       type="checkbox"
+                      data-testid="signup-terms"
                       className="mt-1 h-4 w-4 rounded border-gray-300 bg-gray-100 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
                       {...register('terms', { required: 'پذیرش قوانین الزامی است' })}
                     />
-                    <label htmlFor="terms" className="mr-2 text-sm text-gray-900 dark:text-gray-300">
+                    <label htmlFor="terms" className="mr-2 text-sm font-normal text-gray-900 dark:text-gray-300 leading-relaxed">
                       قوانین و مقررات را می‌پذیرم
                     </label>
                   </div>
@@ -307,15 +312,16 @@ export default function SignupPage() {
 
                   <button
                     type="submit"
+                    data-testid="signup-submit"
                     disabled={isSubmitting}
-                    className="w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-60 dark:bg-indigo-600 dark:hover:bg-indigo-700"
+                    className="w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white text-center hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-60 dark:bg-indigo-600 dark:hover:bg-indigo-700 transition-colors duration-200 ease-out"
                   >
                     {isSubmitting ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
                   </button>
 
-                  <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-center text-sm font-normal text-gray-500 dark:text-gray-400 leading-relaxed">
                     قبلاً ثبت‌نام کرده‌اید؟{' '}
-                    <Link href="/login" className="font-medium text-indigo-600 hover:underline dark:text-indigo-500">
+                    <Link href="/login" className="font-medium text-indigo-600 hover:underline dark:text-indigo-500 transition-colors duration-200 ease-out">
                       ورود
                     </Link>
                   </p>
@@ -325,10 +331,10 @@ export default function SignupPage() {
 
               {step === 'verify-choice' && (
                 <>
-                  <h1 className="mb-4 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="mb-4 text-center text-2xl font-bold leading-tight text-gray-900 dark:text-white">
                     انتخاب روش تأیید
                   </h1>
-                  <p className="mb-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                  <p className="mb-6 text-center text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed">
                     لطفاً یکی از روش‌های زیر را برای تأیید حساب خود انتخاب کنید
                   </p>
 
@@ -338,15 +344,15 @@ export default function SignupPage() {
                         setStep('verify-otp');
                         setOtpTimer(60);
                       }}
-                      className="w-full rounded-lg border-2 border-indigo-600 bg-indigo-50 p-4 text-right hover:bg-indigo-100 dark:border-indigo-500 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40"
+                      className="w-full rounded-lg border-2 border-indigo-600 bg-indigo-50 p-4 text-right hover:bg-indigo-100 dark:border-indigo-500 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 transition-colors duration-200 ease-out"
                     >
                       <div className="flex items-center">
                         <svg className="ml-3 h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         <div>
-                          <p className="font-semibold text-gray-900 dark:text-white">تأیید با پیامک (OTP)</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">کد تأیید به شماره {registeredData?.phone} ارسال می‌شود</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">تأیید با پیامک (OTP)</p>
+                          <p className="text-xs font-normal text-gray-600 dark:text-gray-400 leading-relaxed">کد تأیید به شماره {registeredData?.phone} ارسال می‌شود</p>
                         </div>
                       </div>
                     </button>
@@ -356,15 +362,15 @@ export default function SignupPage() {
                         showToast('لینک تأیید به ایمیل شما ارسال شد', 'success');
                         setStep('verify-email');
                       }}
-                      className="w-full rounded-lg border-2 border-gray-300 bg-white p-4 text-right hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+                      className="w-full rounded-lg border-2 border-gray-300 bg-white p-4 text-right hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors duration-200 ease-out"
                     >
                       <div className="flex items-center">
                         <svg className="ml-3 h-6 w-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <div>
-                          <p className="font-semibold text-gray-900 dark:text-white">تأیید با ایمیل</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">لینک تأیید به {registeredData?.email} ارسال می‌شود</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">تأیید با ایمیل</p>
+                          <p className="text-xs font-normal text-gray-600 dark:text-gray-400 leading-relaxed">لینک تأیید به {registeredData?.email} ارسال می‌شود</p>
                         </div>
                       </div>
                     </button>
@@ -374,22 +380,22 @@ export default function SignupPage() {
 
               {step === 'verify-otp' && (
                 <>
-                  <h1 className="mb-4 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="mb-4 text-center text-2xl font-bold leading-tight text-gray-900 dark:text-white">
                     تأیید شماره موبایل
                   </h1>
-                  <p className="mb-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                  <p className="mb-6 text-center text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed">
                     کد تأیید ۶ رقمی به شماره {registeredData?.phone} ارسال شد
                   </p>
 
                   {/* Development helper - Show OTP code */}
                   {registeredData?.otp && (
-                    <div className="mb-4 rounded-lg border-2 border-dashed border-yellow-400 bg-yellow-50 p-3 dark:border-yellow-600 dark:bg-yellow-900/20">
+                    <div className="mb-4 rounded-lg border-2 border-dashed border-yellow-400 bg-yellow-50 p-3 dark:border-yellow-600 dark:bg-yellow-900/20" data-testid="signup-otp-dev">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
                           <span className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
                             🔑 کد تایید (حالت توسعه):
                           </span>
-                          <span className="mr-2 font-mono text-lg font-bold text-yellow-900 dark:text-yellow-200">
+                          <span className="mr-2 font-mono text-lg font-bold text-yellow-900 dark:text-yellow-200" data-testid="signup-otp-value">
                             {registeredData.otp}
                           </span>
                         </div>
@@ -399,7 +405,7 @@ export default function SignupPage() {
                             navigator.clipboard.writeText(registeredData.otp);
                             showToast('کد کپی شد!', 'success', 2000);
                           }}
-                          className="rounded bg-yellow-200 px-2 py-1 text-xs font-medium text-yellow-800 hover:bg-yellow-300 dark:bg-yellow-800 dark:text-yellow-200 dark:hover:bg-yellow-700"
+                          className="rounded bg-yellow-200 px-2 py-1 text-xs font-medium text-yellow-800 hover:bg-yellow-300 dark:bg-yellow-800 dark:text-yellow-200 dark:hover:bg-yellow-700 transition-colors duration-200 ease-out"
                         >
                           📋 کپی
                         </button>
@@ -407,14 +413,15 @@ export default function SignupPage() {
                     </div>
                   )}
 
-                  <form onSubmit={handleSubmitOtp(handleVerifyOtp)} className="space-y-4">
+                  <form onSubmit={handleSubmitOtp(handleVerifyOtp)} className="space-y-4" data-testid="signup-otp-form">
                     <div>
-                      <label htmlFor="otp" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                      <label htmlFor="otp" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white leading-snug">
                         کد تأیید
                       </label>
                       <input
                         id="otp"
                         type="text"
+                        data-testid="signup-otp"
                         inputMode="numeric"
                         maxLength="6"
                         dir="ltr"
@@ -430,8 +437,9 @@ export default function SignupPage() {
 
                     <button
                       type="submit"
+                      data-testid="signup-otp-submit"
                       disabled={isSubmittingOtp}
-                      className="w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-60"
+                      className="w-full rounded-lg bg-indigo-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-60 transition-colors duration-200 ease-out"
                     >
                       {isSubmittingOtp ? 'در حال تأیید...' : 'تأیید کد'}
                     </button>
@@ -445,7 +453,7 @@ export default function SignupPage() {
                         <button
                           type="button"
                           onClick={handleResendOtp}
-                          className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                          className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400 transition-colors duration-200 ease-out"
                         >
                           ارسال مجدد کد
                         </button>
@@ -455,7 +463,7 @@ export default function SignupPage() {
                     <button
                       type="button"
                       onClick={() => setStep('verify-choice')}
-                      className="w-full text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                      className="w-full text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200 ease-out"
                     >
                       بازگشت به انتخاب روش
                     </button>
@@ -465,23 +473,23 @@ export default function SignupPage() {
 
               {step === 'verify-email' && (
                 <>
-                  <h1 className="mb-4 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="mb-4 text-center text-2xl font-bold leading-tight text-gray-900 dark:text-white">
                     تأیید ایمیل
                   </h1>
                   <div className="text-center">
                     <svg className="mx-auto mb-4 h-16 w-16 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mb-4 text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed">
                       لینک تأیید به ایمیل <span className="font-medium text-gray-900 dark:text-white">{registeredData?.email}</span> ارسال شد.
                     </p>
-                    <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mb-6 text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed">
                       لطفاً ایمیل خود را بررسی کرده و روی لینک تأیید کلیک کنید.
                     </p>
 
                     <button
                       onClick={() => setStep('verify-choice')}
-                      className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                      className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400 transition-colors duration-200 ease-out"
                     >
                       بازگشت به انتخاب روش
                     </button>

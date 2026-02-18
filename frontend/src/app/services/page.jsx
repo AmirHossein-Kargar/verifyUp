@@ -62,7 +62,7 @@ function VpnModal({ open, onClose }) {
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        transition={{ type: "spring", duration: 0.5 }}
+        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
         className="relative p-4 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto scrollbar-hide"
         style={{
           scrollbarWidth: 'none',
@@ -72,10 +72,10 @@ function VpnModal({ open, onClose }) {
       >
         <div className="relative bg-neutral-primary-soft border border-default rounded-lg shadow-lg p-5">
           <div className="flex items-center justify-between border-b border-default pb-3 mb-4">
-            <h3 className="text-base font-semibold text-heading">تفاوت IP Residential و VPS</h3>
+            <h3 className="text-base font-semibold leading-snug text-heading">تفاوت IP Residential و VPS</h3>
             <button
               type="button"
-              className="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors"
+              className="text-sm font-medium text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-lg w-8 h-8 inline-flex justify-center items-center transition-colors duration-200 ease-out"
               onClick={onClose}
             >
               <svg
@@ -94,7 +94,7 @@ function VpnModal({ open, onClose }) {
           </div>
 
           <div className="text-center mb-4">
-            <p className="text-sm font-medium text-heading">کدوم انتخاب درست‌تره؟</p>
+            <p className="text-sm font-medium leading-snug text-heading">کدوم انتخاب درست‌تره؟</p>
           </div>
 
           <div className="space-y-3 mb-4">
@@ -206,7 +206,7 @@ function VpnModal({ open, onClose }) {
               whileTap={{ scale: 0.98 }}
               onClick={onClose}
               type="button"
-              className="text-white bg-brand border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium rounded-lg text-sm px-4 py-2 focus:outline-none transition-colors"
+              className="text-white bg-brand border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium rounded-lg text-sm px-4 py-2 focus:outline-none transition-colors duration-200 ease-out"
             >
               متوجه شدم
             </motion.button>
@@ -247,7 +247,7 @@ function SimModal({ open, onClose }) {
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        transition={{ type: "spring", duration: 0.5 }}
+        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
         className="relative p-4 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto scrollbar-hide"
         style={{
           scrollbarWidth: 'none',
@@ -257,10 +257,10 @@ function SimModal({ open, onClose }) {
       >
         <div className="relative bg-neutral-primary-soft border border-default rounded-lg shadow-lg p-5">
           <div className="flex items-center justify-between border-b border-default pb-3 mb-4">
-            <h3 className="text-base font-semibold text-heading">تفاوت سیم‌کارت فیزیکی و مجازی</h3>
+            <h3 className="text-base font-semibold leading-snug text-heading">تفاوت سیم‌کارت فیزیکی و مجازی</h3>
             <button
               type="button"
-              className="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors"
+              className="text-sm font-medium text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-lg w-8 h-8 inline-flex justify-center items-center transition-colors duration-200 ease-out"
               onClick={onClose}
             >
               <svg
@@ -279,7 +279,7 @@ function SimModal({ open, onClose }) {
           </div>
 
           <div className="text-center mb-4">
-            <p className="text-sm font-medium text-heading">کدوم انتخاب مطمئن‌تره؟</p>
+            <p className="text-sm font-medium leading-snug text-heading">کدوم انتخاب مطمئن‌تره؟</p>
           </div>
 
           <div className="space-y-3 mb-4">
@@ -393,7 +393,7 @@ function SimModal({ open, onClose }) {
               whileTap={{ scale: 0.98 }}
               onClick={onClose}
               type="button"
-              className="text-white bg-brand border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium rounded-lg text-sm px-4 py-2 focus:outline-none transition-colors"
+              className="text-white bg-brand border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium rounded-lg text-sm px-4 py-2 focus:outline-none transition-colors duration-200 ease-out"
             >
               متوجه شدم
             </motion.button>
@@ -407,7 +407,7 @@ function SimModal({ open, onClose }) {
 function RadioCard({ name, value, checked, onChange, label }) {
   const id = `${name}-${value}`;
   return (
-    <label className="flex items-center p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 transition-colors">
+    <label className="flex items-center p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 transition-colors duration-200 ease-out">
       <input
         id={id}
         type="radio"
@@ -417,7 +417,7 @@ function RadioCard({ name, value, checked, onChange, label }) {
         onChange={(e) => onChange(e.target.value)}
         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
       />
-      <span className="w-full ms-2 sm:ms-3 text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-300">{label}</span>
+      <span className="w-full ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 sm:ms-3">{label}</span>
     </label>
   );
 }
@@ -473,9 +473,9 @@ function PlanCard({ config, state, onUpdate, onOpenVpnModal, onOpenSimModal, dis
             {config.icon}
           </div>
         )}
-        <h5 className="mb-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white text-center px-2">{config.title}</h5>
+        <h5 className="mb-2 text-lg font-semibold leading-snug text-gray-900 dark:text-white text-center px-2 sm:text-xl">{config.title}</h5>
         <div className="flex items-baseline justify-center text-gray-900 dark:text-white mb-3 sm:mb-4">
-          <span className="text-2xl sm:text-3xl font-extrabold tracking-tight">{formatTooman(displayPrice)}</span>
+          <span className="text-xl font-bold tracking-tight sm:text-2xl">{formatTooman(displayPrice)}</span>
         </div>
       </div>
 
@@ -485,8 +485,8 @@ function PlanCard({ config, state, onUpdate, onOpenVpnModal, onOpenSimModal, dis
           {showConnectionOptions && (
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">انتخاب سرویس اتصال:</p>
-                <button onClick={onOpenVpnModal} type="button" className="text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400 text-xs font-medium whitespace-nowrap">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">انتخاب سرویس اتصال:</p>
+                <button onClick={onOpenVpnModal} type="button" className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400 whitespace-nowrap">
                   تفاوت چیست؟
                 </button>
               </div>
@@ -520,8 +520,8 @@ function PlanCard({ config, state, onUpdate, onOpenVpnModal, onOpenSimModal, dis
                 className="w-4 h-4 mt-0.5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
               />
               <div className="ms-3">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">قبض تایید آدرس</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">قبض برای تایید آدرس شما</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">قبض تایید آدرس</p>
+                <p className="text-sm font-normal text-gray-500 dark:text-gray-400 leading-relaxed">قبض برای تایید آدرس شما</p>
               </div>
             </label>
           )}
@@ -530,8 +530,8 @@ function PlanCard({ config, state, onUpdate, onOpenVpnModal, onOpenSimModal, dis
           {showSimOptions && (
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">انتخاب نوع سیمکارت:</p>
-                <button onClick={onOpenSimModal} type="button" className="text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400 text-xs font-medium whitespace-nowrap">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">انتخاب نوع سیمکارت:</p>
+                <button onClick={onOpenSimModal} type="button" className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400 whitespace-nowrap">
                   تفاوت چیست؟
                 </button>
               </div>
@@ -580,7 +580,7 @@ function PlanCard({ config, state, onUpdate, onOpenVpnModal, onOpenSimModal, dis
               <svg className={`shrink-0 w-4 h-4 ${enabled ? 'text-blue-600 dark:text-blue-500' : 'text-gray-400 dark:text-gray-500'}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
               </svg>
-              <span className={`text-xs sm:text-sm ms-3 ${enabled ? 'text-gray-500 dark:text-gray-400' : 'text-gray-400 dark:text-gray-500'}`}>{f.text}</span>
+              <span className={`text-sm font-normal ms-3 ${enabled ? 'text-gray-500 dark:text-gray-400' : 'text-gray-400 dark:text-gray-500'}`}>{f.text}</span>
             </li>
           );
         })}
@@ -591,8 +591,8 @@ function PlanCard({ config, state, onUpdate, onOpenVpnModal, onOpenSimModal, dis
         disabled={disabled || isInCart}
         className={
           disabled || isInCart
-            ? 'w-full text-white bg-gray-400 cursor-not-allowed font-medium rounded-lg text-sm px-5 py-2.5 text-center'
-            : 'w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-colors'
+            ? 'w-full text-sm font-medium text-white bg-gray-400 cursor-not-allowed rounded-lg px-5 py-2.5 text-center'
+            : 'w-full text-sm font-medium text-white bg-blue-600 rounded-lg px-5 py-2.5 text-center hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-colors duration-200 ease-out'
         }
         onClick={() => {
           if (disabled || isInCart) return;

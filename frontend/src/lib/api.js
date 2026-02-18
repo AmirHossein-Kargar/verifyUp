@@ -25,6 +25,14 @@ class ApiClient {
   }
 
   /**
+   * Clear cached CSRF token (e.g. after logout so next login gets a fresh token).
+   */
+  clearCsrfToken() {
+    this.csrfToken = null;
+    this.csrfLoading = null;
+  }
+
+  /**
    * Lazily fetch CSRF token from backend and cache it.
    * Runs only in the browser; on the server we skip CSRF headers.
    */
@@ -50,9 +58,10 @@ class ApiClient {
         });
         if (!res.ok) return;
         const data = await res.json();
-        if (data && data.token) {
-          this.csrfToken = data.token;
-        }
+        // Backend returns { success, message, data: { token } }
+        // Keep fallback for any older shape that may return { token } directly.
+        const token = data?.data?.token ?? data?.token;
+        if (token) this.csrfToken = token;
       } catch {
         // Fail silently; requests will still be sent but may be rejected by server
       } finally {
@@ -105,14 +114,8 @@ class ApiClient {
       credentials: "include",
     };
 
-    // Log request details for debugging
     if (process.env.NODE_ENV !== "production") {
-      console.log("API Request:", {
-        method,
-        url,
-        hasCSRF: !!this.csrfToken,
-        headers: headersWithCsrf,
-      });
+      console.debug("[API]", method, endpoint, "csrf:", !!this.csrfToken);
     }
 
     try {
@@ -122,13 +125,8 @@ class ApiClient {
       // * Parse JSON response
       const data = await response.json();
 
-      // Log response for debugging
-      if (process.env.NODE_ENV !== "production") {
-        console.log("API Response:", {
-          status: response.status,
-          ok: response.ok,
-          data,
-        });
+      if (process.env.NODE_ENV !== "production" && !response.ok && !(endpoint === "/auth/me" && response.status === 401)) {
+        console.warn("[API]", endpoint, response.status, data?.message);
       }
 
       // * Handle non-success responses from backend

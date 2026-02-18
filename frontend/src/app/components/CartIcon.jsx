@@ -11,7 +11,7 @@ export default function CartIcon() {
         <Link
             href="/cart"
             prefetch={true}
-            className="relative p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 inline-flex"
+            className="relative p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 inline-flex transition-colors duration-200 ease-out"
             aria-label="Shopping cart"
         >
             <svg
@@ -29,7 +29,7 @@ export default function CartIcon() {
                 />
             </svg>
             {count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
                     {count > 9 ? '9+' : count}
                 </span>
             )}

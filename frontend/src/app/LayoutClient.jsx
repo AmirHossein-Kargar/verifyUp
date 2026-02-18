@@ -1,34 +1,25 @@
 'use client';
 
-import { usePathname } from "next/navigation";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import dynamic from "next/dynamic";
 import { CartProvider } from "@/contexts/CartContext";
-import { useAuth } from "@/contexts/AuthContext";
+
+// Dynamically import Header and Footer to avoid SSR hydration issues
+const Header = dynamic(() => import("./components/Header"), { ssr: false });
+const Footer = dynamic(() => import("./components/Footer"), { ssr: false });
 
 export default function LayoutClient({ children }) {
-    const pathname = usePathname();
-    const { isLoggingOut } = useAuth();
-    const hideFooter = pathname === '/cart';
-    const isDashboardLike = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
-
-    // Debug log
-    if (typeof window !== 'undefined') {
-        console.log('LayoutClient - pathname:', pathname, 'isDashboardLike:', isDashboardLike);
-    }
-
     return (
         <CartProvider>
-            {/* Header - hide on dashboard and admin pages */}
-            {!isDashboardLike && <Header />}
+            {/* Header - always show */}
+            <Header />
 
             {/* Main Content with padding for fixed header */}
-            <main className={isDashboardLike ? '' : 'pt-24'}>
+            <main className="pt-24">
                 {children}
             </main>
 
-            {/* Footer - hide on cart, dashboard, admin, and during logout */}
-            {!hideFooter && !isDashboardLike && !isLoggingOut && <Footer />}
+            {/* Footer - conditional rendering handled inside Footer component */}
+            <Footer />
         </CartProvider>
     );
 }
