@@ -8,6 +8,24 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
+// * Base URL for the API server (no /api suffix) – used for profile images etc.
+const API_SERVER_BASE = API_BASE_URL.replace(/\/api\/?$/, "") || "http://localhost:4000";
+
+/** Build profile image URL (same-origin proxy when token present). Delegates to shared logic. */
+function buildProfileImageUrl(path, token) {
+  if (!path || typeof path !== "string") return null;
+  const trimmed = path.trim();
+  if (!trimmed) return null;
+  let pathPart = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  const match = pathPart.match(/\/api\/users\/profile-image\/([a-f0-9]{24})$/i);
+  if (match && token && typeof token === "string") {
+    return `/api/user/profile-image/${match[1]}?token=${encodeURIComponent(token)}`;
+  }
+  const url = `${API_SERVER_BASE}${pathPart}`;
+  if (token && typeof token === "string") return `${url}?token=${encodeURIComponent(token)}`;
+  return url;
+}
+
 // HTTP methods considered safe from a CSRF perspective
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "TRACE"];
 
@@ -236,6 +254,11 @@ class ApiClient {
     return this.request("/auth/me");
   }
 
+  /** Profile image URL – delegates to module-level function so it is never stripped. */
+  getProfileImageUrl(path, token) {
+    return buildProfileImageUrl(path, token);
+  }
+
   // * Refresh access token using refresh token
   async refreshToken() {
     return this.request("/auth/refresh", {
@@ -295,4 +318,24 @@ class ApiClient {
 }
 
 // * Export a single shared API client instance
-export const api = new ApiClient();
+const api = new ApiClient();
+
+/**
+ * Upload profile image. Use this function directly (do not use api.uploadProfileImage)
+ * to avoid Turbopack/bundler stripping. Returns { success, data: { profileImage } }.
+ */
+async function uploadProfileImage(file) {
+  if (!file || !(file instanceof File)) {
+    throw { status: 400, message: "No image file provided" };
+  }
+  const formData = new FormData();
+  formData.append("image", file);
+  return api.request("/users/profile-image", { method: "PATCH", body: formData });
+}
+
+api.uploadProfileImage = uploadProfileImage;
+
+/** Exported alias so callers can use getProfileImageUrl() directly and avoid api.getProfileImageUrl. */
+const getProfileImageUrl = buildProfileImageUrl;
+
+export { api, uploadProfileImage, getProfileImageUrl };

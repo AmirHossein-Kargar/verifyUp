@@ -75,7 +75,7 @@ export default function OrdersPage() {
                 )}
 
                 {orders.length === 0 && !error ? (
-                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 md:p-12">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 md:p-12" data-testid="orders-empty">
                         <div className="text-center">
                             <svg className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-3 md:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -89,7 +89,7 @@ export default function OrdersPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-3 md:space-y-4" data-testid="orders-list">
                         {orders.map((order) => {
                             const uiStatusKey = STATUS_MAP[order.status] || 'pending';
                             const badge = STATUS_BADGES[uiStatusKey] || STATUS_BADGES.pending;
@@ -110,6 +110,8 @@ export default function OrdersPage() {
                             return (
                                 <div
                                     key={order._id}
+                                    data-testid="order-item"
+                                    data-order-id={order._id}
                                     className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-5 hover:shadow-md transition-shadow duration-200 ease-out"
                                 >
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
@@ -133,19 +135,19 @@ export default function OrdersPage() {
                                                     {serviceConfig.title}
                                                 </h3>
                                                 {dateText && (
-                                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed mb-1 md:mb-2">
+                                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed mb-1 md:mb-2" data-testid="order-item-date">
                                                         تاریخ ثبت: {dateText}
                                                     </p>
                                                 )}
 
-                                                <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded md:px-2.5 ${badge}`}>
+                                                <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded md:px-2.5 ${badge}`} data-testid="order-item-status">
                                                     {text}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div className="text-left sm:text-right">
-                                            <p className="text-base font-bold leading-tight text-gray-900 dark:text-white md:text-lg">
+                                            <p className="text-base font-bold leading-tight text-gray-900 dark:text-white md:text-lg" data-testid="order-item-total">
                                                 {formatTooman(order.priceToman || 0)}
                                             </p>
 

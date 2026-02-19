@@ -25,7 +25,21 @@ async function loginWithCredentials(page, { email, password }) {
  */
 async function loginAndWaitForDashboard(page, { email, password }) {
   await loginWithCredentials(page, { email, password });
-  await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+  try {
+    await page.waitForURL(/\/dashboard/, {
+      timeout: 15000,
+      waitUntil: 'domcontentloaded',
+    });
+  } catch (e) {
+    const pathname = new URL(page.url()).pathname;
+    if (pathname === '/login' || pathname.endsWith('/login')) {
+      const toastText = await page.getByTestId('toast-message').textContent().catch(() => '') || '';
+      throw new Error(
+        `Login did not redirect to dashboard (still on /login). ${toastText ? `Toast: ${toastText}` : 'No toast'}. Check backend is running and TEST_USER_EMAIL/TEST_USER_PASSWORD are valid for a verified user.`
+      );
+    }
+    throw e;
+  }
   await page.getByTestId('dashboard-welcome').waitFor({ state: 'visible', timeout: 10000 });
 }
 

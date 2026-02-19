@@ -588,6 +588,7 @@ function PlanCard({ config, state, onUpdate, onOpenVpnModal, onOpenSimModal, dis
 
       <button
         type="button"
+        data-testid={`add-to-cart-${config.id}`}
         disabled={disabled || isInCart}
         className={
           disabled || isInCart

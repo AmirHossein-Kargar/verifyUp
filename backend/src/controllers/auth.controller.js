@@ -13,6 +13,7 @@ const {
   setAuthCookies,
   clearAuthCookies,
   verifyRefreshToken,
+  generateProfileImageToken,
 } = require("../utils/jwt");
 const { sanitizeUser } = require("../utils/sanitize");
 const ApiResponse = require("../utils/response");
@@ -215,10 +216,18 @@ exports.login = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    const safeUser = sanitizeUser(user);
+    if (user.profileImageId) {
+      safeUser.profileImageToken = generateProfileImageToken(
+        user._id.toString(),
+        user.profileImageId.toString()
+      );
+    }
+
     // Return success response
     return ApiResponse.success(res, {
       message: "ورود با موفقیت انجام شد",
-      data: { user: sanitizeUser(user) },
+      data: { user: safeUser },
     });
   } catch (err) {
     if (err?.issues) {
@@ -332,9 +341,17 @@ exports.me = async (req, res, next) => {
       });
     }
 
+    const safeUser = sanitizeUser(user);
+    if (user.profileImageId) {
+      safeUser.profileImageToken = generateProfileImageToken(
+        req.user.userId,
+        user.profileImageId.toString()
+      );
+    }
+
     return ApiResponse.success(res, {
       message: "اطلاعات کاربر با موفقیت دریافت شد",
-      data: { user: sanitizeUser(user) },
+      data: { user: safeUser },
     });
   } catch (err) {
     next(err);

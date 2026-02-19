@@ -36,6 +36,19 @@ export function AuthProvider({ children }) {
         setUser(userData);
     };
 
+    /** Update profile image (and optional token) so UI updates immediately after upload. */
+    const updateUserProfileImage = (profileImage, profileImageToken) => {
+        setUser((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      profileImage: profileImage ?? prev.profileImage,
+                      profileImageToken: profileImageToken !== undefined ? profileImageToken : prev.profileImageToken,
+                  }
+                : null
+        );
+    };
+
     const logout = async () => {
         try {
             setIsLoggingOut(true);
@@ -54,7 +67,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, isLoggingOut, login, logout, checkAuth }}>
+        <AuthContext.Provider value={{ user, loading, isLoggingOut, login, logout, checkAuth, updateUserProfileImage }}>
             {children}
         </AuthContext.Provider>
     );

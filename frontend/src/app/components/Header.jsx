@@ -8,22 +8,29 @@ import CartIcon from "./CartIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from 'framer-motion';
+import { api } from "@/lib/api";
+import { useProfileImage } from "@/contexts/ProfileImageContext";
 
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const { user, logout } = useAuth();
+    const { displayUrl: profileImageDisplayUrl } = useProfileImage();
     const router = useRouter();
     const pathname = usePathname();
     const dropdownRef = useRef(null);
     const [mounted, setMounted] = useState(false);
+    const [avatarImageError, setAvatarImageError] = useState(false);
 
-    // Prevent hydration mismatch by only showing auth UI after mount
     useEffect(() => {
         const timer = setTimeout(() => setMounted(true), 0);
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        setAvatarImageError(false);
+    }, [profileImageDisplayUrl]);
 
     // Helper function to check if a route is active
     const isActiveRoute = (route) => {
@@ -139,9 +146,25 @@ export default function Header() {
                                     type="button"
                                     data-testid="user-menu-button"
                                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                                    className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full cursor-pointer bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors duration-200 ease-out"
+                                    className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full cursor-pointer bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors duration-200 ease-out overflow-hidden shrink-0"
                                 >
-                                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                                    {profileImageDisplayUrl && !avatarImageError ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            key={profileImageDisplayUrl}
+                                            src={profileImageDisplayUrl}
+                                            alt=""
+                                            className="w-full h-full object-cover"
+                                            onError={() => {
+                                                if (process.env.NODE_ENV !== "production") {
+                                                    console.warn("[Header] Profile image failed to load:", profileImageDisplayUrl?.slice(0, 60));
+                                                }
+                                                setAvatarImageError(true);
+                                            }}
+                                        />
+                                    ) : (
+                                        user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'
+                                    )}
                                 </button>
 
                                 {/* Dropdown menu */}

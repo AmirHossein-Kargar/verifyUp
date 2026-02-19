@@ -144,7 +144,19 @@
     line-height: 1.625;
     letter-spacing: normal;
   }
-  h1, h2, h3, h4, h5, h6, p, button, a, label, input, select, textarea {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  button,
+  a,
+  label,
+  input,
+  select,
+  textarea {
     font-family: inherit;
   }
 }

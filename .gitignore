@@ -26,6 +26,9 @@ dist/
 # Testing
 coverage/
 .nyc_output/
+tests/e2e/auth/.auth/
+test-results/
+playwright-report/
 
 # IDE and Editor files
 .vscode/

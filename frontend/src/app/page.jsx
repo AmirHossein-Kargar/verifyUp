@@ -1,8 +1,16 @@
+import dynamic from 'next/dynamic';
 import HomeClient from './HomeClient';
-import MotionSection from './MotionSection';
 import StepCard from './components/StepCard';
-import FAQ from './components/FAQ';
 import JsonLd from './components/JsonLd';
+
+const MotionSection = dynamic(() => import('./MotionSection'), {
+  ssr: true,
+  loading: () => <div className="min-h-[1px]" aria-hidden />,
+});
+const FAQ = dynamic(() => import('./components/FAQ'), {
+  ssr: true,
+  loading: () => <div className="min-h-[200px] animate-pulse rounded bg-gray-100 dark:bg-gray-800" aria-hidden />,
+});
 
 // Homepage - cache for 30 minutes (more frequent updates possible)
 export const revalidate = 1800;

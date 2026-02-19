@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -21,14 +21,28 @@ export function useRequireAuth(options = {}) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const redirectTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (loading) return;
 
-    // Not authenticated → go to login
+    // Not authenticated → redirect after short delay so in-flight checkAuth (e.g. from profile page) can complete
     if (!user) {
-      router.replace("/login");
-      return;
+      redirectTimeoutRef.current = window.setTimeout(() => {
+        redirectTimeoutRef.current = null;
+        router.replace("/login");
+      }, 300);
+      return () => {
+        if (redirectTimeoutRef.current) {
+          clearTimeout(redirectTimeoutRef.current);
+          redirectTimeoutRef.current = null;
+        }
+      };
+    }
+
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+      redirectTimeoutRef.current = null;
     }
 
     const userRole = user.role || "user";
@@ -52,6 +66,13 @@ export function useRequireAuth(options = {}) {
         router.replace("/dashboard");
       }
     }
+
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+        redirectTimeoutRef.current = null;
+      }
+    };
   }, [loading, user, router, allowedRoles, pathname]);
 
   useEffect(() => {

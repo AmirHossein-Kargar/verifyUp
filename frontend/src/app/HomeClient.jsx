@@ -5,16 +5,29 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfileImage } from '@/contexts/ProfileImageContext';
+
+const PLACEHOLDER_AVATARS = [
+  'https://flowbite.com/docs/images/people/profile-picture-5.jpg',
+  'https://flowbite.com/docs/images/people/profile-picture-2.jpg',
+  'https://flowbite.com/docs/images/people/profile-picture-3.jpg',
+];
 
 export default function HomeClient() {
   const { user, loading } = useAuth();
+  const { displayUrl: profileImageDisplayUrl } = useProfileImage();
   const reduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
+  const [userAvatarError, setUserAvatarError] = useState(false);
   useEffect(() => setMounted(true), []);
+  useEffect(() => setUserAvatarError(false), [profileImageDisplayUrl]);
 
-  // Use reduce only after hydration so server and client first render match
   const reduce = mounted ? reduceMotion : false;
   const fadeUp = reduce ? {} : { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
+
+  const showUserAvatar = user && (profileImageDisplayUrl ? !userAvatarError : true);
+  const userInitial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U';
+  const userImageUrl = profileImageDisplayUrl ?? null;
 
   return (
     <motion.section
@@ -38,18 +51,34 @@ export default function HomeClient() {
         از ثبت‌ نام تا تأیید نهایی هویت در آپورک، کنار شما هستیم تا بدون ریسک و مشکل شروع به کار کنید.
       </motion.p>
 
-      {/* Avatars */}
+      {/* Avatars: logged-in user first (when present), then placeholders, then +99 */}
       <motion.div
         className="mb-6 flex items-center justify-center gap-3 sm:mb-8"
         {...(reduce ? {} : { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } })}
         transition={{ duration: 0.6, delay: 0.35 }}
       >
         <div className="flex -space-x-4 rtl:space-x-reverse">
-          {[
-            'https://flowbite.com/docs/images/people/profile-picture-5.jpg',
-            'https://flowbite.com/docs/images/people/profile-picture-2.jpg',
-            'https://flowbite.com/docs/images/people/profile-picture-3.jpg',
-          ].map((src) => (
+          {showUserAvatar && (
+            <div
+              className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white dark:border-gray-800"
+              title={user?.name || 'شما'}
+            >
+              {userImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={userImageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  onError={() => setUserAvatarError(true)}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-indigo-600 text-sm font-medium text-white">
+                  {userInitial}
+                </div>
+              )}
+            </div>
+          )}
+          {PLACEHOLDER_AVATARS.map((src) => (
             <div
               key={src}
               className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-white dark:border-gray-800"

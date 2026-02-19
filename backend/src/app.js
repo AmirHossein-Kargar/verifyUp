@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -12,6 +13,7 @@ const ApiResponse = require("./utils/response");
 const authRoutes = require("./routes/auth.routes");
 const orderRoutes = require("./routes/order.routes");
 const adminRoutes = require("./routes/admin.routes");
+const userRoutes = require("./routes/user.routes");
 
 const app = express();
 
@@ -21,7 +23,11 @@ app.set("trust proxy", 1);
 
 // Security middleware
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const API_PUBLIC_URL = process.env.API_PUBLIC_URL || null; // e.g. https://api.verifyup.ir for profile images
 const allowedOrigins = [FRONTEND_URL].filter(Boolean);
+
+const imgSrcDirective = ["'self'", "data:"];
+if (API_PUBLIC_URL) imgSrcDirective.push(API_PUBLIC_URL);
 
 app.use(
   helmet({
@@ -30,10 +36,9 @@ app.use(
         ? {
             directives: {
               defaultSrc: ["'self'"],
-              // برای Next ممکنه nonce لازم باشه؛ اگر مشکل داشتی اینجا باید اصلاح شه
               scriptSrc: ["'self'"],
               styleSrc: ["'self'", "'unsafe-inline'"],
-              imgSrc: ["'self'", "data:"],
+              imgSrc: imgSrcDirective,
               connectSrc: ["'self'", FRONTEND_URL],
               fontSrc: ["'self'"],
               objectSrc: ["'none'"],
@@ -140,10 +145,14 @@ app.get("/", (req, res) => {
   });
 });
 
+// Serve uploaded profile images (makes files accessible to frontend)
+app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
+
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/users", userRoutes);
 
 // 404 handler
 app.use((req, res) => {

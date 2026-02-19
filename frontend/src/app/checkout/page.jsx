@@ -65,17 +65,11 @@ export default function CheckoutPage() {
       setSubmitting(true);
       showToast('در حال نهایی‌سازی سفارش...', 'info', 2000);
 
-      console.log('User:', user);
-      console.log('Sending order payload:', pending.orderPayload);
-
       // Ensure we have a fresh CSRF token
       await api.ensureCsrfToken();
-      console.log('CSRF token ensured');
 
       // در حالت واقعی این نقطه بعد از تأیید درگاه پرداخت (وبهوک) فراخوانی می‌شود
       const response = await api.createPaidOrder(pending.orderPayload);
-
-      console.log('Order response:', response);
 
       // Clear cart and pending checkout after successful order
       window.localStorage.removeItem('pendingCheckout');
@@ -88,15 +82,9 @@ export default function CheckoutPage() {
         router.push('/dashboard/orders');
       }, 500);
     } catch (error) {
-      console.error('=== Order Creation Error ===');
-      console.error('Error object:', error);
-      console.error('Error type:', typeof error);
-      console.error('Error keys:', Object.keys(error || {}));
-      console.error('Error status:', error?.status);
-      console.error('Error message:', error?.message);
-      console.error('Error errors:', error?.errors);
-      console.error('========================');
-
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Order creation error:', error);
+      }
       let message = 'خطا در نهایی‌سازی سفارش پس از پرداخت';
 
       if (error?.status === 401) {
@@ -138,8 +126,8 @@ export default function CheckoutPage() {
 
   if (!pending) {
     return (
-      <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl">
-        <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl" data-testid="checkout-page">
+        <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800" data-testid="checkout-no-pending">
           <div className="text-center space-y-3">
             <h1 className="text-xl font-bold leading-tight text-gray-900 dark:text-white">
               سفارشی برای پرداخت یافت نشد
@@ -160,13 +148,13 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl">
+    <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl" data-testid="checkout-page">
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <h1 className="mb-4 text-xl font-bold leading-tight text-gray-900 dark:text-white text-center">
           مرحله پرداخت و ثبت سفارش
         </h1>
 
-        <div className="mb-6 space-y-2 text-sm font-normal text-gray-700 dark:text-gray-300 leading-relaxed">
+        <div className="mb-6 space-y-2 text-sm font-normal text-gray-700 dark:text-gray-300 leading-relaxed" data-testid="checkout-order-summary">
           <p>
             <span className="font-medium">پلن انتخابی:</span>{' '}
             {pending.item?.title || 'نامشخص'}
@@ -186,6 +174,7 @@ export default function CheckoutPage() {
         <div className="flex flex-col gap-3 mt-4">
           <button
             type="button"
+            data-testid="checkout-submit"
             onClick={handleMockPaymentSuccess}
             disabled={submitting}
             className="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white text-center hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:focus:ring-emerald-800 transition-colors duration-200 ease-out"
@@ -195,6 +184,7 @@ export default function CheckoutPage() {
 
           <button
             type="button"
+            data-testid="checkout-cancel"
             onClick={handleCancel}
             disabled={submitting}
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 text-center hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-gray-700 transition-colors duration-200 ease-out"

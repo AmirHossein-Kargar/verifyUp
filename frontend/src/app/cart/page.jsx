@@ -87,14 +87,14 @@ export default function CartPage() {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl">
-        <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-8">
+      <div className="min-h-[calc(100vh-20rem)] flex items-center justify-center p-4" dir="rtl" data-testid="cart-page">
+        <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-8" data-testid="cart-empty">
           <div className="flex flex-col items-center justify-center text-center">
             <svg className="mb-4 h-20 w-20 text-gray-400 sm:h-24 sm:w-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
 
-            <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white" data-testid="cart-empty-title">
               سبد خرید شما خالی است
             </h1>
             <p className="mb-6 text-sm text-gray-700 dark:text-gray-400">
@@ -103,6 +103,7 @@ export default function CartPage() {
 
             <Link
               href="/services"
+              data-testid="cart-empty-link-services"
               className="inline-flex w-full items-center justify-center rounded-lg bg-indigo-700 px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
             >
               مشاهده خدمات
@@ -114,13 +115,14 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-20rem)] p-4 sm:p-6 lg:p-8" dir="rtl">
+    <div className="min-h-[calc(100vh-20rem)] p-4 sm:p-6 lg:p-8" dir="rtl" data-testid="cart-page">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">سبد خرید</h1>
 
           <button
             type="button"
+            data-testid="cart-clear-all"
             onClick={handleClearCart}
             className="self-start text-sm font-medium text-red-600 transition-colors duration-200 ease-out hover:text-red-700 dark:text-red-500 dark:hover:text-red-400 sm:self-auto"
           >
@@ -134,6 +136,8 @@ export default function CartPage() {
             {cart.map((item) => (
               <div
                 key={item.id}
+                data-testid="cart-item"
+                data-item-id={item.id}
                 className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800 sm:p-6"
               >
                 <div className="flex items-start gap-4">
@@ -155,7 +159,7 @@ export default function CartPage() {
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="mb-2 text-base font-semibold text-gray-900 dark:text-white sm:text-lg">
+                    <h3 className="mb-2 text-base font-semibold text-gray-900 dark:text-white sm:text-lg" data-testid="cart-item-title">
                       {item.title}
                     </h3>
 
@@ -190,13 +194,14 @@ export default function CartPage() {
                       </div>
                     )}
 
-                    <p className="mt-3 text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+                    <p className="mt-3 text-lg font-bold text-gray-900 dark:text-white sm:text-xl" data-testid="cart-item-price">
                       {formatTooman(item.price)}
                     </p>
                   </div>
 
                   <button
                     type="button"
+                    data-testid="cart-item-remove"
                     onClick={() => handleRemoveItem(item.id)}
                     className="p-1 text-red-600 transition-colors duration-200 ease-out hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
                     aria-label="حذف محصول"
@@ -225,7 +230,7 @@ export default function CartPage() {
 
                 <div className="flex justify-between border-t border-gray-200 pt-3 text-base font-bold text-gray-900 dark:border-gray-700 dark:text-white sm:text-lg">
                   <span>مجموع:</span>
-                  <span>{formatTooman(totalPrice)}</span>
+                  <span data-testid="cart-total">{formatTooman(totalPrice)}</span>
                 </div>
               </div>
 
@@ -239,6 +244,7 @@ export default function CartPage() {
 
               <button
                 type="button"
+                data-testid="cart-checkout-button"
                 onClick={handleCheckout}
                 className="mb-3 w-full rounded-lg bg-indigo-700 px-5 py-3 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
               >

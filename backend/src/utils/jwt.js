@@ -83,6 +83,27 @@ function clearAuthCookies(res) {
   res.clearCookie("refreshToken", REFRESH_COOKIE);
 }
 
+const PROFILE_IMAGE_TOKEN_EXPIRY = "1h";
+
+function generateProfileImageToken(userId, imageId) {
+  return jwt.sign(
+    { userId, imageId, purpose: "profile-image" },
+    process.env.JWT_SECRET,
+    { expiresIn: PROFILE_IMAGE_TOKEN_EXPIRY, algorithm: JWT_ALG }
+  );
+}
+
+function verifyProfileImageToken(token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: [JWT_ALG] });
+    return decoded?.purpose === "profile-image" && decoded?.userId && decoded?.imageId
+      ? decoded
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
@@ -90,4 +111,6 @@ module.exports = {
   verifyRefreshToken,
   setAuthCookies,
   clearAuthCookies,
+  generateProfileImageToken,
+  verifyProfileImageToken,
 };

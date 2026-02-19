@@ -5,7 +5,9 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:headed": "playwright test --headed",
-    "e2e:auth": "playwright test tests/e2e/auth/"
+    "e2e:auth": "playwright test tests/e2e/auth/",
+    "e2e:orders": "playwright test tests/e2e/orders/",
+    "e2e:full-order": "playwright test tests/e2e/orders/full-order-flow.spec.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"

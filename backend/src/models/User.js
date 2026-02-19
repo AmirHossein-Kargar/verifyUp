@@ -44,6 +44,11 @@ const UserSchema = new mongoose.Schema(
 
     // Optional telemetry
     lastLoginAt: { type: Date, default: null, select: false },
+
+    // Profile image URL path for display (e.g. /api/users/profile-image/ID). Used by frontend.
+    profileImage: { type: String, default: null },
+    // Reference to encrypted ProfileImage document (optional; used for secure retrieval).
+    profileImageId: { type: mongoose.Schema.Types.ObjectId, ref: "ProfileImage", default: null },
   },
   { timestamps: true },
 );

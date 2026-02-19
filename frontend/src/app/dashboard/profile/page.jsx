@@ -1,23 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfileImage } from '@/contexts/ProfileImageContext';
 import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
 import { useToast } from '@/hooks/useToast';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { uploadProfileImage } from '@/lib/api';
+import Toast from '@/components/Toast';
+
+const MAX_SIZE_MB = 2;
+const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ACCEPT_ATTR = 'image/jpeg,image/jpg,image/png,image/webp';
+
+function validateProfileImageFile(file) {
+  if (!file) return { ok: false, message: 'فایلی انتخاب نشده است.' };
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return { ok: false, message: 'فرمت فایل مجاز نیست. فقط jpg، jpeg، png و webp مجاز است.' };
+  }
+  if (file.size > MAX_SIZE_BYTES) {
+    return { ok: false, message: `حجم تصویر نباید بیشتر از ${MAX_SIZE_MB} مگابایت باشد.` };
+  }
+  return { ok: true };
+}
+
+function UploadSpinner() {
+  return (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+    </svg>
+  );
+}
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, loading: authLoading, showSkeleton: authSkeleton } = useRequireAuth();
-    const { logout } = useAuth();
-    const { showToast } = useToast();
+    const { user: authUser, loading: authLoading, showSkeleton: authSkeleton } = useRequireAuth();
+    const { user: contextUser, logout, checkAuth } = useAuth();
+    const { displayUrl: profileImageDisplayUrl, setProfileImage } = useProfileImage();
+    const user = contextUser ?? authUser;
+    const { toast, showToast, hideToast } = useToast();
+    const fileInputRef = useRef(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
     });
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [uploadLoading, setUploadLoading] = useState(false);
+    const [profileImageLoadError, setProfileImageLoadError] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -29,6 +70,16 @@ export default function ProfilePage() {
         }
     }, [user]);
 
+    useEffect(() => {
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+        };
+    }, [previewUrl]);
+
+    useEffect(() => {
+        setProfileImageLoadError(false);
+    }, [profileImageDisplayUrl]);
+
     if (authLoading || authSkeleton) {
         return <DashboardSkeleton />;
     }
@@ -37,9 +88,53 @@ export default function ProfilePage() {
         return null;
     }
 
+    const displayPreview =
+        previewUrl || (profileImageDisplayUrl && !profileImageLoadError ? profileImageDisplayUrl : null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        const validation = validateProfileImageFile(file);
+        if (!validation.ok) {
+            showToast(validation.message, 'error');
+            return;
+        }
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(URL.createObjectURL(file));
+        setSelectedFile(file);
+    };
+
+    const handleSaveProfileImage = async () => {
+        if (!selectedFile || uploadLoading) return;
+        setUploadLoading(true);
+        try {
+            const res = await uploadProfileImage(selectedFile);
+            const data = res?.data ?? res ?? {};
+            const imageUrl = data.imageUrl ?? data.profileImage ?? null;
+            const imageToken = data.imageToken ?? null;
+            if (imageUrl) {
+                setProfileImage(imageUrl, imageToken);
+            }
+            setPreviewUrl((prev) => {
+                if (prev) URL.revokeObjectURL(prev);
+                return null;
+            });
+            setSelectedFile(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            showToast('تصویر پروفایل با موفقیت ذخیره شد', 'success');
+            await checkAuth();
+        } catch (err) {
+            const message = err?.message || 'آپلود تصویر با خطا مواجه شد';
+            showToast(message, 'error');
+            if (process.env.NODE_ENV !== 'production') {
+                console.warn('[Profile] Upload error:', err?.status, message);
+            }
+        } finally {
+            setUploadLoading(false);
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Here you would typically make an API call to update the user profile
         showToast('پروفایل با موفقیت به‌روزرسانی شد', 'success');
         setIsEditing(false);
     };
@@ -61,9 +156,59 @@ export default function ProfilePage() {
                         <div className="lg:col-span-1">
                             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6">
                                 <div className="flex flex-col items-center">
-                                    <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold mb-3 md:w-24 md:h-24 md:text-2xl md:mb-4">
-                                        {user?.name?.[0]?.toUpperCase() || 'U'}
+                                    <div className="w-20 h-20 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center text-white text-xl font-bold mb-3 md:w-24 md:h-24 md:text-2xl md:mb-4 shrink-0">
+                                        {displayPreview ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                key={profileImageDisplayUrl ?? 'avatar'}
+                                                src={displayPreview}
+                                                alt=""
+                                                className="w-full h-full object-cover"
+                                                onError={() => {
+                                                    if (process.env.NODE_ENV !== 'production') {
+                                                        console.warn('[Profile] Profile image failed to load');
+                                                    }
+                                                    setProfileImageLoadError(true);
+                                                }}
+                                            />
+                                        ) : (
+                                            <span>{user?.name?.[0]?.toUpperCase() || 'U'}</span>
+                                        )}
                                     </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept={ACCEPT_ATTR}
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        aria-label="انتخاب تصویر پروفایل"
+                                        disabled={uploadLoading}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => !uploadLoading && fileInputRef.current?.click()}
+                                        disabled={uploadLoading}
+                                        className="mb-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors duration-200 ease-out disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {profileImageDisplayUrl || selectedFile ? 'تغییر تصویر' : 'آپلود تصویر'}
+                                    </button>
+                                    {selectedFile && (
+                                        <button
+                                            type="button"
+                                            onClick={handleSaveProfileImage}
+                                            disabled={uploadLoading}
+                                            className="w-full mb-3 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ease-out flex items-center justify-center gap-2"
+                                        >
+                                            {uploadLoading ? (
+                                                <>
+                                                    <UploadSpinner />
+                                                    <span>در حال آپلود...</span>
+                                                </>
+                                            ) : (
+                                                'ذخیره تغییرات'
+                                            )}
+                                        </button>
+                                    )}
                                     <h2 className="text-lg font-semibold leading-snug text-gray-900 dark:text-white mb-1 md:text-xl">{user?.name || 'کاربر'}</h2>
                                     <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed mb-3 md:mb-4">{user?.email || user?.phone}</p>
                                     <button
@@ -176,6 +321,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+            {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} duration={toast.duration} />}
         </div>
     );
 }

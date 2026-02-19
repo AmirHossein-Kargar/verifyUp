@@ -29,7 +29,7 @@ export default function CartIcon() {
                 />
             </svg>
             {count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center" data-testid="cart-count">
                     {count > 9 ? '9+' : count}
                 </span>
             )}
