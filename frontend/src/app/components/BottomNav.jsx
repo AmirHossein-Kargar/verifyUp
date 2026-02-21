@@ -24,7 +24,7 @@ export default function BottomNav({ items, ordersCount = 0 }) {
             <div className="fixed bottom-0 left-0 right-0 z-50 w-full">
                 <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
                     <div className="max-w-7xl mx-auto px-4">
-                        <div className="grid h-16 grid-cols-4 gap-2">
+                        <div className="grid h-16 gap-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
                             {items.map((item) => (
                                 <div
                                     key={item.href}
@@ -45,7 +45,7 @@ export default function BottomNav({ items, ordersCount = 0 }) {
         <div className="fixed bottom-0 left-0 right-0 z-50 w-full">
             <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="grid h-16 grid-cols-4 gap-2">
+                    <div className="grid h-16 gap-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
                         {items.map((item, index) => {
                             const active = isActive(item.href);
                             const badgeValue = item.badgeKey === 'ordersCount' ? ordersCount : null;
@@ -55,6 +55,7 @@ export default function BottomNav({ items, ordersCount = 0 }) {
                                 <Link
                                     key={item.href}
                                     href={item.href}
+                                    data-testid={`bottom-nav-${item.href.replace(/\//g, '-').replace(/^-/, '') || 'home'}`}
                                     className={`relative inline-flex flex-col items-center justify-center py-2 group transition-colors duration-200 ease-out rounded-lg ${active
                                         ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
                                         : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700'

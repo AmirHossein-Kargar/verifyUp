@@ -63,6 +63,10 @@ router.get("/stats", adminReadLimiter, ctrl.getStats);
 router.get("/orders", adminReadLimiter, ctrl.listOrders);
 router.get("/orders/:orderId", adminReadLimiter, ctrl.getOrderDetails);
 
+// Users management (admin only, secure)
+router.get("/users", adminReadLimiter, ctrl.listUsers);
+router.get("/users/:userId", adminReadLimiter, ctrl.getUserById);
+
 // Mutations (CSRF strongly recommended if cookie-based auth)
 // router.patch("/orders/:orderId/status", csrfProtection(), adminWriteLimiter, ctrl.updateOrderStatus);
 router.patch(

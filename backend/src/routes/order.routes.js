@@ -44,6 +44,7 @@ const paidOrderLimiter = rateLimit({
 });
 
 router.get("/me", ctrl.myOrders);
+router.get("/me/events", ctrl.orderEvents);
 router.get("/:orderId", ctrl.getOrderById);
 
 router.post("/", orderCreateLimiter, ctrl.createOrder);

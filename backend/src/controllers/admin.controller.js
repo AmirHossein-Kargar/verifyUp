@@ -3,11 +3,14 @@
 const Order = require("../models/Order");
 const User = require("../models/User");
 const ApiResponse = require("../utils/response");
+const { broadcastOrderUpdate } = require("../services/orderEvents");
 const { sanitizeQuery } = require("../utils/sanitize");
 const {
   adminListOrdersQuerySchema,
   adminOrderParamsSchema,
   updateOrderStatusBodySchema,
+  adminListUsersQuerySchema,
+  adminUserParamsSchema,
 } = require("../validators/admin.validation");
 
 /**
@@ -135,9 +138,9 @@ exports.listOrders = async (req, res, next) => {
       sort = { priceToman: direction, createdAt: -1 };
     else if (sortBy === "status") sort = { status: direction, createdAt: -1 };
 
-    // Least-privilege select: only necessary fields for list
+    // Least-privilege select: only necessary fields for list (inclusion only; no -__v)
     const ORDER_LIST_FIELDS =
-      "userId status priceToman createdAt updatedAt adminNote summary";
+      "userId status statusHistory priceToman service createdAt updatedAt adminNote docsSummary";
 
     const [orders, total] = await Promise.all([
       Order.find(sanitizedQuery)
@@ -145,7 +148,7 @@ exports.listOrders = async (req, res, next) => {
         .skip(skip)
         .limit(limit)
         .populate("userId", "name email phone role")
-        .select(`${ORDER_LIST_FIELDS} -__v`)
+        .select(ORDER_LIST_FIELDS)
         .lean(),
       Order.countDocuments(sanitizedQuery),
     ]);
@@ -195,6 +198,65 @@ exports.getOrderDetails = async (req, res, next) => {
   }
 };
 
+// Users management (admin only)
+const USER_LIST_FIELDS = "name email phone address role profileImage createdAt updatedAt";
+
+exports.listUsers = async (req, res, next) => {
+  try {
+    const { search, page, limit } = adminListUsersQuerySchema.parse(req.query);
+    const query = {};
+
+    if (search && search.trim().length >= 2) {
+      const safeQ = escapeRegex(search.trim());
+      query.$or = [
+        { name: { $regex: safeQ, $options: "i" } },
+        { email: { $regex: safeQ, $options: "i" } },
+        { phone: { $regex: safeQ, $options: "i" } },
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).select(USER_LIST_FIELDS).lean(),
+      User.countDocuments(query),
+    ]);
+
+    return ApiResponse.success(res, {
+      message: "لیست کاربران با موفقیت دریافت شد",
+      data: {
+        users,
+        pagination: { total, page, limit, pages: Math.ceil(total / limit) },
+      },
+    });
+  } catch (err) {
+    if (err?.issues) {
+      return ApiResponse.badRequest(res, {
+        message: "پارامترهای جستجو نامعتبر هستند",
+        errors: err.issues.map((i) => i.message),
+      });
+    }
+    next(err);
+  }
+};
+
+exports.getUserById = async (req, res, next) => {
+  try {
+    const { userId } = adminUserParamsSchema.parse(req.params);
+    const user = await User.findById(userId).select("-passwordHash -__v -emailVerificationToken -emailVerificationExpires -phoneOtp -phoneOtpExpires -tokenVersion -passwordChangedAt -lastLoginAt").lean();
+
+    if (!user) {
+      return ApiResponse.notFound(res, { message: "کاربر یافت نشد" });
+    }
+
+    return ApiResponse.success(res, {
+      message: "اطلاعات کاربر با موفقیت دریافت شد",
+      data: { user },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Document-related endpoints removed - admin manages order status directly
 
 exports.updateOrderStatus = async (req, res, next) => {
@@ -202,18 +264,30 @@ exports.updateOrderStatus = async (req, res, next) => {
     const { orderId } = adminOrderParamsSchema.parse(req.params);
     const { status, adminNote } = updateOrderStatusBodySchema.parse(req.body);
 
-    // For audit: read previous status
-    const before = await Order.findById(orderId).select("status").lean();
+    const before = await Order.findById(orderId).select("status statusHistory userId createdAt").lean();
     if (!before) {
       return ApiResponse.notFound(res, { message: "سفارش یافت نشد" });
     }
 
+    const statusHistoryEntry = { status, timestamp: new Date() };
+    const updates = {
+      $set: { status, adminNote: adminNote || "" },
+      $currentDate: { updatedAt: true },
+    };
+
+    // Backfill statusHistory for legacy orders that don't have it
+    if (!before.statusHistory || before.statusHistory.length === 0) {
+      updates.$set.statusHistory = [
+        { status: before.status, timestamp: before.createdAt || new Date() },
+        statusHistoryEntry,
+      ];
+    } else {
+      updates.$push = { statusHistory: statusHistoryEntry };
+    }
+
     const order = await Order.findByIdAndUpdate(
       orderId,
-      {
-        $set: { status, adminNote: adminNote || "" },
-        $currentDate: { updatedAt: true },
-      },
+      updates,
       { new: true },
     )
       .populate("userId", "email phone role name")
@@ -225,6 +299,21 @@ exports.updateOrderStatus = async (req, res, next) => {
       fromStatus: before.status,
       toStatus: status,
     });
+
+    // Real-time: notify the order's user so their dashboard updates without refresh
+    const userId = order.userId?._id || order.userId;
+    if (userId) {
+      broadcastOrderUpdate(userId, {
+        type: "ORDER_STATUS_UPDATED",
+        orderId: order._id,
+        order: {
+          _id: order._id,
+          status: order.status,
+          statusHistory: order.statusHistory,
+          updatedAt: order.updatedAt,
+        },
+      });
+    }
 
     return ApiResponse.success(res, {
       message: "وضعیت سفارش با موفقیت به‌روزرسانی شد",
@@ -330,7 +419,7 @@ exports.getStats = async (req, res, next) => {
         .sort({ createdAt: -1 })
         .limit(5)
         .populate("userId", "email phone")
-        .select("userId status priceToman createdAt -__v")
+        .select("userId status priceToman createdAt")
         .lean(),
     ]);
 
@@ -360,9 +449,14 @@ exports.getStats = async (req, res, next) => {
     const pendingOrInReview =
       (statusMap.pending_docs || 0) +
       (statusMap.in_review || 0) +
-      (statusMap.needs_resubmit || 0);
+      (statusMap.needs_resubmit || 0) +
+      (statusMap.placed || 0) +
+      (statusMap.confirmed || 0) +
+      (statusMap.processing || 0);
 
-    const completed = (statusMap.approved || 0) + (statusMap.completed || 0);
+    const completed =
+      (statusMap.approved || 0) +
+      (statusMap.completed || 0);
 
     const conversionRate =
       totalOrders > 0 ? (completed / totalOrders) * 100 : 0;
@@ -371,6 +465,7 @@ exports.getStats = async (req, res, next) => {
       message: "آمار با موفقیت دریافت شد",
       data: {
         totalOrders,
+        ordersTotal: totalOrders,
         totalUsers,
         ordersByStatus: statusMap,
         recentOrders,

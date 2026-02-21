@@ -33,9 +33,16 @@ async function loginAndWaitForDashboard(page, { email, password }) {
   } catch (e) {
     const pathname = new URL(page.url()).pathname;
     if (pathname === '/login' || pathname.endsWith('/login')) {
-      const toastText = await page.getByTestId('toast-message').textContent().catch(() => '') || '';
+      // Give the app a moment to show an error toast after failed login
+      const toast = page.getByTestId('toast-message');
+      await toast.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
+      const toastText = (await toast.textContent().catch(() => '')) || '';
+      const envHint =
+        !process.env.TEST_USER_EMAIL && !process.env.TEST_USER_PASSWORD
+          ? ' Set TEST_USER_EMAIL and TEST_USER_PASSWORD (e.g. your real email/password) when running the test.'
+          : '';
       throw new Error(
-        `Login did not redirect to dashboard (still on /login). ${toastText ? `Toast: ${toastText}` : 'No toast'}. Check backend is running and TEST_USER_EMAIL/TEST_USER_PASSWORD are valid for a verified user.`
+        `Login did not redirect to dashboard (still on /login). ${toastText ? `Toast: ${toastText}` : 'No toast.'} Check backend is running and credentials are valid for a verified user.${envHint}`
       );
     }
     throw e;

@@ -11,8 +11,8 @@ export default function DashboardPage() {
     if (!user) return null;
 
     return (
-        <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 min-h-screen pt-24 pb-20">
-            <div className="p-4 max-w-7xl mx-auto">
+        <div dir="rtl" className="bg-gray-50 dark:bg-gray-900 h-screen pt-20 pb-16 overflow-hidden">
+            <div className="p-3 max-w-7xl mx-auto h-full overflow-y-auto">
                 <DashboardClient user={user} />
             </div>
         </div>

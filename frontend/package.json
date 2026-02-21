@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true});console.log('Cleaned .next')\""
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -17,7 +18,9 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
-    "react-loading-indicators": "^1.0.1"
+    "react-loading-indicators": "^1.0.1",
+    "recharts": "^2.15.0",
+    "react-multi-date-picker": "^4.5.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

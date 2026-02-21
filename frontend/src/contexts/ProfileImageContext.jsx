@@ -75,11 +75,15 @@ export function ProfileImageProvider({ children }) {
       saveToStorage(nextPath, nextToken);
       if (nextPath) {
         updateUserProfileImage(nextPath, nextToken);
-        setUrlVersion((v) => v + 1);
       }
+      setUrlVersion((v) => v + 1);
     },
     [updateUserProfileImage]
   );
+
+  const refreshProfileImage = useCallback(() => {
+    setUrlVersion((v) => v + 1);
+  }, []);
 
   const displayUrl = useMemo(() => {
     const base = getProfileImageUrl(profileImage, profileImageToken);
@@ -94,8 +98,9 @@ export function ProfileImageProvider({ children }) {
       profileImageToken,
       displayUrl,
       setProfileImage,
+      refreshProfileImage,
     }),
-    [profileImage, profileImageToken, displayUrl, setProfileImage]
+    [profileImage, profileImageToken, displayUrl, setProfileImage, refreshProfileImage]
   );
 
   return (

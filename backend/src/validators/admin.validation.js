@@ -5,12 +5,18 @@ const objectIdSchema = z
   .regex(/^[0-9a-fA-F]{24}$/i, "شناسه نامعتبر است");
 
 const orderStatusEnum = z.enum([
+  "placed",
+  "confirmed",
+  "processing",
+  "completed",
+  "rejected",
+  // Legacy (for backward compatibility / display only)
   "pending_docs",
   "in_review",
   "needs_resubmit",
   "approved",
-  "rejected",
-  "completed",
+  "in_progress",
+  "delivered",
 ]);
 
 const adminListOrdersQuerySchema = z
@@ -74,10 +80,22 @@ const updateOrderStatusBodySchema = z.object({
     .optional(),
 });
 
+const adminListUsersQuerySchema = z.object({
+  search: z.string().trim().max(64).optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+const adminUserParamsSchema = z.object({
+  userId: objectIdSchema,
+});
+
 module.exports = {
   objectIdSchema,
   orderStatusEnum,
   adminListOrdersQuerySchema,
   adminOrderParamsSchema,
   updateOrderStatusBodySchema,
+  adminListUsersQuerySchema,
+  adminUserParamsSchema,
 };

@@ -254,6 +254,16 @@ class ApiClient {
     return this.request("/auth/me");
   }
 
+  /**
+   * Update profile (name, email, phone, address). Sends only provided fields; backend updates only those.
+   */
+  async updateProfile(data) {
+    return this.request("/users/profile", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
   /** Profile image URL – delegates to module-level function so it is never stripped. */
   getProfileImageUrl(path, token) {
     return buildProfileImageUrl(path, token);
@@ -292,6 +302,11 @@ class ApiClient {
     return this.request("/orders/me");
   }
 
+  // * Get a single order by ID (user's own order only)
+  async getOrder(orderId) {
+    return this.request(`/orders/${orderId}`);
+  }
+
   // Document upload removed - admin manages order status directly
 
   // ===============================
@@ -311,9 +326,19 @@ class ApiClient {
 
   async updateOrderStatus(orderId, data) {
     return this.request(`/admin/orders/${orderId}/status`, {
-      method: "PUT",
+      method: "PATCH",
       body: JSON.stringify(data),
     });
+  }
+
+  async getAdminUsers(params = {}) {
+    const searchParams = new URLSearchParams(params).toString();
+    const qs = searchParams ? `?${searchParams}` : "";
+    return this.request(`/admin/users${qs}`);
+  }
+
+  async getAdminUser(userId) {
+    return this.request(`/admin/users/${userId}`);
   }
 }
 

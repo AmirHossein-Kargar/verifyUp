@@ -13,7 +13,7 @@ async function ensureUserOwnsOrder(orderId, userId, res) {
   }
 
   const order = await Order.findOne({ _id: orderId, userId })
-    .select("_id userId status service priceToman currency requiredDocs createdAt updatedAt")
+    .select("_id userId status statusHistory service priceToman currency requiredDocs adminNote docsSummary createdAt updatedAt")
     .lean();
 
   if (!order) {

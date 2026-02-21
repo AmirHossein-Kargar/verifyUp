@@ -1,17 +1,21 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatTooman } from '@/utils/currency';
-import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
+import OrdersSkeleton from '@/components/skeletons/OrdersSkeleton';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useOrders } from '@/hooks/useOrders';
 import { useToast } from '@/hooks/useToast';
+import { useOrderEvents } from '@/hooks/useOrderEvents';
+import OrderTrackingStepper from '../components/OrderTrackingStepper';
 
 const STATUS_BADGES = {
     completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
     active: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
     pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+    pending_docs: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
 };
 
@@ -19,15 +23,21 @@ const STATUS_TEXT = {
     completed: 'تکمیل شده',
     active: 'در حال بررسی',
     pending: 'در انتظار بررسی',
+    pending_docs: 'در انتظار دریافت مدارک',
     cancelled: 'لغو شده',
 };
 
 const STATUS_MAP = {
-    pending_docs: 'pending',
+    placed: 'pending',
+    confirmed: 'active',
+    processing: 'active',
+    in_progress: 'active',
+    pending_docs: 'pending_docs',
     in_review: 'active',
     needs_resubmit: 'active',
     approved: 'completed',
     completed: 'completed',
+    delivered: 'completed',
     rejected: 'cancelled',
 };
 
@@ -57,8 +67,32 @@ export default function OrdersPage() {
     const { user, loading: authLoading, showSkeleton } = useRequireAuth();
     const { orders, loading: ordersLoading, error, refetch } = useOrders();
     const { showToast } = useToast();
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [liveOrder, setLiveOrder] = useState(null);
+    const [orderUpdates, setOrderUpdates] = useState({});
 
-    if (authLoading || showSkeleton || ordersLoading) return <DashboardSkeleton />;
+    const handleOrderUpdate = useCallback((payload) => {
+        if (payload?.type !== 'ORDER_STATUS_UPDATED' || !payload?.order) return;
+        const order = payload.order;
+        setLiveOrder(order);
+        setOrderUpdates((prev) => ({ ...prev, [order._id]: order }));
+        refetch();
+    }, [refetch]);
+
+    useOrderEvents(handleOrderUpdate);
+
+    const displayOrder =
+        selectedOrder?._id === liveOrder?._id
+            ? { ...selectedOrder, ...liveOrder }
+            : selectedOrder;
+
+    const orderWithLive = (order) => {
+        const live = orderUpdates[order._id];
+        return live ? { ...order, ...live } : order;
+    };
+
+    if (authLoading || showSkeleton) return <OrdersSkeleton count={3} />;
+    if (ordersLoading) return <OrdersSkeleton count={orders?.length || 4} />;
     if (!user) return null;
 
     return (
@@ -89,86 +123,100 @@ export default function OrdersPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-3 md:space-y-4" data-testid="orders-list">
-                        {orders.map((order) => {
-                            const uiStatusKey = STATUS_MAP[order.status] || 'pending';
-                            const badge = STATUS_BADGES[uiStatusKey] || STATUS_BADGES.pending;
-                            const text = STATUS_TEXT[uiStatusKey] || 'نامشخص';
+                    <>
+                        <div className="space-y-3 md:space-y-4" data-testid="orders-list">
+                            {orders.map((order) => {
+                                const orderToShow = orderWithLive(order);
+                                const uiStatusKey = STATUS_MAP[orderToShow.status] || 'pending';
+                                const badge = STATUS_BADGES[uiStatusKey] || STATUS_BADGES.pending;
+                                const text = STATUS_TEXT[uiStatusKey] || orderToShow.status;
 
-                            const createdAt = order.createdAt ? new Date(order.createdAt) : null;
-                            const dateText = createdAt
-                                ? createdAt.toLocaleDateString('fa-IR', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                })
-                                : '';
+                                const createdAt = orderToShow.createdAt ? new Date(orderToShow.createdAt) : null;
+                                const dateText = createdAt
+                                    ? createdAt.toLocaleDateString('fa-IR', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                    })
+                                    : '';
 
-                            // Get service configuration
-                            const serviceConfig = SERVICE_CONFIG[order.service] || SERVICE_CONFIG.upwork_verification;
+                                // Get service configuration
+                                const serviceConfig = SERVICE_CONFIG[orderToShow.service] || SERVICE_CONFIG.upwork_verification;
 
-                            return (
-                                <div
-                                    key={order._id}
-                                    data-testid="order-item"
-                                    data-order-id={order._id}
-                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-5 hover:shadow-md transition-shadow duration-200 ease-out"
-                                >
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
-                                        <div className="flex items-start gap-3 md:gap-4">
-                                            {serviceConfig.logo ? (
-                                                <Image
-                                                    src={serviceConfig.logo}
-                                                    alt={serviceConfig.title}
-                                                    width={40}
-                                                    height={40}
-                                                    className="object-contain md:w-12 md:h-12"
-                                                />
-                                            ) : serviceConfig.icon ? (
-                                                <div className="shrink-0 scale-75 md:scale-100">
-                                                    {serviceConfig.icon}
+                                const isSelected = selectedOrder?._id === orderToShow._id;
+                                return (
+                                    <div
+                                        key={orderToShow._id}
+                                        data-testid="order-item"
+                                        data-order-id={orderToShow._id}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => setSelectedOrder(orderToShow)}
+                                        onKeyDown={(e) => e.key === 'Enter' && setSelectedOrder(orderToShow)}
+                                        className={`bg-white dark:bg-gray-800 border rounded-lg p-3 md:p-5 transition-all duration-200 ease-out cursor-pointer ${isSelected
+                                            ? 'border-indigo-500 dark:border-indigo-500 ring-2 ring-indigo-500/20 shadow-md'
+                                            : 'border-gray-200 dark:border-gray-700 hover:shadow-md'
+                                            }`}
+                                    >
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
+                                            <div className="flex items-start gap-3 md:gap-4">
+                                                {serviceConfig.logo ? (
+                                                    <Image
+                                                        src={serviceConfig.logo}
+                                                        alt={serviceConfig.title}
+                                                        width={40}
+                                                        height={40}
+                                                        className="object-contain md:w-12 md:h-12"
+                                                    />
+                                                ) : serviceConfig.icon ? (
+                                                    <div className="shrink-0 scale-75 md:scale-100">
+                                                        {serviceConfig.icon}
+                                                    </div>
+                                                ) : null}
+
+                                                <div>
+                                                    <h3 className="text-sm font-semibold leading-snug text-gray-900 dark:text-white mb-1 md:text-base">
+                                                        {serviceConfig.title}
+                                                    </h3>
+                                                    {dateText && (
+                                                        <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed mb-1 md:mb-2" data-testid="order-item-date">
+                                                            تاریخ ثبت: {dateText}
+                                                        </p>
+                                                    )}
+
+                                                    <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded md:px-2.5 ${badge}`} data-testid="order-item-status">
+                                                        {text}
+                                                    </span>
                                                 </div>
-                                            ) : null}
+                                            </div>
 
-                                            <div>
-                                                <h3 className="text-sm font-semibold leading-snug text-gray-900 dark:text-white mb-1 md:text-base">
-                                                    {serviceConfig.title}
-                                                </h3>
-                                                {dateText && (
-                                                    <p className="text-sm font-normal text-gray-600 dark:text-gray-400 leading-relaxed mb-1 md:mb-2" data-testid="order-item-date">
-                                                        تاریخ ثبت: {dateText}
+                                            <div className="text-left sm:text-right">
+                                                <p className="text-base font-bold leading-tight text-gray-900 dark:text-white md:text-lg" data-testid="order-item-total">
+                                                    {formatTooman(orderToShow.priceToman || 0)}
+                                                </p>
+
+                                                {orderToShow.adminNote && (
+                                                    <p className="mt-1 text-xs font-normal text-gray-600 dark:text-gray-400 leading-relaxed md:mt-2">
+                                                        یادداشت ادمین: {orderToShow.adminNote}
                                                     </p>
                                                 )}
-
-                                                <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded md:px-2.5 ${badge}`} data-testid="order-item-status">
-                                                    {text}
-                                                </span>
                                             </div>
                                         </div>
-
-                                        <div className="text-left sm:text-right">
-                                            <p className="text-base font-bold leading-tight text-gray-900 dark:text-white md:text-lg" data-testid="order-item-total">
-                                                {formatTooman(order.priceToman || 0)}
-                                            </p>
-
-                                            {order.adminNote && (
-                                                <p className="mt-1 text-xs font-normal text-gray-600 dark:text-gray-400 leading-relaxed md:mt-2">
-                                                    یادداشت ادمین: {order.adminNote}
-                                                </p>
-                                            )}
-
-                                            {order.docsSummary && (
-                                                <p className="mt-1 text-xs font-normal text-gray-600 dark:text-gray-400 leading-relaxed">
-                                                    وضعیت مدارک: {order.docsSummary.accepted || 0} تایید شده،{' '}
-                                                    {order.docsSummary.resubmit || 0} نیاز به ارسال مجدد
-                                                </p>
-                                            )}
-                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Step-by-step tracking: only show after user clicks an order (not on first load/refresh) */}
+                        {selectedOrder && (
+                            <div className="mt-6" data-testid="order-tracking-detail">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                                    وضعیت سفارش (به‌روز لحظه‌ای)
+                                </h2>
+                                <OrderTrackingStepper order={displayOrder} />
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

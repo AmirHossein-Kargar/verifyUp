@@ -155,6 +155,7 @@ export default function Header() {
                                             src={profileImageDisplayUrl}
                                             alt=""
                                             className="w-full h-full object-cover"
+                                            data-testid="header-avatar"
                                             onError={() => {
                                                 if (process.env.NODE_ENV !== "production") {
                                                     console.warn("[Header] Profile image failed to load:", profileImageDisplayUrl?.slice(0, 60));

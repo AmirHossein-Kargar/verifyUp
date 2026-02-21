@@ -21,6 +21,13 @@ const UserSchema = new mongoose.Schema(
       index: true,
     },
 
+    address: {
+      type: String,
+      trim: true,
+      maxlength: 50,
+      default: null,
+    },
+
     passwordHash: { type: String, required: true, select: false },
 
     role: { type: String, enum: ["user", "admin"], default: "user" },

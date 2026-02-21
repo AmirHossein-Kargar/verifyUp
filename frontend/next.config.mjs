@@ -16,6 +16,18 @@ const nextConfig = {
         hostname: "cdn.worldvectorlogo.com",
         pathname: "/logos/**",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "4000",
+        pathname: "/api/users/profile-image/**",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "4000",
+        pathname: "/api/users/profile-image/**",
+      },
     ],
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -29,8 +41,10 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
 
-  /* Caching headers for static assets */
+  /* Caching headers for static assets (skip in dev to avoid serving stale JS) */
   async headers() {
+    const isDev = process.env.NODE_ENV === "development";
+    if (isDev) return [];
     return [
       {
         source: "/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)",

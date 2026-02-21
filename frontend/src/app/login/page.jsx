@@ -36,9 +36,11 @@ export default function LoginPage() {
     };
   }, []);
 
-  // Redirect if already logged in
+  // Redirect if already logged in (admin → /admin, user → /dashboard)
   useEffect(() => {
-    if (!loading && user) router.replace('/dashboard');
+    if (!loading && user) {
+      router.replace(user.role === 'admin' ? '/admin' : '/dashboard');
+    }
   }, [user, loading, router]);
 
   const onSubmit = async (data) => {
@@ -54,9 +56,10 @@ export default function LoginPage() {
 
       showToast(response.message || 'ورود با موفقیت انجام شد', 'success');
 
+      const isAdmin = response.data?.user?.role === 'admin';
       if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
       redirectTimerRef.current = setTimeout(() => {
-        router.replace('/dashboard');
+        router.replace(isAdmin ? '/admin' : '/dashboard');
       }, 900);
     } catch (error) {
       setIsRedirecting(false); // Hide skeleton on error

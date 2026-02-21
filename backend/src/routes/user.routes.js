@@ -2,7 +2,9 @@ const router = require("express").Router();
 const auth = require("../middleware/auth");
 const optionalAuth = require("../middleware/optionalAuth");
 const { uploadProfileImage, handleUploadError } = require("../middleware/uploadProfileImage");
-const { updateProfileImage, getProfileImage } = require("../controllers/user.controller");
+const { updateProfile, updateProfileImage, getProfileImage } = require("../controllers/user.controller");
+
+router.patch("/profile", auth, updateProfile);
 
 router.patch(
   "/profile-image",

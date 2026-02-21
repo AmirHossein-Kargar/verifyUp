@@ -4,6 +4,56 @@ const ProfileImage = require("../models/ProfileImage");
 const ApiResponse = require("../utils/response");
 const { encrypt, decrypt } = require("../utils/imageEncryption");
 const { generateProfileImageToken, verifyProfileImageToken } = require("../utils/jwt");
+const { sanitizeUser } = require("../utils/sanitize");
+
+const ADDRESS_MAX_LENGTH = 50;
+
+/**
+ * PATCH /api/users/profile
+ * Authenticated. Body: optional name, address. Email and phone are not updatable via this endpoint.
+ */
+exports.updateProfile = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return ApiResponse.unauthorized(res, { message: "Unauthorized" });
+    }
+
+    const userId = req.user.userId;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return ApiResponse.badRequest(res, { message: "Invalid user id" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return ApiResponse.notFound(res, { message: "User not found" });
+    }
+
+    const { name, address } = req.body || {};
+
+    if (name !== undefined) {
+      const trimmed = typeof name === "string" ? name.trim() : "";
+      user.name = trimmed || null;
+    }
+    if (address !== undefined) {
+      const trimmed = typeof address === "string" ? address.trim() : "";
+      if (trimmed.length > ADDRESS_MAX_LENGTH) {
+        return ApiResponse.badRequest(res, {
+          message: `Address must be at most ${ADDRESS_MAX_LENGTH} characters`,
+        });
+      }
+      user.address = trimmed || null;
+    }
+
+    await user.save();
+    const safeUser = sanitizeUser(user);
+    return ApiResponse.success(res, {
+      message: "Profile updated successfully",
+      data: { user: safeUser },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * PATCH /api/users/profile-image
@@ -108,6 +158,7 @@ exports.getProfileImage = async (req, res, next) => {
 
     let userId;
     const token = req.query.token;
+    const isAdmin = req.user?.role === "admin";
     if (token) {
       const decoded = verifyProfileImageToken(token);
       if (!decoded || decoded.imageId !== id) {
@@ -126,7 +177,8 @@ exports.getProfileImage = async (req, res, next) => {
       return ApiResponse.notFound(res, { message: "Image not found" });
     }
 
-    if (doc.userId.toString() !== userId) {
+    // Admins can view any user's profile image; others can only view their own
+    if (!isAdmin && doc.userId.toString() !== userId) {
       return ApiResponse.forbidden(res, { message: "Access denied" });
     }
 
